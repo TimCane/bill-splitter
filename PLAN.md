@@ -1,5 +1,9 @@
 # Bill Splitter — Plan
 
+> Superseded by [docs/](docs/00-overview.md), which carries the full,
+> authoritative design. This file is the original one-page plan, kept for
+> the narrative; where they disagree, docs/ wins.
+
 Ephemeral bill splitting for a table of people paying a restaurant
 individually. Host scans the receipt, everyone claims their items from their
 own phone, totals reconcile to the penny, everything is deleted as soon as
