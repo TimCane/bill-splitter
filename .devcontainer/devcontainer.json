@@ -1,0 +1,29 @@
+{
+  "name": "C# (.NET) Redis, MinIO",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "shutdownAction": "stopCompose",
+  "forwardPorts": [
+    6379,
+    9000,
+    9001
+  ],
+  "features": {
+    "ghcr.io/42atomys/devcontainers-features/redis-cli:1": {},
+    "ghcr.io/timcane/devcontainer-features/claude-code-passthrough:latest": {
+      "passthroughHostConfig": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.vscode-dotnet-runtime"
+      ]
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}
