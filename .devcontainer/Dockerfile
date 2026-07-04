@@ -5,4 +5,4 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         tmux \
      && rm -rf /var/lib/apt/lists/*
 
-RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && nvm install --lts && nvm use --lts && npm install -g typescript" 2>&1
+RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && nvm install --lts && nvm use --lts && npm install -g typescript pnpm" 2>&1

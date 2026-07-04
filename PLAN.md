@@ -108,11 +108,8 @@ shape the API, so they land in v1, not later:
   people's numbers live. Correct by design, but the UI must flag/animate the
   change so it doesn't read as a bug.
 
-## Devcontainer fixes (before scaffolding)
+## Devcontainer
 
-- `post-create.sh` paths say `bill-spliiter` — tmux.conf copy and frontend
-  install point at a nonexistent dir.
-- Banner advertises `pg`/`pgd` aliases that don't exist (no Postgres in this
-  app — drop them).
-- Add the PaddleOCR sidecar to `docker-compose.yml`.
-- Frontend install uses npm; switch to pnpm.
+The PaddleOCR sidecar joins `docker-compose.yml` when the `ocr/` service is
+scaffolded — a compose service without its build context would break
+`docker compose up` for everyone until then.
