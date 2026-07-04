@@ -1,0 +1,30 @@
+{
+  "features": {
+    "ghcr.io/42atomys/devcontainers-features/redis-cli:1": {
+      "version": "1.0.0",
+      "resolved": "ghcr.io/42atomys/devcontainers-features/redis-cli@sha256:eb706e0ff6982509f08502aa2d0b6e446e8ac20fa478342bfc561c4c90f7bc3d",
+      "integrity": "sha256:eb706e0ff6982509f08502aa2d0b6e446e8ac20fa478342bfc561c4c90f7bc3d",
+      "dependsOn": [
+        "ghcr.io/devcontainers/features/github-cli:1"
+      ]
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "1.1.0",
+      "resolved": "ghcr.io/devcontainers/features/github-cli@sha256:d22f50b70ed75339b4eed1ba9ecde3a1791f90e88d37936517e3bace0bbad671",
+      "integrity": "sha256:d22f50b70ed75339b4eed1ba9ecde3a1791f90e88d37936517e3bace0bbad671"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "1.7.1",
+      "resolved": "ghcr.io/devcontainers/features/node@sha256:8c0de46939b61958041700ee89e3493f3b2e4131a06dc46b4d9423427d06e5f6",
+      "integrity": "sha256:8c0de46939b61958041700ee89e3493f3b2e4131a06dc46b4d9423427d06e5f6"
+    },
+    "ghcr.io/timcane/devcontainer-features/claude-code-passthrough:latest": {
+      "version": "0.5.0",
+      "resolved": "ghcr.io/timcane/devcontainer-features/claude-code-passthrough@sha256:9e345854ef6dbbce4970684417f80c98d46cfc3a1f40105d13c42c4143dab35a",
+      "integrity": "sha256:9e345854ef6dbbce4970684417f80c98d46cfc3a1f40105d13c42c4143dab35a",
+      "dependsOn": [
+        "ghcr.io/devcontainers/features/node:1"
+      ]
+    }
+  }
+}
