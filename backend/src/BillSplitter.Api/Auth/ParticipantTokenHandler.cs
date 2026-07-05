@@ -87,8 +87,16 @@ public sealed class ParticipantTokenHandler : AuthenticationHandler<Authenticati
             return value.Length == 0 ? null : value;
         }
 
-        var queryToken = Request.Query["access_token"].ToString();
-        return string.IsNullOrEmpty(queryToken) ? null : queryToken;
+        // The query-string slot is only for the hub (WebSockets cannot send an
+        // Authorization header - docs/05-realtime-contract.md#connecting). Accepting
+        // it on REST routes would leak the participant token into access logs.
+        if (Request.Path.StartsWithSegments("/hubs"))
+        {
+            var queryToken = Request.Query["access_token"].ToString();
+            return string.IsNullOrEmpty(queryToken) ? null : queryToken;
+        }
+
+        return null;
     }
 
     private string? ExtractSessionId()
