@@ -189,8 +189,9 @@ Element inventory:
 └──────────────────────────────┘
 ```
 
-- Read-only for everyone including host. Countdown derived from
-  `finalizedAt + 1h`.
+- Read-only for everyone including host. Countdown formatted from the
+  snapshot's `expiresAt` - the client never computes expiry itself (the
+  finalized TTL is server configuration).
 - If an email was requested the host sees `Summary sent to t***@e***.com`
   (masked, from the finalize response - the address itself is never in a
   snapshot).

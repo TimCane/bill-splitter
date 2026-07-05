@@ -153,6 +153,7 @@ fields marked (c).
   "version": 17,
   "state": "Open",                  // Processing | Review | Open | Finalized
   "currency": "GBP",
+  "expiresAt": "2026-07-05T19:02:11Z", // (c) from the key's remaining TTL at read time
   "shortCode": "K7MPQ2",            // null until open
   "joinUrl": "https://...",         // (c) null until open
   "hostParticipantId": "aB3x...",
