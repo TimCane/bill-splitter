@@ -11,8 +11,12 @@ public sealed record ParticipantTotals(
 
 /// <summary>Everything the snapshot needs that is derived from split math, keyed
 /// for direct lookup. Recomputed from scratch on every snapshot; nothing is
-/// cached (docs/02-domain-model.md#split-math-the-core-algorithm).</summary>
+/// cached (docs/02-domain-model.md#split-math-the-core-algorithm). Participants
+/// come back in canonical order so callers render totals without re-sorting.</summary>
 public sealed record SplitResult(
     IReadOnlyDictionary<string, ParticipantTotals> Totals,
     IReadOnlyDictionary<(string ItemId, string ParticipantId), long> Allocations,
-    long UnclaimedTotalMinor);
+    long UnclaimedTotalMinor,
+    long SubtotalMinor,
+    long ChecksumMinor,
+    IReadOnlyList<string> OrderedParticipantIds);

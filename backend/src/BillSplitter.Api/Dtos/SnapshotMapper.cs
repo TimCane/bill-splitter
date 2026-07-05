@@ -6,9 +6,9 @@ namespace BillSplitter.Api.Dtos;
 
 /// <summary>
 /// The only place a <see cref="Session"/> becomes a <see cref="SessionSnapshotDto"/>.
-/// Computes every derived field (subtotal, checksum, per-participant totals via
-/// <see cref="SplitCalculator"/>, expiresAt from the key's TTL) and never leaks a
-/// token hash (docs/07-backend-design.md#api-project).
+/// Every money field (subtotal, checksum, per-participant totals) comes from
+/// <see cref="SplitCalculator"/>; the mapper only formats and adds expiresAt from
+/// the key's TTL, and never leaks a token hash (docs/07-backend-design.md#api-project).
 /// </summary>
 public sealed class SnapshotMapper
 {
@@ -24,14 +24,8 @@ public sealed class SnapshotMapper
     public SessionSnapshotDto Map(Session session, TimeSpan ttl)
     {
         var split = SplitCalculator.Compute(session);
-        var ordered = session.Participants
-            .OrderBy(p => p.JoinedAt)
-            .ThenBy(p => p.Id, StringComparer.Ordinal)
-            .ToList();
-
-        var subtotal = session.Items.Sum(i => i.PriceMinor);
-        var checksum = subtotal + session.Bill.TaxMinor + session.Bill.TipMinor
-            + session.Bill.ServiceMinor - session.Bill.TotalMinor;
+        var byId = session.Participants.ToDictionary(p => p.Id, StringComparer.Ordinal);
+        var ordered = split.OrderedParticipantIds.Select(id => byId[id]).ToList();
 
         var participants = ordered
             .Select(p => new ParticipantDto(p.Id, p.DisplayName, session.IsHost(p.Id)))
@@ -67,12 +61,12 @@ public sealed class SnapshotMapper
             Participants: participants,
             Items: items,
             Bill: new BillDto(
-                subtotal,
+                split.SubtotalMinor,
                 session.Bill.TaxMinor,
                 session.Bill.TipMinor,
                 session.Bill.ServiceMinor,
                 session.Bill.TotalMinor,
-                checksum),
+                split.ChecksumMinor),
             UnclaimedTotalMinor: split.UnclaimedTotalMinor,
             Totals: totals);
     }

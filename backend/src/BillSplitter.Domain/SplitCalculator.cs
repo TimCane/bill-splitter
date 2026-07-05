@@ -74,17 +74,23 @@ public static class SplitCalculator
             .ThenBy(p => p.Id, StringComparer.Ordinal)
             .ToList();
 
+        // One pass fixes each participant's canonical sort index so claimant
+        // ordering is an O(1) lookup rather than a linear scan per claim.
+        var orderById = new Dictionary<string, int>(participants.Count, StringComparer.Ordinal);
         var items = new Dictionary<string, long>(participants.Count);
-        foreach (var p in participants)
+        for (var i = 0; i < participants.Count; i++)
         {
-            items[p.Id] = 0;
+            orderById[participants[i].Id] = i;
+            items[participants[i].Id] = 0;
         }
 
         var allocations = new Dictionary<(string, string), long>();
         long unclaimedTotal = 0;
+        long subtotal = 0;
 
         foreach (var item in session.Items)
         {
+            subtotal += item.PriceMinor;
             if (item.Claims.Count == 0)
             {
                 unclaimedTotal += item.PriceMinor;
@@ -92,7 +98,7 @@ public static class SplitCalculator
             }
 
             var claimants = item.Claims
-                .OrderBy(c => ParticipantOrder(participants, c.ParticipantId))
+                .OrderBy(c => orderById.GetValueOrDefault(c.ParticipantId, int.MaxValue))
                 .ToList();
             var weights = claimants.Select(c => (long)c.Shares).ToList();
             var shares = Distribute(item.PriceMinor, weights);
@@ -123,7 +129,18 @@ public static class SplitCalculator
             totals[pid] = new ParticipantTotals(items[pid], tax[i], tip[i], service[i], unclaimed[i], total);
         }
 
-        return new SplitResult(totals, allocations, unclaimedTotal);
+        // Reconciliation checksum: subtotal + extras - printed total. Zero means
+        // the receipt adds up; the frontend only displays this, never derives it.
+        var checksum = subtotal + session.Bill.TaxMinor + session.Bill.TipMinor
+            + session.Bill.ServiceMinor - session.Bill.TotalMinor;
+
+        return new SplitResult(
+            totals,
+            allocations,
+            unclaimedTotal,
+            subtotal,
+            checksum,
+            participants.Select(p => p.Id).ToList());
 
         long[] ExtrasFor(long amount)
         {
@@ -136,18 +153,5 @@ public static class SplitCalculator
 
             return Distribute(amount, itemWeights);
         }
-    }
-
-    private static int ParticipantOrder(List<Participant> ordered, string participantId)
-    {
-        for (var i = 0; i < ordered.Count; i++)
-        {
-            if (ordered[i].Id == participantId)
-            {
-                return i;
-            }
-        }
-
-        return int.MaxValue;
     }
 }
