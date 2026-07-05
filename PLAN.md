@@ -1,5 +1,9 @@
 # Bill Splitter — Plan
 
+> Superseded by [docs/](docs/00-overview.md), which carries the full,
+> authoritative design. This file is the original one-page plan, kept for
+> the narrative; where they disagree, docs/ wins.
+
 Ephemeral bill splitting for a table of people paying a restaurant
 individually. Host scans the receipt, everyone claims their items from their
 own phone, totals reconcile to the penny, everything is deleted as soon as
@@ -49,7 +53,8 @@ possible. No accounts, no persistent data.
   Backend POSTs the image, gets text + bounding boxes back. Bounded to 1–2
   concurrent jobs, queued behind that. Parsing heuristics: right-aligned
   price column, qty prefixes, keyword rows for TAX/TIP/TOTAL.
-- **State**: Redis is the only store. Server is the single source of truth:
+- **State**: Redis is the only session store (MinIO transiently holds the
+  receipt image). Server is the single source of truth:
   every mutation recomputes and broadcasts the full session snapshot (items,
   claims, per-person totals) — a few KB, so no deltas, no client-side totals
   math, reconnect is free.
@@ -75,8 +80,8 @@ possible. No accounts, no persistent data.
 
 - Receipt image: deleted from MinIO when the host confirms the review gate.
   Bucket gets a 1-day lifecycle rule as a safety net for orphaned uploads.
-- Session state: 24h absolute TTL in Redis, plus explicit delete on
-  finalize + email send.
+- Session state: 24h absolute TTL in Redis, shrunk to 1h at finalize so
+  the summary stays readable before it self-destructs.
 - Email address: never stored; held only in the finalize request.
 
 ## Abuse controls
