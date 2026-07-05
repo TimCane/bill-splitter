@@ -57,7 +57,8 @@ rehydrates).
 ### `GET /api/v1/sessions/{sessionId}/receipt`
 
 The stored receipt image, `image/jpeg` or `image/png`. Host only, state
-`Review` only (the object is deleted at open). `404` after open.
+`Review` only (the object is deleted at open). `404` `receipt-not-found`
+after open.
 
 ### `PUT /api/v1/sessions/{sessionId}/participants/me`
 
@@ -214,6 +215,7 @@ switches on:
 | 403 | `unknown-participant` | token does not match any participant |
 | 404 | `session-not-found` | expired or never existed (indistinguishable, deliberately) |
 | 404 | `item-not-found` | item id not in session |
+| 404 | `receipt-not-found` | receipt image requested after open (deleted) |
 | 409 | `wrong-state` | operation not allowed in current state (`detail` names both) |
 | 409 | `session-full` | participant cap |
 | 413 | `image-too-large` | upload > 10MB |
