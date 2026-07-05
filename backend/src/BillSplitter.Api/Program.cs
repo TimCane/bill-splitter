@@ -1,6 +1,7 @@
 using BillSplitter.Api.Configuration;
+using BillSplitter.Api.Health;
 using BillSplitter.Api.Hubs;
-using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +20,19 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
-// 3. Singletons (Redis multiplexer, session store, receipt storage, OCR queue,
-//    id generator), the typed OCR HttpClient and the scoped SnapshotMapper land
-//    with their implementations in M2+.
+// 3. Singletons. Session store, receipt storage, OCR queue, id generator and
+//    the scoped SnapshotMapper land with their implementations in M2+; the
+//    Redis multiplexer and health probe are needed for /healthz now.
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+{
+    var redis = builder.Configuration.GetSection(RedisOptions.SectionName).Get<RedisOptions>()!;
+    var config = ConfigurationOptions.Parse(redis.ConnectionString);
+    // Keep startup alive when Redis is down - /healthz reports it, not crashes.
+    config.AbortOnConnectFail = false;
+    return ConnectionMultiplexer.Connect(config);
+});
+builder.Services.AddHttpClient(HealthProbe.HttpClientName);
+builder.Services.AddSingleton<HealthProbe>();
 
 // 4. Hosted services: OcrWorker lands in M3.
 
@@ -57,14 +68,14 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<SessionHub>("/hubs/session");
 
-// Anonymous liveness/readiness probe. Real Redis/MinIO/OCR checks land in #7;
-// email is a static capability flag driven by SMTP configuration.
-app.MapGet("/healthz", (IOptions<SmtpOptions> smtp) => Results.Ok(new
+// Anonymous readiness probe: 200 only when Redis, MinIO and OCR all answer,
+// 503 otherwise. email is a capability flag and never changes the status code.
+app.MapGet("/healthz", async (HealthProbe probe, CancellationToken ct) =>
 {
-    redis = true,
-    minio = true,
-    ocr = true,
-    email = smtp.Value.IsEnabled,
-}));
+    var report = await probe.CheckAsync(ct);
+    return Results.Json(
+        new { redis = report.Redis, minio = report.Minio, ocr = report.Ocr, email = report.Email },
+        statusCode: report.IsHealthy ? StatusCodes.Status200OK : StatusCodes.Status503ServiceUnavailable);
+});
 
 app.Run();
