@@ -1,6 +1,7 @@
 using BillSplitter.Domain;
 using Minio;
 using Minio.DataModel.Args;
+using Minio.DataModel.ILM;
 using Minio.Exceptions;
 
 namespace BillSplitter.Infrastructure.Storage;
@@ -78,10 +79,30 @@ public sealed class MinioReceiptStorage : IReceiptStorage
     private async Task EnsureBucketAsync(CancellationToken ct)
     {
         var exists = await _client.BucketExistsAsync(new BucketExistsArgs().WithBucket(_bucket), ct);
-        if (!exists)
+        if (exists)
         {
-            await _client.MakeBucketAsync(new MakeBucketArgs().WithBucket(_bucket), ct);
+            return;
         }
+
+        await _client.MakeBucketAsync(new MakeBucketArgs().WithBucket(_bucket), ct);
+
+        // Safety net: expire objects after a day so a receipt image self-destructs
+        // even if the delete-at-open path never runs
+        // (docs/01-architecture.md#receipt-image-lifecycle).
+        var rule = new LifecycleRule(
+            null,
+            "expire-receipts",
+            new Expiration { Days = 1 },
+            null,
+            new RuleFilter(null, string.Empty, null),
+            null,
+            null,
+            LifecycleRule.LifecycleRuleStatusEnabled);
+        await _client.SetBucketLifecycleAsync(
+            new SetBucketLifecycleArgs()
+                .WithBucket(_bucket)
+                .WithLifecycleConfiguration(new LifecycleConfiguration([rule])),
+            ct);
     }
 
     private static string ObjectKey(string sessionId) => $"receipts/{sessionId}";
