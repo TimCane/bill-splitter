@@ -157,6 +157,7 @@ public sealed class SessionTests
     [InlineData("", 1, 0)]
     [InlineData("Beer", 0, 100)]
     [InlineData("Beer", 1, -1)]
+    [InlineData("Beer", 1, Session.MaxAmountMinor + 1)]
     public void AddItem_bounds_are_validation(string name, int quantity, long price)
     {
         var session = SessionBuilder.InState(SessionState.Review);

@@ -13,6 +13,12 @@ public sealed class Session
 {
     public const string DefaultCurrency = "GBP";
 
+    /// <summary>Upper bound on any single money field, in minor units
+    /// (1,000,000.00 major). Bounding every amount keeps the amount * weight
+    /// products in <see cref="SplitCalculator"/> well inside <see cref="long"/>
+    /// range, so totals can never silently overflow (docs/02-domain-model.md).</summary>
+    public const long MaxAmountMinor = 100_000_000;
+
     private readonly List<Participant> _participants;
     private readonly List<LineItem> _items;
 
@@ -328,9 +334,10 @@ public sealed class Session
 
     private static long ValidatePrice(long amountMinor)
     {
-        if (amountMinor < 0)
+        if (amountMinor is < 0 or > MaxAmountMinor)
         {
-            throw new DomainException(ErrorCodes.Validation, "amount must be >= 0");
+            throw new DomainException(
+                ErrorCodes.Validation, $"amount must be between 0 and {MaxAmountMinor} minor units");
         }
 
         return amountMinor;
