@@ -1,6 +1,7 @@
 using BillSplitter.Api.Configuration;
 using BillSplitter.Api.Health;
 using BillSplitter.Api.Hubs;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,9 +24,9 @@ builder.Services.AddRateLimiter(options =>
 // 3. Singletons. Session store, receipt storage, OCR queue, id generator and
 //    the scoped SnapshotMapper land with their implementations in M2+; the
 //    Redis multiplexer and health probe are needed for /healthz now.
-builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var redis = builder.Configuration.GetSection(RedisOptions.SectionName).Get<RedisOptions>()!;
+    var redis = sp.GetRequiredService<IOptions<RedisOptions>>().Value;
     var config = ConfigurationOptions.Parse(redis.ConnectionString);
     // Keep startup alive when Redis is down - /healthz reports it, not crashes.
     config.AbortOnConnectFail = false;
@@ -52,6 +53,11 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
+
+// Connect the multiplexer at startup (AbortOnConnectFail=false keeps a down
+// Redis from crashing boot) so the first /healthz probe never pays the connect
+// cost on the request thread.
+_ = app.Services.GetRequiredService<IConnectionMultiplexer>();
 
 // 6. Pipeline: exception handling -> rate limiter -> auth -> endpoints.
 app.UseExceptionHandler();

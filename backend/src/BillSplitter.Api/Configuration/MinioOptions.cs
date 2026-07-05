@@ -7,6 +7,7 @@ public sealed class MinioOptions
     public const string SectionName = "Minio";
 
     [Required]
+    [Url]
     public string Endpoint { get; set; } = string.Empty;
 
     [Required]

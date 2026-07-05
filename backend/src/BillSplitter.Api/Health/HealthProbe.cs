@@ -41,7 +41,7 @@ public sealed class HealthProbe
 
     public async Task<HealthReport> CheckAsync(CancellationToken ct)
     {
-        var redis = ProbeRedisAsync();
+        var redis = ProbeRedisAsync(ct);
         var minio = ProbeHttpAsync($"{_minio.Endpoint.TrimEnd('/')}/minio/health/live", ct);
         var ocr = ProbeHttpAsync($"{_ocr.BaseUrl.TrimEnd('/')}/healthz", ct);
 
@@ -50,7 +50,7 @@ public sealed class HealthProbe
         return new HealthReport(redis.Result, minio.Result, ocr.Result, _emailEnabled);
     }
 
-    private async Task<bool> ProbeRedisAsync()
+    private async Task<bool> ProbeRedisAsync(CancellationToken ct)
     {
         try
         {
@@ -59,10 +59,12 @@ public sealed class HealthProbe
                 return false;
             }
 
-            await _redis.GetDatabase().PingAsync();
+            // PingAsync has no token; bound it to ProbeTimeout so a stalled but
+            // reachable Redis cannot push the whole sweep past its budget.
+            await _redis.GetDatabase().PingAsync().WaitAsync(ProbeTimeout, ct);
             return true;
         }
-        catch (RedisException)
+        catch (Exception)
         {
             return false;
         }
@@ -79,7 +81,7 @@ public sealed class HealthProbe
             using var response = await client.GetAsync(url, timeout.Token);
             return response.IsSuccessStatusCode;
         }
-        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException)
+        catch (Exception)
         {
             return false;
         }
