@@ -12,7 +12,6 @@ Client library: StackExchange.Redis (single multiplexer, DI singleton).
 | --- | --- | --- | --- |
 | `session:{sessionId}` | string | JSON document (below) | 24h from create; reset to 1h at finalize |
 | `code:{shortCode}` | string | `sessionId` | matches its session's remaining TTL at mint |
-| `ratelimit:*` | - | owned by the ASP.NET rate limiter if a distributed store is ever needed; not used single-instance | - |
 
 That is the whole schema. No indexes, no scans, no cross-session queries
 exist anywhere in the app.
