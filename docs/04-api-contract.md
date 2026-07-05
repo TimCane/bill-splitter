@@ -138,8 +138,11 @@ never stored. Returns the finalized snapshot.
 ### `GET /healthz`
 
 Anonymous. `200` when the app can reach Redis; body
-`{ "redis": true, "minio": true, "ocr": true }` with `503` if any probe
-fails. Used by compose healthchecks and CI smoke tests.
+`{ "redis": true, "minio": true, "ocr": true, "email": false }` with `503`
+if any probe fails. `email` is a capability flag, not a probe - `true`
+when SMTP is configured ([13-deployment.md](13-deployment.md#environment));
+it drives the finalize dialog's email field and never causes `503`. Used
+by compose healthchecks and CI smoke tests.
 
 ## SessionSnapshotDto
 
