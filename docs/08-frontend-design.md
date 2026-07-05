@@ -77,7 +77,7 @@ One source of truth: the TanStack Query cache entry
 Hub connection lifecycle lives in `useSession`: connect on mount (token
 present), `withAutomaticReconnect`, dispose on unmount. Connection status
 (`connected | reconnecting | disconnected`) is exposed for the status pill
-([09-ux-flows.md](09-ux-flows.md#claim)).
+([09-ux-flows.md](09-ux-flows.md#7-claim---state-open-the-main-screen-everyone)).
 
 ## API client
 
@@ -119,5 +119,6 @@ Share card. No server-side image generation.
   primitives (Button, Card, Input, Sheet, Badge, Alert).
 - Prettier: single quotes, no semicolons, 2-space.
 - Tests: Vitest + RTL for components/hooks
-  ([11-testing-strategy.md](11-testing-strategy.md#frontend)); Puppeteer
+  ([11-testing-strategy.md](11-testing-strategy.md#frontend-vitest--rtl));
+  Puppeteer
   for the two-browser e2e flows.

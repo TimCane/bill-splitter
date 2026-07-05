@@ -92,7 +92,7 @@ BillSplitter.Api/
   `SessionSnapshotDto`; calls `SplitCalculator` for computed fields. Every
   snapshot in the system flows through this one class.
 - **Rate limiting**: built-in ASP.NET rate limiter, policies per
-  [10-security-privacy.md](10-security-privacy.md#rate-limits).
+  [10-security-privacy.md](10-security-privacy.md#rate-limits-aspnet-rate-limiter-per-client-ip).
 - **OpenAPI**: Swashbuckle in dev; NSwag generates the frontend client in
   CI ([12-ci.md](12-ci.md)).
 

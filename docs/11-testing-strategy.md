@@ -15,7 +15,7 @@ the deepest coverage in the repo.
 - Largest-remainder cases: exact division, remainders, tie-breaking by
   index, single claimant, all-equal weights.
 - Property-based (FsCheck) over random sessions, asserting the invariants
-  from [02-domain-model.md](02-domain-model.md#invariants):
+  from [02-domain-model.md](02-domain-model.md#invariants-property-test-these):
   allocations sum exactly, nothing negative, deterministic on re-run,
   post-finalize whole-bill coverage.
 - Named regression cases: extras with zero claimed subtotals, nobody
@@ -30,7 +30,8 @@ One parameterized test runs the whole corpus.
 
 - **Grow the corpus from real receipts from day one** - every OCR
   misparse found during development becomes a fixture before it is fixed.
-  This corpus is the parser's real spec ([known risk](00-overview.md)).
+  This corpus is the parser's real spec
+  ([known risk](00-overview.md#known-risks)).
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

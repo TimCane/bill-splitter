@@ -56,7 +56,7 @@ Accept:
 
 Scope: item CRUD + bill endpoints, checksum, receipt image endpoint, open
 (image delete + short code + join URL), Review UI per
-[09-ux-flows.md](09-ux-flows.md#4-review-host-gate), Share sheet, code
+[09-ux-flows.md](09-ux-flows.md#4-review-host-gate---state-review), Share sheet, code
 resolve + `/join`.
 
 Accept:

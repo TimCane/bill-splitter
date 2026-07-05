@@ -79,7 +79,7 @@ liveness). The backend's `/healthz` probes this.
 
 `ReceiptParser` in `BillSplitter.Domain` - pure function
 `Parse(OcrResult) -> ParsedReceipt { Items, Bill, Warnings }`. Fixture-driven
-tests are the spec ([11-testing-strategy.md](11-testing-strategy.md#fixtures));
+tests are the spec ([11-testing-strategy.md](11-testing-strategy.md#receiptparser));
 the heuristics below are the initial implementation, expected to grow with
 the fixture corpus.
 

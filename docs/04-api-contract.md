@@ -74,7 +74,8 @@ Returns the snapshot.
 | `PUT .../items/{itemId}` | same shape | `200`, snapshot |
 | `DELETE .../items/{itemId}` | - | `200`, snapshot |
 
-Validation per [02-domain-model.md](02-domain-model.md#domain-rules):
+Validation per
+[02-domain-model.md](02-domain-model.md#domain-rules-enforced-in-the-aggregate-surfaced-as-400409):
 name 1-80 chars, `quantity >= 1`, `priceMinor >= 0`, max 100 items.
 
 ### `PUT /api/v1/sessions/{sessionId}/bill`
@@ -104,7 +105,7 @@ rendered client-side from it.
 
 Anonymous. Resolves a typed-in code: `{ "sessionId": "..." }`. `404` if
 unknown/expired. Rate limited (brute-force guard,
-[10-security-privacy.md](10-security-privacy.md#rate-limits)).
+[10-security-privacy.md](10-security-privacy.md#rate-limits-aspnet-rate-limiter-per-client-ip)).
 
 ### `POST /api/v1/sessions/{sessionId}/participants`
 

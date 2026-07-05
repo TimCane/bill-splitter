@@ -159,7 +159,7 @@ Element inventory:
   (calls `SetShares`; min 1, max 99; unclaim via the claim button toggle).
 - When another claimant joins/leaves an item you claimed, your share
   amount animates (brief highlight) - retroactive change must read as
-  intentional ([known risk](00-overview.md)).
+  intentional ([known risk](00-overview.md#known-risks)).
 - Totals drawer (`Everyone`): per person - name, items £, extras £, total
   £; plus the unclaimed line. Data straight from `snapshot.totals`.
 - Finalize (host): confirm dialog `Lock the split? Unclaimed £6.50 gets

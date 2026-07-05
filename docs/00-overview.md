@@ -42,6 +42,16 @@ hour later.
 - Presence indicators (who is online)
 - Receipt re-upload (bad photo = start a new session or enter items by hand)
 
+## Known risks
+
+- **OCR accuracy is the project risk.** Expect ~70-85% line accuracy on
+  real thermal receipts; the review gate is the product, not polish. Grow
+  the parser fixture corpus from real receipts from day one
+  ([11-testing-strategy.md](11-testing-strategy.md#receiptparser)).
+- **Retroactive totals.** Another claimant joining an item changes other
+  people's numbers live. Correct by design, but the UI must animate the
+  change so it reads as intentional, not as a bug.
+
 ## Document map
 
 | Doc | Contents |
