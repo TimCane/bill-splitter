@@ -18,6 +18,11 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   minio:
     image: minio/minio:latest
@@ -31,6 +36,11 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   minio-init:
     image: minio/mc:latest
@@ -45,6 +55,24 @@ services:
       "
     networks:
       - backend
+
+  # PaddleOCR sidecar - internal only, no published ports.
+  ocr:
+    build:
+      context: ../ocr
+    restart: unless-stopped
+    networks:
+      - backend
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz').read()
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
 
 networks:
   backend:
