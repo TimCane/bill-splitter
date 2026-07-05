@@ -1,5 +1,6 @@
 using BillSplitter.Api.Auth;
 using BillSplitter.Api.Configuration;
+using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Health;
 using BillSplitter.Api.Hubs;
 using BillSplitter.Api.Middleware;
@@ -66,6 +67,9 @@ builder.Services.AddSingleton<IMinioClient>(sp =>
 builder.Services.AddSingleton<IReceiptStorage>(sp => new MinioReceiptStorage(
     sp.GetRequiredService<IMinioClient>(),
     sp.GetRequiredService<IOptions<MinioOptions>>().Value.Bucket));
+
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<SnapshotMapper>();
 
 // 4. Hosted services: OcrWorker lands in M3.
 
