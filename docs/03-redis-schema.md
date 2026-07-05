@@ -89,8 +89,9 @@ Write path in `RedisSessionStore`:
 2. Apply the mutation to the aggregate (domain method), increment
    `Version`.
 3. `EVALSHA` the CAS script with the pre-mutation version.
-4. On `0` (conflict): re-read and retry from step 1, up to 5 attempts, no
-   backoff (conflicts resolve in single-digit milliseconds at table scale).
+4. On `0` (conflict): re-read and retry from step 1, up to 5 attempts,
+   with a tiny jittered delay (random 0-10ms, doubling per attempt) so
+   lockstep writers interleave instead of colliding again.
    After 5 failures: `503` / hub error - should never happen in practice;
    if it does, it is a bug worth an alert.
 5. On `-1`: session expired -> `404` / `SessionExpired` hub error.
