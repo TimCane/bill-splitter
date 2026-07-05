@@ -99,14 +99,18 @@ explicitly at create (24h) and finalize (1h).
 | --- | --- |
 | Create session | `SET session:{id} {json} EX 86400` |
 | Any mutation | CAS script above (`KEEPTTL`) |
-| Open | CAS write (state -> `Open`, shortCode set), then `SET code:{code} {id} EX {remaining-session-ttl}` |
+| Open | mint the code key (below), then CAS write (state -> `Open`, shortCode set) |
 | Finalize | CAS write (state -> `Finalized`), then `EXPIRE session:{id} 3600` and `EXPIRE code:{code} 3600` |
 | Expiry | Redis TTL. No cleanup jobs, no tombstones. |
 
 Short-code minting: generate 6 chars from the alphabet
-`ABCDEFGHJKMNPQRSTUVWXYZ23456789`, `SET code:{code} {id} NX`; on collision
-(NX fails) generate a new code, up to 5 attempts. ~1.1e9 combinations vs a
-handful of live sessions: collisions are lottery-rare.
+`ABCDEFGHJKMNPQRSTUVWXYZ23456789`,
+`SET code:{code} {id} NX EX {remaining-session-ttl}`; on collision (NX
+fails) generate a new code, up to 5 attempts. The code key is minted
+before the CAS commit stores `shortCode`, so a failed CAS or a crash never
+leaves a session displaying a code it does not own - an orphaned code key
+just expires with its TTL. ~1.1e9 combinations vs a handful of live
+sessions: collisions are lottery-rare.
 
 ## Sizing
 
