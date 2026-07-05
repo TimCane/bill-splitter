@@ -82,6 +82,7 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec prettier --check .
+      - run: pnpm lint
       - run: pnpm exec tsc -b
       - run: pnpm test
       - run: pnpm build
