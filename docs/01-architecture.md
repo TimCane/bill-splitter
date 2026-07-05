@@ -80,7 +80,11 @@
 | `Processing` | host | `GET` snapshot (poll-free: `OcrStatusChanged` over hub) |
 | `Review` | host | item CRUD, bill edit, view receipt image, open |
 | `Open` | host + joiners | join, claim/unclaim/set-shares, finalize (host) |
-| `Finalized` | anyone with token | `GET` snapshot (read-only) until TTL |
+| `Finalized` | anyone with the link | `GET` snapshot (read-only) until TTL |
+
+The access column governs mutations and the receipt image; the snapshot
+`GET` itself is anonymous in every state - the unguessable URL is the
+credential ([04-api-contract.md](04-api-contract.md#auth)).
 
 - OCR failure does **not** create a dead state: the session lands in
   `Review` with `ocr.status = "Failed"` and an empty item list; the host

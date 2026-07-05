@@ -10,7 +10,11 @@ hub ([05-realtime-contract.md](05-realtime-contract.md)).
 
 ## Auth
 
-- Anonymous: create, resolve short code, join, health.
+- Anonymous: create, resolve short code, join, health, and the snapshot
+  `GET` - the unguessable session URL is the credential
+  ([10-security-privacy.md](10-security-privacy.md#identity-and-access)),
+  and the tokenless visitor states in
+  [09-ux-flows.md](09-ux-flows.md#routestaterole-matrix) need to read it.
 - Everything else: `Authorization: Bearer {participantToken}`. The token is
   matched by hex SHA-256 against `participants[].tokenHash` in the session
   addressed by the route. There is no cross-session token registry - a
@@ -45,9 +49,10 @@ for `OcrStatusChanged`.
 
 ### `GET /api/v1/sessions/{sessionId}`
 
-Full snapshot ([snapshot shape](#sessionsnapshotdto)). Any participant.
-Works in every state (this is how a refreshed tab or late viewer of a
-finalized session rehydrates).
+Full snapshot ([snapshot shape](#sessionsnapshotdto)). Anonymous: holding
+the session URL grants read access in every state (this is how a refreshed
+tab, a tokenless visitor, or a late viewer of a finalized session
+rehydrates).
 
 ### `GET /api/v1/sessions/{sessionId}/receipt`
 

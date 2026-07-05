@@ -9,8 +9,8 @@ one restaurant receipt image (briefly), first names, and one email address
 
 - **Session URL is the credential.** `sessionId` = 16 bytes of crypto
   randomness, base64url (22 chars) - unguessable. Anyone holding the URL
-  can join while `Open`; that is the product's trust model (the QR sits on
-  a physical table).
+  can read the snapshot in any state and join while `Open`; that is the
+  product's trust model (the QR sits on a physical table).
 - **Participant tokens**: 32 bytes crypto random, base64url (43 chars),
   issued once at create/join, stored client-side in localStorage and
   server-side only as a hex SHA-256 hash. A leaked Redis dump therefore
