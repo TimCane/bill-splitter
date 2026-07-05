@@ -56,23 +56,14 @@ services:
     networks:
       - backend
 
-  # PaddleOCR sidecar - internal only, no published ports.
+  # PaddleOCR sidecar - internal only, no published ports. Healthcheck is
+  # inherited from the image's HEALTHCHECK (ocr/Dockerfile).
   ocr:
     build:
       context: ../ocr
     restart: unless-stopped
     networks:
       - backend
-    healthcheck:
-      test:
-        - CMD
-        - python
-        - -c
-        - import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz').read()
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 15s
 
 networks:
   backend:
