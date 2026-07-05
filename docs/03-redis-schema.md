@@ -67,14 +67,21 @@ optimistic compare-and-swap on `version` via a Lua script
 
 ```lua
 -- KEYS[1] = session:{id}
+-- KEYS[2] = code:{shortCode} (finalize only)
 -- ARGV[1] = expected version (int)
 -- ARGV[2] = new JSON document (version already incremented)
+-- ARGV[3] = new TTL in seconds (finalize only; absent = keep TTL)
 -- returns 1 on success, 0 on conflict, -1 on missing key
 local raw = redis.call('GET', KEYS[1])
 if not raw then return -1 end
 local current = cjson.decode(raw)
 if current.version ~= tonumber(ARGV[1]) then return 0 end
-redis.call('SET', KEYS[1], ARGV[2], 'KEEPTTL')
+if ARGV[3] then
+  redis.call('SET', KEYS[1], ARGV[2], 'EX', ARGV[3])
+  if KEYS[2] then redis.call('EXPIRE', KEYS[2], ARGV[3]) end
+else
+  redis.call('SET', KEYS[1], ARGV[2], 'KEEPTTL')
+end
 return 1
 ```
 
@@ -91,7 +98,8 @@ Write path in `RedisSessionStore`:
 5. On `-1`: session expired -> `404` / `SessionExpired` hub error.
 
 `KEEPTTL` preserves the TTL on every write; the TTL is only ever set
-explicitly at create (24h) and finalize (1h).
+explicitly at create (24h) and inside the finalize CAS call (1h) - never
+in a follow-up step a crash could skip.
 
 ## Lifecycle operations
 
@@ -100,7 +108,7 @@ explicitly at create (24h) and finalize (1h).
 | Create session | `SET session:{id} {json} EX 86400` |
 | Any mutation | CAS script above (`KEEPTTL`) |
 | Open | mint the code key (below), then CAS write (state -> `Open`, shortCode set) |
-| Finalize | CAS write (state -> `Finalized`), then `EXPIRE session:{id} 3600` and `EXPIRE code:{code} 3600` |
+| Finalize | CAS write (state -> `Finalized`) passing TTL 3600 - the script shrinks the session and code keys atomically with the write |
 | Expiry | Redis TTL. No cleanup jobs, no tombstones. |
 
 Short-code minting: generate 6 chars from the alphabet

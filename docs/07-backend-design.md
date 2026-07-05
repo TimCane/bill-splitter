@@ -32,7 +32,7 @@ Dependencies flow inward only: `Api -> Infrastructure -> Domain`,
 | `SplitCalculator` | pure static service | largest-remainder distribution + per-participant totals |
 | `ReceiptParser` | pure service | OCR lines -> `ParsedReceipt` ([06-ocr-service.md](06-ocr-service.md#parsing)) |
 | `OcrResult`, `OcrLine`, `ParsedReceipt` | value types | sidecar output / parser output |
-| `ISessionStore` | interface | `GetAsync`, `CreateAsync`, `MutateAsync` (below), `OpenAsync`, `FinalizeExpiryAsync`, `ResolveCodeAsync` |
+| `ISessionStore` | interface | `GetAsync`, `CreateAsync`, `MutateAsync` (below), `OpenAsync`, `FinalizeAsync` (the CAS write with the TTL shrink in one script), `ResolveCodeAsync` |
 | `IReceiptStorage` | interface | `PutAsync`, `GetAsync`, `DeleteAsync` |
 | `IOcrClient` | interface | `RecognizeAsync(Stream) -> OcrResult` |
 | `IEmailSender` | interface | `SendSummaryAsync(email, snapshot)` |
