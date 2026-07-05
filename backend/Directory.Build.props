@@ -1,0 +1,26 @@
+<Project>
+
+  <!--
+    Shared MSBuild defaults for every .NET project in the solution. A project
+    that must relax a setting (e.g. test projects and CS1591) overrides it
+    locally in its .csproj.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Missing XML doc comment - too noisy to fail the build on. -->
+    <WarningsNotAsErrors>CS1591</WarningsNotAsErrors>
+
+    <!-- Reproducible CI artifacts. -->
+    <Deterministic>true</Deterministic>
+
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+</Project>

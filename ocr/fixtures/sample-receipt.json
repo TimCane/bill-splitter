@@ -1,0 +1,35 @@
+{
+  "durationMs": 3412,
+  "lines": [
+    {
+      "text": "THE CORNER BISTRO",
+      "confidence": 0.97,
+      "box": { "x": 120, "y": 60, "width": 640, "height": 44 }
+    },
+    {
+      "text": "2 PERONI 660ML        11.00",
+      "confidence": 0.94,
+      "box": { "x": 42, "y": 310, "width": 828, "height": 38 }
+    },
+    {
+      "text": "MARGHERITA            12.50",
+      "confidence": 0.95,
+      "box": { "x": 42, "y": 356, "width": 828, "height": 38 }
+    },
+    {
+      "text": "TIRAMISU               6.00",
+      "confidence": 0.91,
+      "box": { "x": 42, "y": 402, "width": 828, "height": 38 }
+    },
+    {
+      "text": "SERVICE               2.95",
+      "confidence": 0.9,
+      "box": { "x": 42, "y": 520, "width": 828, "height": 38 }
+    },
+    {
+      "text": "TOTAL                32.45",
+      "confidence": 0.96,
+      "box": { "x": 42, "y": 578, "width": 828, "height": 40 }
+    }
+  ]
+}

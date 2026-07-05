@@ -18,6 +18,11 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   minio:
     image: minio/minio:latest
@@ -31,6 +36,11 @@ services:
     restart: unless-stopped
     networks:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   minio-init:
     image: minio/mc:latest
@@ -43,6 +53,15 @@ services:
       mc mb --ignore-existing local/bill-splitter;
       exit 0;
       "
+    networks:
+      - backend
+
+  # PaddleOCR sidecar - internal only, no published ports. Healthcheck is
+  # inherited from the image's HEALTHCHECK (ocr/Dockerfile).
+  ocr:
+    build:
+      context: ../ocr
+    restart: unless-stopped
     networks:
       - backend
 
