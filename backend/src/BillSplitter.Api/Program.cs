@@ -70,6 +70,7 @@ builder.Services.AddSingleton<IReceiptStorage>(sp => new MinioReceiptStorage(
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<SnapshotMapper>();
+builder.Services.AddScoped<ISessionNotifier, SignalRSessionNotifier>();
 
 // 4. Hosted services: OcrWorker lands in M3.
 
@@ -133,3 +134,6 @@ app.MapGet("/healthz", async (HealthProbe probe, CancellationToken ct) =>
 });
 
 app.Run();
+
+// Exposed so WebApplicationFactory<Program> can host the API in integration tests.
+public partial class Program;
