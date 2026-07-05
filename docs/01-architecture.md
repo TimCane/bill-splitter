@@ -78,8 +78,8 @@
 | State | Who can access | Allowed operations |
 | --- | --- | --- |
 | `Processing` | host | `GET` snapshot (poll-free: `OcrStatusChanged` over hub) |
-| `Review` | host | item CRUD, bill edit, view receipt image, open |
-| `Open` | host + joiners | join, claim/unclaim/set-shares, finalize (host) |
+| `Review` | host | item CRUD, bill edit, rename self, view receipt image, open |
+| `Open` | host + joiners | join, rename self, claim/unclaim/set-shares, finalize (host) |
 | `Finalized` | anyone with the link | `GET` snapshot (read-only) until TTL |
 
 The access column governs mutations and the receipt image; the snapshot
