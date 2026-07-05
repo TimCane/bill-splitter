@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageVersion Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageVersion Include="Minio" Version="6.0.3" />
   </ItemGroup>
 
   <ItemGroup>
