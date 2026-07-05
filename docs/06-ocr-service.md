@@ -39,8 +39,11 @@ Body: raw image bytes, `Content-Type: image/jpeg` or `image/png`, max
 
 - `lines` ordered top-to-bottom by box `y`. `box` is the axis-aligned
   bounding rectangle of PaddleOCR's quad, in pixels of the submitted image.
-- `422` undecodable image, `413` too large, `500` inference error (body is
-  problem+json with a `detail`).
+- `422` undecodable image or header dimensions over 8000x8000 (checked
+  before full decode - the sidecar's half of the decode-bomb guard,
+  [10-security-privacy.md](10-security-privacy.md#upload-hardening)),
+  `413` too large, `500` inference error (body is problem+json with a
+  `detail`).
 
 ### `GET /healthz`
 
