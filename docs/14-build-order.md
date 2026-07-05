@@ -27,9 +27,10 @@ Accept:
 
 ## M2 - Session core
 
-Scope: the aggregate, Redis store with Lua CAS, tokens/auth, create (image
-accepted and stored, OCR faked as instant-empty-`Review`), join, snapshot
-GET, rename. [02](02-domain-model.md), [03](03-redis-schema.md),
+Scope: the aggregate, Redis store with Lua CAS, MinIO storage
+(`IReceiptStorage` - create needs it), tokens/auth, create (image accepted
+and stored, OCR faked as instant-empty-`Review`), join, snapshot GET,
+rename. [02](02-domain-model.md), [03](03-redis-schema.md),
 [04](04-api-contract.md) minus OCR/finalize.
 
 Accept:
@@ -40,7 +41,7 @@ Accept:
 
 ## M3 - OCR pipeline
 
-Scope: MinIO storage, bounded queue + `OcrWorker`, real sidecar inference,
+Scope: bounded queue + `OcrWorker`, real sidecar inference,
 `ReceiptParser` + fixture corpus, `OcrStatusChanged` over the hub (hub
 exists connect+events only). [06](06-ocr-service.md),
 [05](05-realtime-contract.md) events.
