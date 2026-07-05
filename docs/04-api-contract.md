@@ -180,10 +180,10 @@ fields marked (c).
       "participantId": "aB3x...",
       "itemsMinor": 1250,
       "taxMinor": 0,
-      "tipMinor": 126,
+      "tipMinor": 167,              // 500 weighted by claimed itemsMinor: floor(500*1250/3750) + largest remainder
       "serviceMinor": 0,
       "unclaimedMinor": 0,          // populated only once Finalized
-      "totalMinor": 1376
+      "totalMinor": 1417
     }
   ]
 }
