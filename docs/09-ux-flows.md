@@ -193,8 +193,9 @@ Element inventory:
   snapshot's `expiresAt` - the client never computes expiry itself (the
   finalized TTL is server configuration).
 - If an email was requested the host sees `Summary sent to t***@e***.com`
-  (masked, from the finalize response - the address itself is never in a
-  snapshot).
+  (masked client-side from the address typed in the finalize dialog - the
+  API never returns the address, so the confirmation does not survive a
+  refresh; that is fine).
 
 ## 9. Expired / not found
 
