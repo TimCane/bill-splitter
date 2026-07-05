@@ -89,8 +89,9 @@ the fixture corpus.
    - `TIP|GRATUITY` -> `bill.tipMinor`
    - `SERVICE` -> `bill.serviceMinor`
    - `TOTAL|AMOUNT DUE|BALANCE DUE|TO PAY` (and not `SUBTOTAL`) ->
-     `bill.totalMinor`; if several match, the **largest amount lowest on
-     the receipt** wins
+     `bill.totalMinor`; if several match, the **lowest on the receipt**
+     wins (grand totals print last); same-height ties take the larger
+     amount
    - `CASH|CHANGE|CARD|VISA|MASTERCARD|AUTH` -> ignore (payment noise)
 3. **Item rows**: any remaining candidate row above the total row. Name =
    text before the money token, trimmed of dot leaders and `#` codes.
