@@ -128,5 +128,6 @@ credential ([04-api-contract.md](04-api-contract.md#auth)).
 2. Backend: split unclaimed items equally, lock claims, state ->
    `Finalized`, shrink TTL to 1h, broadcast `SessionFinalized`.
 3. If an email was given: render summary, send via SMTP in the background.
-   Email failure is logged, never blocks finalize; the address is never
-   written to Redis.
+   Email failure is logged as exception type + SMTP status code only (SMTP
+   error messages embed the recipient address), never blocks finalize; the
+   address is never written to Redis.

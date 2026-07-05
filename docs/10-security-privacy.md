@@ -68,7 +68,7 @@ is small but real:
 | Receipt image | upload | host opens session | explicit MinIO delete; 1-day bucket lifecycle as backstop |
 | Session doc (names, items, claims) | create | 24h, or finalize + 1h | Redis TTL, set at write time, never absent |
 | Email address | never persisted | end of finalize request | exists only in the request + SMTP handshake |
-| Server logs | continuous | log rotation | **rule**: log ids and states, never display names, never email addresses, never image bytes |
+| Server logs | continuous | log rotation | **rule**: log ids and states, never display names, never email addresses, never image bytes; SMTP failures log exception type + status code only - the message embeds the recipient address |
 
 Redis runs with `save ""` and `appendonly no` - nothing ever touches disk.
 An honest limitation to state anywhere ephemerality is advertised: the

@@ -133,8 +133,9 @@ The client must check localStorage before joining
 Host, state `Open` only. Body: `{ "email": "tim@example.com" }` or `{}`.
 Locks claims, splits unclaimed items, shrinks TTL to 1h, broadcasts
 `SessionFinalized`, then (if email present) sends the summary in the
-background - send failures are logged, never surfaced, and the address is
-never stored. Returns the finalized snapshot.
+background - send failures are logged (exception type + SMTP status only;
+the message embeds the address), never surfaced, and the address is never
+stored. Returns the finalized snapshot.
 
 ### `GET /healthz`
 
