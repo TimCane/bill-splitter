@@ -55,9 +55,10 @@ liveness). The backend's `/healthz` probes this.
 
 1. CAS session `ocr.status -> Processing`, broadcast `OcrStatusChanged` +
    `SnapshotUpdated`.
-2. Fetch image from MinIO, `POST /ocr` (timeout 60s, no retry - a second
-   identical attempt will fail identically; transient network errors retry
-   once).
+2. Fetch image from MinIO, `POST /ocr` (timeout 60s). Timeouts and HTTP
+   error responses never retry - a second identical attempt will fail
+   identically; only connection-level failures (refused, reset, DNS) retry
+   once.
 3. Parse lines -> items + bill (below).
 4. CAS session: items, bill, `state -> Review`, `ocr.status -> Done`;
    broadcast `OcrStatusChanged` + `SnapshotUpdated`.
