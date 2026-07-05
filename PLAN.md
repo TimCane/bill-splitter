@@ -79,8 +79,8 @@ possible. No accounts, no persistent data.
 
 - Receipt image: deleted from MinIO when the host confirms the review gate.
   Bucket gets a 1-day lifecycle rule as a safety net for orphaned uploads.
-- Session state: 24h absolute TTL in Redis, plus explicit delete on
-  finalize + email send.
+- Session state: 24h absolute TTL in Redis, shrunk to 1h at finalize so
+  the summary stays readable before it self-destructs.
 - Email address: never stored; held only in the finalize request.
 
 ## Abuse controls
