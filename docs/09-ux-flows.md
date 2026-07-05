@@ -156,7 +156,7 @@ Element inventory:
 - Item row: name (+`2x` qty prefix), price, claim button (`Mine` /
   `Claimed` filled state), claimant chips with initials, your share amount
   when you claim, shares stepper (`- 1 +`) revealed while claimed by you
-  (calls `SetShares`; min 1; unclaim via the claim button toggle).
+  (calls `SetShares`; min 1, max 99; unclaim via the claim button toggle).
 - When another claimant joins/leaves an item you claimed, your share
   amount animates (brief highlight) - retroactive change must read as
   intentional ([known risk](00-overview.md)).

@@ -74,7 +74,7 @@ shares divide it. "I had 2 of the 3 beers" is `SetShares(itemId, 2)`.
 | Field | Type | Notes |
 | --- | --- | --- |
 | `ParticipantId` | `string` | one claim per participant per item |
-| `Shares` | `int` | >= 1; default 1 |
+| `Shares` | `int` | 1-99; default 1 |
 
 ### Bill
 
@@ -152,7 +152,7 @@ At **finalize**, additionally:
 | Item CRUD and bill edits only in `Review` | `Session.EnsureState` |
 | Claims only in `Open` | `Session.EnsureState` |
 | Join only in `Open`; max 20 participants | `Session.Join` |
-| `Shares >= 1`; claim references an existing item | `Session.SetShares` |
+| `Shares` 1-99; claim references an existing item | `Session.SetShares` |
 | Finalize only in `Open`, only by host | `Session.Finalize` |
 | Open only in `Review`, only by host | `Session.Open` |
 | Max 100 items; name/price bounds | `Session.AddItem` / `UpdateItem` |

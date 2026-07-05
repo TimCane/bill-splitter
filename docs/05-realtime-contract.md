@@ -36,7 +36,7 @@ mutation triggers a group-wide `SnapshotUpdated`.
 | --- | --- | --- |
 | `ClaimItem` | `(string itemId)` | upsert my claim with `shares = 1`; no-op if already claimed by me with 1 share |
 | `UnclaimItem` | `(string itemId)` | remove my claim; no-op if not claimed by me |
-| `SetShares` | `(string itemId, int shares)` | `shares >= 1`: upsert my claim at that weight. Claims are removed only via `UnclaimItem`; `shares <= 0` is an error |
+| `SetShares` | `(string itemId, int shares)` | `shares` 1-99: upsert my claim at that weight. Claims are removed only via `UnclaimItem`; out-of-range `shares` is an error |
 
 `ClaimItem` is sugar for `SetShares(itemId, 1)` - kept as a separate method
 so the common gesture is a single argument.
@@ -51,7 +51,7 @@ so the common gesture is a single argument.
 | `session-not-found` | session expired mid-connection |
 | `wrong-state` | claim gesture outside `Open` |
 | `item-not-found` | stale item id |
-| `validation` | `shares < 1` |
+| `validation` | `shares` outside 1-99 |
 | `conflict-retry-exhausted` | CAS gave up (see [03-redis-schema.md](03-redis-schema.md#concurrency)) |
 
 The client surfaces `wrong-state` after finalize as a soft "session was
