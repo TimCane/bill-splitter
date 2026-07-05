@@ -22,7 +22,8 @@ Scope: repo skeleton and the walking skeleton of every process.
 
 Accept:
 - [ ] `docker compose up` in the devcontainer: all four services healthy
-- [ ] `GET /healthz` returns all-true through the backend
+- [ ] `GET /healthz` returns `200` with redis/minio/ocr probes true (the
+      `email` capability flag stays false until SMTP is wired in M6)
 - [ ] CI green on a PR touching all three trees
 
 ## M2 - Session core
@@ -50,7 +51,7 @@ Accept:
 - [ ] Photo of a real receipt -> `Review` with plausible items in < 30s
 - [ ] Seed fixture corpus (7 receipts, [11-testing-strategy.md](11-testing-strategy.md#receiptparser)) passes
 - [ ] Sidecar down -> session lands `Review`/`Failed` with reason; no hang
-- [ ] 17 concurrent uploads: 16 queue, overflow gets 429, none pin CPU beyond 2 workers
+- [ ] 19 concurrent uploads: 2 in flight + 16 queued, the overflow gets 429, none pin CPU beyond 2 workers
 
 ## M4 - Review gate
 

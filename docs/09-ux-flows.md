@@ -74,6 +74,7 @@ active split.` On resolve -> `/s/:id`.
 ```
 ┌──────────────────────────────┐
 │  Check the items      [photo]│  <- opens receipt image in a sheet
+│  You: Host             [edit]│  <- tap to set your own name
 │ ┌──────────────────────────┐ │
 │ │ (i) Items + extras match │ │  <- checksum banner, green
 │ │     the total. £54.50    │ │
@@ -93,6 +94,10 @@ active split.` On resolve -> `/s/:id`.
 └──────────────────────────────┘
 ```
 
+- Host name: the `You: {name}` row (default `Host`) taps to rename via
+  `PUT .../participants/me`
+  ([04-api-contract.md](04-api-contract.md#put-apiv1sessionssessionidparticipantsme));
+  the host may fix it here or later from the Claim screen header.
 - Checksum banner variants (advisory, never blocks):
   - green: `Items + extras match the total. {total}`
   - amber: `Items + extras are {delta} {over|under} the printed total.
@@ -131,13 +136,13 @@ Name input (1-30 chars) + `Join the split`. Errors: session full
 ```
 ┌──────────────────────────────┐
 │ Split K7MPQ2        [● live] │  <- short code; connection pill: live/reconnecting
-│ You: Tim        Your £13.76  │  <- sticky header, live total
+│ You: Tim        Your £20.09  │  <- sticky header, live Open total
 ├──────────────────────────────┤
 │ Margherita            £12.50 │
 │ [ Mine ]              Tim ●  │  <- claimed by me: filled; shows share £
 │──────────────────────────────│
 │ 2x Peroni 660ml       £11.00 │
-│ [ Mine ]        Sam ● Aly ●  │  <- avatars = claimant initials
+│ [ Mine ]        Tim ● Sam ●  │  <- avatars = claimant initials
 │   your share £5.50  [shares:1│  <- share stepper appears when claimed
 │──────────────────────────────│
 │ Tiramisu              £6.50  │
@@ -151,8 +156,13 @@ Name input (1-30 chars) + `Join the split`. Errors: session full
 
 Element inventory:
 
-- Connection pill: `live` (green) / `reconnecting` (amber, spinner) /
-  `offline` (red after reconnect gives up; tap = reload).
+- Connection pill: maps `useSession`'s `connected | reconnecting |
+  disconnected` status ([08-frontend-design.md](08-frontend-design.md#server-state))
+  to labels `live` (green) / `reconnecting` (amber, spinner) / `offline`
+  (red after reconnect gives up; tap = reload).
+- Header name: the `You: {name}` label taps to rename via
+  `PUT .../participants/me` - the one place the host can fix a still-`Host`
+  name once the split is `Open`.
 - Item row: name (+`2x` qty prefix), price, claim button (`Mine` /
   `Claimed` filled state), claimant chips with initials, your share amount
   when you claim, shares stepper (`- 1 +`) revealed while claimed by you
@@ -176,10 +186,12 @@ Element inventory:
 │  Split locked  ✓             │
 │  Total              £54.50   │
 │                              │
-│  Tim   £13.76                │
+│  Tim   £21.72                │
 │   Margherita £12.50          │
-│   + tip £1.26  + unclaimed.. │  <- expandable per person
-│  Sam   £15.20               ▾│
+│   Peroni £5.50               │
+│   + tip £2.09                │  <- expandable per person
+│   + unclaimed £1.63          │
+│  Sam   £16.70               ▾│
 │                              │
 │  Unclaimed £6.50 was split   │
 │  between 4 people.           │

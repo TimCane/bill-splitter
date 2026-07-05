@@ -52,19 +52,25 @@ liveness). The backend's `/healthz` probes this.
 
 ## Backend job flow
 
-`OcrWorker` (a `BackgroundService` reading a bounded
-`Channel<OcrJob>(capacity: 16)`, max 2 concurrent jobs
-- [07-backend-design.md](07-backend-design.md#background-processing)):
+`OcrWorker` (a `BackgroundService` reading a bounded `Channel<OcrJob>`;
+capacity and max-concurrency are the `Ocr__QueueCapacity` /
+`Ocr__MaxConcurrency` config defaults, 16 / 2
+- [07-backend-design.md](07-backend-design.md#infrastructure-project)):
 
-1. CAS session `ocr.status -> Processing`, broadcast `OcrStatusChanged` +
+1. CAS session `ocr.status -> Processing` (only while `state` is still
+   `Processing`; otherwise abandon the job), broadcast `OcrStatusChanged` +
    `SnapshotUpdated`.
 2. Fetch image from MinIO, `POST /ocr` (timeout 60s). Timeouts and HTTP
    error responses never retry - a second identical attempt will fail
    identically; only connection-level failures (refused, reset, DNS) retry
    once.
 3. Parse lines -> items + bill (below).
-4. CAS session: items, bill, `state -> Review`, `ocr.status -> Done`;
-   broadcast `OcrStatusChanged` + `SnapshotUpdated`.
+4. CAS session, **only while `state` is still `Processing`**: items, bill,
+   `state -> Review`, `ocr.status -> Done`; broadcast `OcrStatusChanged` +
+   `SnapshotUpdated`. If the session already left `Processing` - the lazy
+   recovery below fired first, or it was abandoned - the worker discards its
+   parse result and writes nothing, so a late job never clobbers the host's
+   manual entries.
 5. Any failure: `state -> Review`, `ocr.status -> Failed`,
    `failureReason` set; broadcast as in step 4. The host enters items
    manually.
@@ -73,7 +79,10 @@ liveness). The backend's `/healthz` probes this.
    (snapshot `GET` or hub connect) still `Processing` more than 5 minutes
    after `createdAt` applies step 5 with `failureReason`
    `"OCR did not finish"`. A stuck spinner heals on the client's next
-   reconnect or refresh; there is no dead end.
+   reconnect or refresh; there is no dead end. Because every `OcrWorker` write
+   is conditional on `state == Processing` (steps 1 and 4), this recovery and
+   a slow-but-live worker cannot both land: whichever CAS-writes first wins
+   and the other is a silent no-op.
 
 ## Parsing
 

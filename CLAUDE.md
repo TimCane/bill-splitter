@@ -2,7 +2,8 @@
 
 Ephemeral bill-splitting app: scan a receipt, the table claims items from
 their phones, totals reconcile exactly, everything self-destructs. C#
-backend + React SPA + PaddleOCR sidecar; Redis is the only store.
+backend + React SPA + PaddleOCR sidecar; Redis is the only session store
+(MinIO transiently holds the receipt image until the host opens the split).
 
 ## Read first
 

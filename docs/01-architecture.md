@@ -25,7 +25,7 @@
                     │ image bytes (fetched by backend)
               ┌──────────┐
               │  minio   │
-              │ receipts │
+              │  images  │
               └──────────┘
 ```
 
@@ -100,7 +100,7 @@ credential ([04-api-contract.md](04-api-contract.md#auth)).
 
 | Moment | Action |
 | --- | --- |
-| Upload (`POST /api/v1/sessions`) | stored at `receipts/{sessionId}.jpg` in MinIO |
+| Upload (`POST /api/v1/sessions`) | stored at key `receipts/{sessionId}` in the `bill-splitter` bucket ([07-backend-design.md](07-backend-design.md#infrastructure-project)); content-type set from the sniffed image type |
 | OCR job | backend streams object to the OCR sidecar |
 | Review | host may view it via `GET .../receipt` |
 | Open (`POST .../open`) | object deleted |

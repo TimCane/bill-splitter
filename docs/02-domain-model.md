@@ -24,6 +24,12 @@ document; there are no cross-aggregate references
    fractional parts `(amount * weight_i) % totalWeight`; break ties by list
    index (lowest index wins).
 
+If `totalWeight == 0` (every weight is zero - e.g. the only claimed items
+were priced 0), fall back to equal weights (all 1) so `amount` still lands
+somewhere. An empty weight list returns an empty array: there is no one to
+pay, so callers must never divide a non-zero `amount` over nobody. This one
+rule closes every zero-weight call site, so no caller carries its own guard.
+
 Deterministic, exact, and order-stable: callers must pass weights in a
 stable order (participants by `joinedAt`, then `id`).
 
@@ -78,6 +84,10 @@ shares divide it. "I had 2 of the 3 beers" is `SetShares(itemId, 2)`.
 | `ParticipantId` | `string` | one claim per participant per item |
 | `Shares` | `int` | 1-99; default 1 |
 
+Shares are always integers, never fractions - a deliberate call that keeps
+every allocation exact and the split reproducible
+([ADR-0005](adr/0005-integer-shares-claims.md)).
+
 ### Bill
 
 | Field | Type | Notes |
@@ -118,9 +128,11 @@ For each participant `p`, in `Open` state:
    ordered by `JoinedAt`, then `Id`). `p.ItemsMinor` = sum of p's
    allocations.
 2. **Extras** (tax, tip, service - each distributed independently):
-   distribute across participants with `ItemsMinor` as weights. If everyone's
-   `ItemsMinor` is 0 (nothing claimed yet), extras stay unallocated and each
-   `p.TaxMinor` etc. is 0.
+   distribute across participants (ordered by `JoinedAt`, then `Id`) with
+   `ItemsMinor` as weights. While `Open`, if the claimed subtotal is 0
+   (nothing claimed yet), extras stay unallocated for display and each
+   `p.TaxMinor` etc. is 0; the equal-split fallback fires only at finalize
+   (step 6).
 3. **Unclaimed**: `UnclaimedMinor` = 0 for everyone while `Open`. The
    session-level `UnclaimedTotalMinor` (sum of items with no claims) is
    shown to the whole table.
@@ -135,7 +147,12 @@ At **finalize**, additionally:
    unclaimed allocations do not attract a share of tax/tip. Deliberate:
    unclaimed items were nobody's order, so their share carries no tip
    judgment.
-6. If nothing was claimed at all, extras distribute equally (weights all 1).
+6. Extras are always fully distributed at finalize - step 2 runs without the
+   `Open`-state display suppression. When the claimed subtotal is 0 (nothing
+   was claimed, or every claimed item was priced 0) the `ItemsMinor` weights
+   are all zero, so `Distribute` falls back to equal weights and the extras
+   split evenly across all participants. The finalize invariant below then
+   holds regardless of what was claimed.
 
 ### Invariants (property-test these)
 

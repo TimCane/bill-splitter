@@ -53,7 +53,8 @@ possible. No accounts, no persistent data.
   Backend POSTs the image, gets text + bounding boxes back. Bounded to 1–2
   concurrent jobs, queued behind that. Parsing heuristics: right-aligned
   price column, qty prefixes, keyword rows for TAX/TIP/TOTAL.
-- **State**: Redis is the only store. Server is the single source of truth:
+- **State**: Redis is the only session store (MinIO transiently holds the
+  receipt image). Server is the single source of truth:
   every mutation recomputes and broadcasts the full session snapshot (items,
   claims, per-person totals) — a few KB, so no deltas, no client-side totals
   math, reconnect is free.

@@ -56,9 +56,9 @@ rehydrates).
 
 ### `GET /api/v1/sessions/{sessionId}/receipt`
 
-The stored receipt image, `image/jpeg` or `image/png`. Host only, state
-`Review` only (the object is deleted at open). `404` `receipt-not-found`
-after open.
+The stored receipt image, `image/jpeg` or `image/png` (content-type echoed
+from the stored object metadata). Host only, state `Review` only (the object
+is deleted at open). `404` `receipt-not-found` after open.
 
 ### `PUT /api/v1/sessions/{sessionId}/participants/me`
 
@@ -140,12 +140,13 @@ stored. Returns the finalized snapshot.
 
 ### `GET /healthz`
 
-Anonymous. `200` when the app can reach Redis; body
-`{ "redis": true, "minio": true, "ocr": true, "email": false }` with `503`
-if any probe fails. `email` is a capability flag, not a probe - `true`
-when SMTP is configured ([13-deployment.md](13-deployment.md#environment));
-it drives the finalize dialog's email field and never causes `503`. Used
-by compose healthchecks and CI smoke tests.
+Anonymous. `200` when the Redis, MinIO and OCR probes all pass; `503` if any
+of them fails. Body
+`{ "redis": true, "minio": true, "ocr": true, "email": false }`. `email` is a
+capability flag, not a probe - `true` when SMTP is configured
+([13-deployment.md](13-deployment.md#environment)); it drives the finalize
+dialog's email field and never affects the status code. Used by compose
+healthchecks and CI smoke tests.
 
 ## SessionSnapshotDto
 
@@ -184,7 +185,7 @@ fields marked (c).
     "tipMinor": 500,
     "serviceMinor": 0,
     "totalMinor": 5450,
-    "checksumMinor": 0              // (c) subtotal+tax+tip+service-total
+    "checksumMinor": 0              // (c) see 02-domain-model.md#checksum
   },
   "unclaimedTotalMinor": 1200,      // (c)
   "totals": [                       // (c) one entry per participant

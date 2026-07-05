@@ -94,7 +94,7 @@ Write path in `RedisSessionStore`:
    lockstep writers interleave instead of colliding again.
    After 5 failures: `503` / hub error - should never happen in practice;
    if it does, it is a bug worth an alert.
-5. On `-1`: session expired -> `404` / `SessionExpired` hub error.
+5. On `-1`: session expired -> `404` / `session-not-found` hub error.
 
 `KEEPTTL` preserves the TTL on every write; the TTL is only ever set
 explicitly at create (24h) and inside the finalize CAS call (1h) - never
@@ -110,8 +110,8 @@ in a follow-up step a crash could skip.
 | Finalize | CAS write (state -> `Finalized`) passing TTL 3600 - the script shrinks the session and code keys atomically with the write |
 | Expiry | Redis TTL. No cleanup jobs, no tombstones. |
 
-Short-code minting: generate 6 chars from the alphabet
-`ABCDEFGHJKMNPQRSTUVWXYZ23456789`,
+Short-code minting: generate 6 chars from the short-code alphabet
+([02-domain-model.md](02-domain-model.md#entities) owns it),
 `SET code:{code} {id} NX EX {remaining-session-ttl}`; on collision (NX
 fails) generate a new code, up to 5 attempts. The code key is minted
 before the CAS commit stores `shortCode`, so a failed CAS or a crash never
