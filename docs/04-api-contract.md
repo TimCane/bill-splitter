@@ -164,7 +164,7 @@ fields marked (c).
   "hostParticipantId": "aB3x...",
   "ocr": { "status": "Done", "failureReason": null },
   "participants": [
-    { "participantId": "aB3x...", "displayName": "Tim", "isHost": true }
+    { "participantId": "aB3x...", "displayName": "Tim", "isHost": true } // isHost (c) = participantId == hostParticipantId
   ],
   "items": [
     {

@@ -53,8 +53,10 @@ stable order (participants by `joinedAt`, then `id`).
 | `Id` | `string` | 22-char base64url |
 | `TokenHash` | `string` | hex SHA-256 of the participant token; the raw token is returned once at create/join and never stored |
 | `DisplayName` | `string` | 1-30 chars, trimmed; collisions allowed |
-| `IsHost` | `bool` | exactly one per session |
 | `JoinedAt` | `DateTimeOffset` | UTC; stable ordering key |
+
+Host-ness is not stored on the participant: `Session.HostParticipantId`
+is the single source, and the snapshot's `isHost` is derived from it.
 
 ### LineItem
 

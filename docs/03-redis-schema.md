@@ -38,7 +38,6 @@ Example (trimmed):
       "id": "aB3xY9kQ2mN8pL4dF6hJ1w",
       "tokenHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
       "displayName": "Tim",
-      "isHost": true,
       "joinedAt": "2026-07-04T19:02:11Z"
     }
   ],
