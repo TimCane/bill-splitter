@@ -145,7 +145,7 @@ At **finalize**, additionally:
   (determinism)
 - No allocation is negative
 
-## Domain rules (enforced in the aggregate, surfaced as 409/422)
+## Domain rules (enforced in the aggregate, surfaced as 400/409)
 
 | Rule | Where |
 | --- | --- |
