@@ -118,13 +118,14 @@ public sealed class RedisSessionStore : ISessionStore
         return value.IsNull ? null : value.ToString();
     }
 
-    // Tiny jittered delay (0-10ms base, doubling per attempt) so lockstep writers
-    // interleave instead of colliding again.
+    // Tiny jittered delay (1-10ms base, doubling per attempt) so lockstep writers
+    // interleave instead of colliding again. The base is never zero: a 0ms delay
+    // would let contending writers retry in lockstep and burn the 5-attempt budget.
     private static Task BackoffAsync(int attempt, CancellationToken ct)
     {
-        var baseMs = Random.Shared.Next(0, 11);
+        var baseMs = Random.Shared.Next(1, 11);
         var delayMs = baseMs << attempt;
-        return delayMs == 0 ? Task.CompletedTask : Task.Delay(delayMs, ct);
+        return Task.Delay(delayMs, ct);
     }
 
     private static RedisKey SessionKey(string sessionId) => $"session:{sessionId}";
