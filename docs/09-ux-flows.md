@@ -130,7 +130,7 @@ Name input (1-30 chars) + `Join the split`. Errors: session full
 
 ```
 ┌──────────────────────────────┐
-│ The Golden Dragon   [● live] │  <- connection pill: live/reconnecting
+│ Split K7MPQ2        [● live] │  <- short code; connection pill: live/reconnecting
 │ You: Tim        Your £13.76  │  <- sticky header, live total
 ├──────────────────────────────┤
 │ Margherita            £12.50 │
@@ -174,7 +174,7 @@ Element inventory:
 ```
 ┌──────────────────────────────┐
 │  Split locked  ✓             │
-│  The Golden Dragon  £54.50   │
+│  Total              £54.50   │
 │                              │
 │  Tim   £13.76                │
 │   Margherita £12.50          │
