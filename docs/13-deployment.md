@@ -66,7 +66,9 @@ override only with reason.
   (or the Coolify equivalent). A deploy restarts `app` and drops live
   SignalR connections; clients auto-reconnect and re-snapshot - mid-meal
   deploys are rude but not destructive. Live sessions survive (they are in
-  Redis, which keeps running).
+  Redis, which keeps running). In-flight OCR jobs are lost; those sessions
+  fail over to manual entry on their next read
+  ([06-ocr-service.md](06-ocr-service.md#backend-job-flow)).
 - **Backups**: none. There is nothing to back up; that is the product.
 - **Logs**: container stdout, platform-collected. The no-PII logging rule
   ([10-security-privacy.md](10-security-privacy.md#ephemerality-guarantees))

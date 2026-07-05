@@ -64,6 +64,12 @@ liveness). The backend's `/healthz` probes this.
 5. Any failure: `state -> Review`, `ocr.status -> Failed`,
    `failureReason` set; broadcast as in step 4. The host enters items
    manually.
+6. The channel is in-process, so a backend restart loses queued and
+   in-flight jobs. Recovery is lazy, not a watchdog: any read of a session
+   (snapshot `GET` or hub connect) still `Processing` more than 5 minutes
+   after `createdAt` applies step 5 with `failureReason`
+   `"OCR did not finish"`. A stuck spinner heals on the client's next
+   reconnect or refresh; there is no dead end.
 
 ## Parsing
 
