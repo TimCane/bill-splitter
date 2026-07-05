@@ -62,8 +62,8 @@ finalized" refresh, not an error toast
 
 | Event | Payload | When |
 | --- | --- | --- |
-| `SnapshotUpdated` | `SessionSnapshotDto` | on connect; after every successful mutation (hub or REST) |
-| `OcrStatusChanged` | `{ status, failureReason }` | OCR job transitions (`Processing`, `Done`, `Failed`) - only the host is connected during these states, but it is broadcast to the group regardless |
+| `SnapshotUpdated` | `SessionSnapshotDto` | on connect; after every successful mutation (hub, REST, or the OCR worker) |
+| `OcrStatusChanged` | `{ status, failureReason }` | OCR job transitions (`Processing`, `Done`, `Failed`) - only the host is connected during these states, but it is broadcast to the group regardless. A hint only: each transition is paired with a `SnapshotUpdated` carrying the authoritative state, so clients render from snapshots and a stale hint is harmless |
 | `SessionFinalized` | `SessionSnapshotDto` | finalize; terminal - after this, only `SnapshotUpdated` re-sends of the same finalized state occur |
 
 `SessionFinalized` carries the same DTO as `SnapshotUpdated` with

@@ -53,15 +53,17 @@ liveness). The backend's `/healthz` probes this.
 `Channel<OcrJob>(capacity: 16)`, max 2 concurrent jobs
 - [07-backend-design.md](07-backend-design.md#background-processing)):
 
-1. CAS session `ocr.status -> Processing`, broadcast `OcrStatusChanged`.
+1. CAS session `ocr.status -> Processing`, broadcast `OcrStatusChanged` +
+   `SnapshotUpdated`.
 2. Fetch image from MinIO, `POST /ocr` (timeout 60s, no retry - a second
    identical attempt will fail identically; transient network errors retry
    once).
 3. Parse lines -> items + bill (below).
 4. CAS session: items, bill, `state -> Review`, `ocr.status -> Done`;
-   broadcast.
+   broadcast `OcrStatusChanged` + `SnapshotUpdated`.
 5. Any failure: `state -> Review`, `ocr.status -> Failed`,
-   `failureReason` set; broadcast. The host enters items manually.
+   `failureReason` set; broadcast as in step 4. The host enters items
+   manually.
 
 ## Parsing
 
