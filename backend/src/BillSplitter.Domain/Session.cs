@@ -262,6 +262,10 @@ public sealed class Session
     public Participant? TryGetParticipant(string participantId) =>
         _participants.Find(p => p.Id == participantId);
 
+    /// <summary>Match a request's token (already hashed) to a participant.</summary>
+    public Participant? FindByTokenHash(string tokenHash) =>
+        _participants.Find(p => p.TokenHash == tokenHash);
+
     private Participant FindParticipant(string participantId) =>
         TryGetParticipant(participantId)
         ?? throw new DomainException(ErrorCodes.UnknownParticipant, participantId);
