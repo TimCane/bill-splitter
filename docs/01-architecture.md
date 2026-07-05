@@ -50,7 +50,8 @@
    No totals math in TypeScript.
 2. **Full snapshot, not deltas.** A session is a few KB. Broadcasting the
    whole `SessionSnapshotDto` on every change eliminates ordering bugs and
-   makes reconnect free (the next snapshot heals everything).
+   makes reconnect free (the next snapshot heals everything). Bursts
+   coalesce per session ([05-realtime-contract.md](05-realtime-contract.md#ordering-and-idempotency)).
 3. **REST for lifecycle, hub for claims.** Session creation, review edits,
    join, and finalize are REST endpoints. Only the high-frequency claim
    gestures (`ClaimItem`, `UnclaimItem`, `SetShares`) are hub methods

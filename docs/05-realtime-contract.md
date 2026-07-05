@@ -76,6 +76,12 @@ diffing snapshots.
 - SignalR guarantees per-connection ordered delivery; because every event
   carries the **full snapshot with a `version`**, clients simply ignore any
   snapshot whose `version` is lower than the one they hold.
+- `SnapshotUpdated` coalesces per session on a ~100ms trailing edge: a
+  burst of mutations collapses into one broadcast of the latest snapshot.
+  Versions still increase strictly, so clients cannot tell the difference;
+  it only caps worst-case fan-out (20 connections x 10 gestures/sec x a
+  40KB snapshot, uncoalesced, is real bandwidth). Mutation responses are
+  never coalesced - a REST caller always gets its own snapshot back.
 - All claim gestures are idempotent upserts/deletes - a retried
   `SetShares(x, 2)` converges to the same state.
 
