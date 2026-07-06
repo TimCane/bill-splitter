@@ -61,32 +61,37 @@ public static class RateLimiting
         context.Request.Path.StartsWithSegments("/api");
 
     private static bool IsCreateSession(HttpContext context) =>
-        HttpMethods.IsPost(context.Request.Method) && PathIs(context, "api", "v1", "sessions");
+        HttpMethods.IsPost(context.Request.Method) && MatchSegments(context, "api", "v1", "sessions");
 
-    private static bool IsJoin(HttpContext context)
+    private static bool IsJoin(HttpContext context) =>
+        HttpMethods.IsPost(context.Request.Method)
+        && MatchSegments(context, "api", "v1", "sessions", null, "participants");
+
+    private static bool IsResolveCode(HttpContext context) =>
+        HttpMethods.IsGet(context.Request.Method) && MatchSegments(context, "api", "v1", "codes", null);
+
+    // Match the path segments case-insensitively to mirror ASP.NET routing - an
+    // ordinal match would let a request vary a segment's case (e.g. /api/v1/Codes)
+    // to reach the endpoint yet slip past its per-IP limit. A null slot is a
+    // wildcard (the session id or code).
+    private static bool MatchSegments(HttpContext context, params string?[] expected)
     {
-        if (!HttpMethods.IsPost(context.Request.Method))
+        var segments = Segments(context);
+        if (segments.Length != expected.Length)
         {
             return false;
         }
 
-        var segments = Segments(context);
-        return segments is ["api", "v1", "sessions", _, "participants"];
-    }
-
-    private static bool IsResolveCode(HttpContext context)
-    {
-        if (!HttpMethods.IsGet(context.Request.Method))
+        for (var i = 0; i < expected.Length; i++)
         {
-            return false;
+            if (expected[i] is { } want && !segments[i].Equals(want, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
         }
 
-        var segments = Segments(context);
-        return segments is ["api", "v1", "codes", _];
+        return true;
     }
-
-    private static bool PathIs(HttpContext context, params string[] expected) =>
-        Segments(context).AsSpan().SequenceEqual(expected);
 
     private static string[] Segments(HttpContext context) =>
         context.Request.Path.Value?.Split('/', StringSplitOptions.RemoveEmptyEntries) ?? [];
