@@ -13,6 +13,7 @@ using BillSplitter.Infrastructure.Redis;
 using BillSplitter.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Minio;
 using StackExchange.Redis;
@@ -29,11 +30,14 @@ builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
-// Per-client-IP rate limits (docs/10-security-privacy.md#rate-limits). Bound
-// eagerly - the limiter is built here, not resolved from DI per request.
-var rateLimits = new RateLimitOptions();
-builder.Configuration.GetSection(RateLimitOptions.SectionName).Bind(rateLimits);
-builder.Services.AddRateLimiter(options => RateLimiting.Configure(options, rateLimits));
+// Per-client-IP rate limits (docs/10-security-privacy.md#rate-limits). The
+// limiter is built from RateLimitOptions resolved through DI, so a test host's
+// or the reverse proxy's config overrides reach it; an eager bind off
+// builder.Configuration here would freeze the production defaults before those
+// overrides apply.
+builder.Services.AddRateLimiter(_ => { });
+builder.Services.AddOptions<RateLimiterOptions>().Configure<IOptions<RateLimitOptions>>(
+    (options, limits) => RateLimiting.Configure(options, limits.Value));
 
 // Trust the reverse proxy's X-Forwarded-For so the limiter keys on the real
 // client, not the proxy (off unless configured - docs/13-deployment.md).
