@@ -64,10 +64,18 @@ public static class ImageDimensions
 
             var marker = content[offset + 1];
 
-            // Standalone markers (padding fill, RSTn, SOI/EOI) carry no length.
-            if (marker is 0xFF or 0x01 or (>= 0xD0 and <= 0xD9))
+            // A fill byte is one 0xFF in a run; skip a single byte and re-read the
+            // real marker on the next pass.
+            if (marker == 0xFF)
             {
                 offset++;
+                continue;
+            }
+
+            // Standalone 2-byte markers (TEM, RSTn, SOI/EOI) carry no length.
+            if (marker is 0x01 or (>= 0xD0 and <= 0xD9))
+            {
+                offset += 2;
                 continue;
             }
 
