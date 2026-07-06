@@ -39,6 +39,18 @@ builder.Services.AddRateLimiter(options => RateLimiting.Configure(options, rateL
 // client, not the proxy (off unless configured - docs/13-deployment.md).
 var trustProxy = builder.Services.AddProxyForwardedHeaders(builder.Configuration);
 
+// Upload cap at the transport: Kestrel refuses a body past the image limit (plus
+// a margin for multipart boundaries) so an oversized POST never buffers into
+// memory - the explicit per-image check is the precise gate on top
+// (docs/10-security-privacy.md#upload-hardening). The margin keeps a legitimate
+// image right at the limit from tripping the transport cap first.
+var maxUploadBytes = builder.Configuration.GetValue("Session:MaxUploadBytes", 10_485_760L);
+var maxRequestBody = maxUploadBytes + 1_048_576;
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(
+    kestrel => kestrel.Limits.MaxRequestBodySize = maxRequestBody);
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(
+    form => form.MultipartBodyLengthLimit = maxRequestBody);
+
 // 3. Singletons. Session store, receipt storage, OCR queue, id generator and
 //    the scoped SnapshotMapper land with their implementations in M2+; the
 //    Redis multiplexer and health probe are needed for /healthz now.

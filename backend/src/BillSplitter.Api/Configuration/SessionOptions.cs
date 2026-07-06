@@ -21,6 +21,12 @@ public sealed class SessionOptions
     [Range(1, 104857600)]
     public long MaxUploadBytes { get; set; } = 10485760;
 
+    /// <summary>Decode-bomb guard: reject an image whose header dimensions exceed
+    /// this on either axis, before any full decode. The OCR sidecar enforces the
+    /// same bound (docs/10-security-privacy.md#upload-hardening).</summary>
+    [Range(1, 100000)]
+    public int MaxImageDimension { get; set; } = 8000;
+
     /// <summary>Per-connection cap on hub claim gestures. The HTTP rate limiter
     /// never sees hub invocations, so the hub enforces this itself
     /// (docs/10-security-privacy.md#rate-limits-aspnet-rate-limiter-per-client-ip).</summary>
