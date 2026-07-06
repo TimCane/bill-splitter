@@ -35,6 +35,11 @@ public static class OptionsServiceCollectionExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<RateLimitOptions>()
+            .Bind(config.GetSection(RateLimitOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         services.AddOptions<SmtpOptions>()
             .Bind(config.GetSection(SmtpOptions.SectionName))
             .ValidateDataAnnotations();

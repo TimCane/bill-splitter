@@ -1,0 +1,114 @@
+name: bill-splitter
+
+# Production stack for a single VPS behind a TLS reverse proxy that forwards to
+# app:8080 (docs/13-deployment.md). ocr/redis/minio publish no host ports; app is
+# bound to loopback for the proxy only. Nothing here terminates TLS - the proxy
+# does (docs/13-deployment.md#topology).
+services:
+  # The API + the SPA (baked into the image), one origin.
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      TZ: Etc/UTC
+      ASPNETCORE_ENVIRONMENT: Production
+      App__PublicBaseUrl: ${APP_PUBLIC_BASE_URL:?set APP_PUBLIC_BASE_URL}
+      Redis__ConnectionString: redis:6379
+      Minio__Endpoint: http://minio:9000
+      Minio__AccessKey: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER}
+      Minio__SecretKey: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
+      Minio__Bucket: bill-splitter
+      Ocr__BaseUrl: http://ocr:8000
+      # Optional transactional relay; unset leaves email disabled and the finalize
+      # dialog hides the address field (docs/13-deployment.md#environment).
+      Smtp__Host: ${SMTP_HOST:-}
+      Smtp__Port: "${SMTP_PORT:-587}"
+      Smtp__Username: ${SMTP_USERNAME:-}
+      Smtp__Password: ${SMTP_PASSWORD:-}
+      Smtp__From: ${SMTP_FROM:-}
+      # Trust the reverse proxy's X-Forwarded-For so the rate limiter keys on the
+      # real client IP (docs/10-security-privacy.md#rate-limits).
+      ForwardedHeaders__Enabled: "true"
+      ForwardedHeaders__KnownNetworks__0: ${TRUSTED_PROXY_NETWORK:-172.16.0.0/12}
+    networks:
+      - internal
+    depends_on:
+      redis:
+        condition: service_healthy
+      ocr:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    # Health: image ships a built-in HEALTHCHECK (curl GET /healthz).
+
+  # PaddleOCR sidecar, prebuilt in CI and pulled from GHCR (docs/12-ci.md).
+  ocr:
+    image: ghcr.io/timcane/bill-splitter-ocr:latest
+    restart: unless-stopped
+    networks:
+      - internal
+    # Health: image ships a built-in HEALTHCHECK (GET /healthz).
+
+  # Session store. No persistence by design, and a hard memory ceiling so a flood
+  # evicts the oldest sessions instead of pinning the box (docs/13-deployment.md).
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Transient receipt storage. The console is never exposed (no ports); objects
+  # die by the lifecycle rule minio-init installs.
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data
+    environment:
+      TZ: Etc/UTC
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # One-shot: create the bucket and set a 1-day object expiry as the ephemerality
+  # backstop, then exit. $$ escapes compose interpolation so mc reads the vars.
+  minio-init:
+    image: minio/mc:latest
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
+      mc mb --ignore-existing local/bill-splitter;
+      mc ilm rule add --expire-days 1 local/bill-splitter || true;
+      exit 0;
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?set MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?set MINIO_ROOT_PASSWORD}
+    networks:
+      - internal
+    depends_on:
+      minio:
+        condition: service_healthy
+
+networks:
+  internal:
+
+volumes:
+  minio-data:

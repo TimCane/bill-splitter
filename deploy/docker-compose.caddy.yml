@@ -1,0 +1,20 @@
+name: bill-splitter-proxy
+
+# The TLS reverse proxy, deployed alongside the app stack (docs/13-deployment.md).
+# Host networking so Caddy owns 80/443 and reaches the app on its loopback publish
+# (127.0.0.1:8080 from docker-compose.prod.yml).
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS to the public host, e.g. split.example.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:

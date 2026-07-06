@@ -109,10 +109,16 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
         return (response.StatusCode, created.SessionId);
     }
 
+    // A minimal but well-formed JPEG: SOI then an SOF0 frame declaring 100x100,
+    // enough for the upload dimension guard to read a real size from the header
+    // (docs/10-security-privacy.md#upload-hardening).
+    private static readonly byte[] TinyJpeg =
+        [0xFF, 0xD8, 0xFF, 0xC0, 0x00, 0x11, 0x08, 0x00, 0x64, 0x00, 0x64];
+
     private static MultipartFormDataContent ImageForm()
     {
         var form = new MultipartFormDataContent();
-        var jpeg = new ByteArrayContent([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]);
+        var jpeg = new ByteArrayContent(TinyJpeg);
         jpeg.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
         form.Add(jpeg, "image", "receipt.jpg");
         return form;
@@ -189,6 +195,14 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
             // The concurrency tests hammer gestures far past the production
             // 10/sec throttle; the throttle itself is unit-scoped, not under test.
             ["Session:HubGesturesPerSecond"] = "10000",
+            // The shared collection creates far more than 5 sessions/hour; loosen
+            // every per-IP limit so only RateLimitTests (its own tight override)
+            // exercises the 429 path.
+            ["RateLimit:CreateSessionPerHour"] = "1000000",
+            ["RateLimit:JoinPerMinute"] = "1000000",
+            ["RateLimit:ResolveCodePerMinute"] = "1000000",
+            ["RateLimit:ResolveCodePerDay"] = "1000000",
+            ["RateLimit:GlobalPerMinute"] = "10000000",
         }));
         builder.ConfigureLogging(logging =>
         {

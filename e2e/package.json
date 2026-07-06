@@ -1,0 +1,12 @@
+{
+  "name": "bill-splitter-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-concurrency=1 specs/"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.10.0"
+  }
+}

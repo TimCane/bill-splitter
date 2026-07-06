@@ -54,6 +54,20 @@ public sealed class SessionsController(
         var contentType = ImageSniffer.Detect(bytes)
             ?? throw new DomainException(ErrorCodes.Validation, "image must be JPEG or PNG");
 
+        // Decode-bomb guard: a valid header can still declare a ruinous canvas.
+        // Reject on the header dimensions before the bytes reach OCR, which runs
+        // the same check (docs/10-security-privacy.md#upload-hardening).
+        if (!ImageDimensions.TryRead(bytes, out var width, out var height))
+        {
+            throw new DomainException(ErrorCodes.Validation, "image header is malformed");
+        }
+
+        if (width > _options.MaxImageDimension || height > _options.MaxImageDimension)
+        {
+            throw new DomainException(
+                ErrorCodes.ImageTooLarge, $"image exceeds {_options.MaxImageDimension}px on an axis");
+        }
+
         var sessionId = ids.NewId();
         var hostId = ids.NewId();
         var token = ids.NewToken();

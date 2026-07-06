@@ -11,9 +11,9 @@ using BillSplitter.Infrastructure.Identity;
 using BillSplitter.Infrastructure.Ocr;
 using BillSplitter.Infrastructure.Redis;
 using BillSplitter.Infrastructure.Storage;
-using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Minio;
 using StackExchange.Redis;
@@ -29,16 +29,35 @@ builder.Services.AddAppOptions(builder.Configuration);
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
-builder.Services.AddRateLimiter(options =>
-{
-    // The full per-IP policy set lands in M7 (docs/10-security-privacy.md); the
-    // code-resolve brute-force guard is needed now for the /join flow.
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddPolicy(RateLimitPolicies.CodeResolve, context =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1) }));
-});
+
+// Per-client-IP rate limits (docs/10-security-privacy.md#rate-limits). The
+// limiter is built from RateLimitOptions resolved through DI, so a test host's
+// or the reverse proxy's config overrides reach it; an eager bind off
+// builder.Configuration here would freeze the production defaults before those
+// overrides apply.
+builder.Services.AddRateLimiter(_ => { });
+builder.Services.AddOptions<RateLimiterOptions>().Configure<IOptions<RateLimitOptions>>(
+    (options, limits) => RateLimiting.Configure(options, limits.Value));
+
+// Trust the reverse proxy's X-Forwarded-For so the limiter keys on the real
+// client, not the proxy (off unless configured - docs/13-deployment.md).
+var trustProxy = builder.Services.AddProxyForwardedHeaders(builder.Configuration);
+
+// Upload cap at the transport: Kestrel refuses a body past the image limit (plus
+// a margin for multipart boundaries) so an oversized POST never buffers into
+// memory - the explicit per-image check is the precise gate on top
+// (docs/10-security-privacy.md#upload-hardening). The margin keeps a legitimate
+// image right at the limit from tripping the transport cap first.
+var sessionOptions = builder.Configuration.GetSection(BillSplitter.Api.Configuration.SessionOptions.SectionName)
+    .Get<BillSplitter.Api.Configuration.SessionOptions>()
+    ?? new BillSplitter.Api.Configuration.SessionOptions();
+// A margin over the per-image cap so multipart boundaries and headers on an
+// otherwise-legal image do not trip the transport limit before the precise check.
+var maxRequestBody = sessionOptions.MaxUploadBytes + 1_048_576;
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(
+    kestrel => kestrel.Limits.MaxRequestBodySize = maxRequestBody);
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(
+    form => form.MultipartBodyLengthLimit = maxRequestBody);
 
 // 3. Singletons. Session store, receipt storage, OCR queue, id generator and
 //    the scoped SnapshotMapper land with their implementations in M2+; the
@@ -162,9 +181,29 @@ var app = builder.Build();
 // cost on the request thread.
 _ = app.Services.GetRequiredService<IConnectionMultiplexer>();
 
-// 6. Pipeline: exception handling -> rate limiter -> auth -> endpoints.
+// 6. Pipeline: forwarded headers -> exception handling -> rate limiter -> auth.
+// Forwarded headers run first so every downstream stage (rate limiter keying,
+// HTTPS-aware redirects) sees the real client address and scheme.
+if (trustProxy)
+{
+    app.UseForwardedHeaders();
+}
+
+// HSTS only once TLS is in front (production); dev is plain HTTP. The same-origin
+// SPA needs no CORS in production - the dev-only policy opens the Vite origin.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
 app.UseMiddleware<DomainExceptionMiddleware>();
+
+// The production image bakes the built SPA into wwwroot and serves it here, one
+// origin with /api and /hubs (docs/13-deployment.md#topology). Harmless in dev
+// and test, where Vite serves the SPA and wwwroot is empty.
+app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
 {
@@ -187,6 +226,14 @@ app.MapGet("/healthz", async (HealthProbe probe, CancellationToken ct) =>
         new { redis = report.Redis, minio = report.Minio, ocr = report.Ocr, email = report.Email },
         statusCode: report.IsHealthy ? StatusCodes.Status200OK : StatusCodes.Status503ServiceUnavailable);
 });
+
+// SPA client-side routing: any non-file, non-API GET falls back to index.html.
+// An unmatched /api or /hubs path must 404, not fall through to the SPA shell -
+// these more specific fallbacks outrank the file fallback and keep API clients
+// from parsing index.html as a 200.
+app.MapFallback("/api/{**rest}", () => Results.NotFound());
+app.MapFallback("/hubs/{**rest}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

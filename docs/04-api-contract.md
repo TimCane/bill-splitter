@@ -223,7 +223,7 @@ switches on:
 | 404 | `receipt-not-found` | receipt image requested after open (deleted) |
 | 409 | `wrong-state` | operation not allowed in current state (`detail` names both) |
 | 409 | `session-full` | participant cap |
-| 413 | `image-too-large` | upload > 10MB |
+| 413 | `image-too-large` | upload > 10MB, or header dimensions > 8000px on an axis |
 | 429 | `rate-limited` | includes `Retry-After` |
 | 503 | `conflict-retry-exhausted` | CAS gave up after 5 attempts |
 

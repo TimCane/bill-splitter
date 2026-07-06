@@ -1,0 +1,13 @@
+# Build context is the repo root (docker-compose.prod.yml -> backend/Dockerfile).
+# Keep it to source: everything below is rebuilt inside the image or unused by it.
+.git
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/.venv
+**/__pycache__
+**/.vs
+**/.vscode
+ocr
+e2e

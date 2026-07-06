@@ -1,8 +1,8 @@
 namespace BillSplitter.Api.Http;
 
 /// <summary>Identifies JPEG/PNG by magic bytes, not file extension
-/// (docs/04-api-contract.md#post-apiv1sessions). Decode-bomb and full upload
-/// hardening land in M7.</summary>
+/// (docs/04-api-contract.md#post-apiv1sessions). The header-dimension decode-bomb
+/// guard sits alongside in <see cref="ImageDimensions"/>.</summary>
 public static class ImageSniffer
 {
     private static readonly byte[] Jpeg = [0xFF, 0xD8, 0xFF];
