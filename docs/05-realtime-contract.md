@@ -54,6 +54,7 @@ so the common gesture is a single argument.
 | `wrong-state` | claim gesture outside `Open` |
 | `item-not-found` | stale item id |
 | `validation` | `shares` outside 1-99 |
+| `rate-limited` | gesture throttle exceeded (see [10-security-privacy.md](10-security-privacy.md#rate-limits-aspnet-rate-limiter-per-client-ip)) |
 | `conflict-retry-exhausted` | CAS gave up (see [03-redis-schema.md](03-redis-schema.md#concurrency)) |
 
 The client surfaces `wrong-state` after finalize as a soft "session was
