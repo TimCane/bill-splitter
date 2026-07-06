@@ -44,10 +44,16 @@ public sealed class ReceiptParserCorpusTests
     }
 
     [Fact]
-    public void Seeds_the_whole_corpus()
+    public void Keeps_the_named_seed_fixtures()
     {
-        // The seed set from docs/14: clean UK, US tax+tip, quantity lines,
-        // service charge, dot leaders, a blurry photo, a non-receipt.
-        Directory.GetDirectories(CorpusRoot).Should().HaveCount(7);
+        // The seed set from docs/14 must always be present; real-receipt fixtures
+        // are added alongside it, so assert the seeds rather than a fixed count.
+        var names = Directory.GetDirectories(CorpusRoot).Select(Path.GetFileName);
+
+        names.Should().Contain(new[]
+        {
+            "clean-uk", "us-tax-tip", "quantity-lines", "service-charge",
+            "dot-leaders", "blurry-low-confidence", "non-receipt",
+        });
     }
 }
