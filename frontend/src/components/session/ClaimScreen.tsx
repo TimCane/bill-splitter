@@ -211,6 +211,31 @@ function ClaimRow({
   const myClaim = item.claims.find((c) => c.participantId === meId)
   const quantityPrefix = item.quantity > 1 ? `${item.quantity}x ` : ''
 
+  // SetShares is absolute, and the authoritative snapshot lags a round-trip
+  // plus the coalescing window - so steps accumulate from the last sent value,
+  // not the rendered one, or two quick taps would both send the same weight.
+  // The pending value expires quickly in case a send was dropped.
+  const sent = useRef<{ shares: number; at: number } | null>(null)
+
+  useEffect(() => {
+    if (!myClaim || myClaim.shares === sent.current?.shares) {
+      sent.current = null
+    }
+  }, [myClaim])
+
+  function step(delta: number) {
+    if (!myClaim) {
+      return
+    }
+
+    const now = Date.now()
+    const pending =
+      sent.current && now - sent.current.at < 2000 ? sent.current.shares : null
+    const next = Math.min(99, Math.max(1, (pending ?? myClaim.shares) + delta))
+    sent.current = { shares: next, at: now }
+    onSetShares(next)
+  }
+
   return (
     <li className="border-b px-4 py-3">
       <div className="flex items-baseline justify-between gap-2">
@@ -256,7 +281,7 @@ function ClaimRow({
               variant="outline"
               aria-label="Decrease shares"
               disabled={myClaim.shares <= 1}
-              onClick={() => onSetShares(myClaim.shares - 1)}
+              onClick={() => step(-1)}
             >
               <Minus />
             </Button>
@@ -268,7 +293,7 @@ function ClaimRow({
               variant="outline"
               aria-label="Increase shares"
               disabled={myClaim.shares >= 99}
-              onClick={() => onSetShares(myClaim.shares + 1)}
+              onClick={() => step(1)}
             >
               <Plus />
             </Button>

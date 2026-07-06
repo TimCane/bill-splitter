@@ -153,7 +153,7 @@ describe('claim interactions', () => {
     expect(unclaimItemMock).toHaveBeenCalledWith(expect.anything(), 'i1')
   })
 
-  it('the stepper calls SetShares with the next weight', async () => {
+  it('the stepper accumulates taps from the last sent weight', async () => {
     const user = userEvent.setup()
     vi.mocked(getSession).mockResolvedValue(
       snapshot(1, [{ participantId: 'me', shares: 2, allocatedMinor: 833 }]),
@@ -165,8 +165,13 @@ describe('claim interactions', () => {
     )
     expect(setSharesMock).toHaveBeenCalledWith(expect.anything(), 'i1', 3)
 
+    // The snapshot still says 2, but the second tap steps from the sent 3 -
+    // rapid taps inside the coalescing window must not resend the same weight.
+    await user.click(screen.getByRole('button', { name: /increase shares/i }))
+    expect(setSharesMock).toHaveBeenCalledWith(expect.anything(), 'i1', 4)
+
     await user.click(screen.getByRole('button', { name: /decrease shares/i }))
-    expect(setSharesMock).toHaveBeenCalledWith(expect.anything(), 'i1', 1)
+    expect(setSharesMock).toHaveBeenCalledWith(expect.anything(), 'i1', 3)
   })
 
   it('an inbound snapshot re-renders shares, behind the version guard', async () => {
