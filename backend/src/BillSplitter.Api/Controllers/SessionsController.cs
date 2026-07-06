@@ -1,9 +1,11 @@
+using BillSplitter.Api.Auth;
 using BillSplitter.Api.Configuration;
 using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Http;
 using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
 using BillSplitter.Infrastructure.Ocr;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SessionOptions = BillSplitter.Api.Configuration.SessionOptions;
@@ -74,5 +76,18 @@ public sealed class SessionsController(
         record = await recovery.RecoverIfStaleAsync(record, ct);
 
         return Ok(mapper.Map(record.Session, record.Ttl));
+    }
+
+    /// <summary>Stream the stored receipt image with its stored content type. Host
+    /// only; the object lives from create until open, so this 404s once the split is
+    /// opened (docs/04-api-contract.md#get-apiv1sessionssessionidreceipt).</summary>
+    [HttpGet("{sessionId}/receipt")]
+    [Authorize(Policy = ParticipantAuth.HostPolicy)]
+    public async Task<IActionResult> Receipt(string sessionId, CancellationToken ct)
+    {
+        var receipt = await storage.GetAsync(sessionId, ct)
+            ?? throw new DomainException(ErrorCodes.ReceiptNotFound, sessionId);
+
+        return File(receipt.Content, receipt.ContentType);
     }
 }
