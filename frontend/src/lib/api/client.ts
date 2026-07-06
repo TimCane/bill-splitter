@@ -1,8 +1,10 @@
 import {
+  HealthSchema,
   JoinResponseSchema,
   OpenResponseSchema,
   ResolveCodeResponseSchema,
   SessionSnapshotSchema,
+  type Health,
   type JoinResponse,
   type OpenResponse,
   type SessionSnapshot,
@@ -185,6 +187,29 @@ export function openSplit(
     (d) => OpenResponseSchema.parse(d),
     token,
   )
+}
+
+/** Finalize the split. The optional address is sent once and never stored; the
+ * response is the finalized snapshot (docs/04-api-contract.md#post-apiv1sessionssessionidfinalize). */
+export function finalizeSplit(
+  sessionId: string,
+  token: string,
+  email: string | null,
+): Promise<SessionSnapshot> {
+  return json(
+    `${sessionBase(sessionId)}/finalize`,
+    { method: 'POST', headers: jsonHeaders, body: JSON.stringify({ email }) },
+    (d) => SessionSnapshotSchema.parse(d),
+    token,
+  )
+}
+
+/** The server capability flags. Read once to know whether to offer the summary
+ * email field; a failure or a degraded 503 just means no email
+ * (docs/04-api-contract.md#get-healthz). */
+export async function getHealth(): Promise<Health> {
+  const response = await fetch(`${API_BASE}/healthz`)
+  return HealthSchema.parse(await response.json())
 }
 
 export function resolveCode(shortCode: string): Promise<string> {

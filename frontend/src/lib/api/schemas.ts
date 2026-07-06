@@ -104,3 +104,13 @@ export type OpenResponse = z.infer<typeof OpenResponseSchema>
 export const ResolveCodeResponseSchema = z.object({
   sessionId: z.string(),
 })
+
+// /healthz capability flags (docs/04-api-contract.md#get-healthz). Only `email`
+// drives UI - it is true when the server has an SMTP relay configured.
+export const HealthSchema = z.object({
+  redis: z.boolean(),
+  minio: z.boolean(),
+  ocr: z.boolean(),
+  email: z.boolean(),
+})
+export type Health = z.infer<typeof HealthSchema>

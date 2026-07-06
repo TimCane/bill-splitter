@@ -7,13 +7,16 @@ import { cn } from '@/lib/utils'
 
 type Props = {
   snapshot: SessionSnapshot
+  // The masked address the host asked their summary be sent to, shown only on
+  // their own device; null for everyone else (docs/09-ux-flows.md#8).
+  sentEmail?: string | null
 }
 
 // State Finalized, read-only for everyone including the host
 // (docs/09-ux-flows.md#8-summary---state-finalized). Every amount here is a
 // server allocation; the screen only formats and adds the per-person totals up
 // for the header - it never runs split math (CLAUDE.md).
-export function SummaryScreen({ snapshot }: Props) {
+export function SummaryScreen({ snapshot, sentEmail }: Props) {
   const { currency, totals, participants, unclaimedTotalMinor } = snapshot
   const grandTotalMinor = totals.reduce(
     (sum, total) => sum + total.totalMinor,
@@ -51,6 +54,12 @@ export function SummaryScreen({ snapshot }: Props) {
         <p className="text-muted-foreground text-sm">
           Unclaimed {formatMinor(unclaimedTotalMinor, currency)} was split
           between {participants.length} people.
+        </p>
+      ) : null}
+
+      {sentEmail ? (
+        <p className="text-muted-foreground text-sm">
+          Summary sent to {sentEmail}
         </p>
       ) : null}
 

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,10 @@ export function Session() {
   // A participant with a token gets live updates; the Processing screen advances to
   // Review off the hub without polling. Visitors render from the REST snapshot only.
   const hub = useSessionHub(sessionId, identity?.participantToken ?? null)
+  // The masked address the host asked their summary be sent to. Lives here so it
+  // survives the Open -> Finalized screen swap, but not a refresh - the API never
+  // returns it (docs/09-ux-flows.md#8-summary---state-finalized).
+  const [sentEmail, setSentEmail] = useState<string | null>(null)
 
   if (query.isPending) {
     return <Centered title="Loading..." />
@@ -52,12 +57,13 @@ export function Session() {
           identity={identity}
           isHost={isHost}
           hub={hub}
+          onEmailedSummary={setSentEmail}
         />
       ) : (
         <JoinPrompt sessionId={sessionId} onJoined={store} />
       )
     case 'Finalized':
-      return <SummaryScreen snapshot={snapshot} />
+      return <SummaryScreen snapshot={snapshot} sentEmail={sentEmail} />
   }
 }
 
