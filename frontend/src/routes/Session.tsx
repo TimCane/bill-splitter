@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router'
 
 import { Button } from '@/components/ui/button'
 import { ClaimScreen } from '@/components/session/ClaimScreen'
+import { JoinPrompt } from '@/components/session/JoinPrompt'
 import { ProcessingScreen } from '@/components/session/ProcessingScreen'
 import { ReviewScreen } from '@/components/session/ReviewScreen'
 import { useParticipantToken } from '@/hooks/useParticipantToken'
@@ -15,7 +16,7 @@ import { ApiError } from '@/lib/api/client'
 export function Session() {
   const params = useParams()
   const sessionId = params.sessionId ?? ''
-  const { identity } = useParticipantToken(sessionId)
+  const { identity, store } = useParticipantToken(sessionId)
   const query = useSession(sessionId)
   // A participant with a token gets live updates; the Processing screen advances to
   // Review off the hub without polling. Visitors render from the REST snapshot only.
@@ -52,7 +53,7 @@ export function Session() {
           hub={hub}
         />
       ) : (
-        <Centered title="The split is open." />
+        <JoinPrompt sessionId={sessionId} onJoined={store} />
       )
     case 'Finalized':
       return <Centered title="Split locked." />

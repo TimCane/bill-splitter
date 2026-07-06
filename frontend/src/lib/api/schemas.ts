@@ -87,6 +87,13 @@ export const SessionSnapshotSchema = z.object({
 })
 export type SessionSnapshot = z.infer<typeof SessionSnapshotSchema>
 
+export const JoinResponseSchema = z.object({
+  participantId: z.string(),
+  participantToken: z.string(),
+  snapshot: SessionSnapshotSchema,
+})
+export type JoinResponse = z.infer<typeof JoinResponseSchema>
+
 export const OpenResponseSchema = z.object({
   shortCode: z.string(),
   joinUrl: z.string(),
