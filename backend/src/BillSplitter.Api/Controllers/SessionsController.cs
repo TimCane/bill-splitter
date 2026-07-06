@@ -105,7 +105,18 @@ public sealed class SessionsController(
         var record = await store.OpenAsync(sessionId, participantId, ct);
 
         // The image only exists to drive Review; once Open, it is gone for good.
-        await storage.DeleteAsync(sessionId, ct);
+        // Best-effort: the transition already committed, so a delete hiccup must
+        // not strand the host on Review - the bucket lifecycle expires the object
+        // within a day either way (MinioReceiptStorage).
+        try
+        {
+            await storage.DeleteAsync(sessionId, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Swallow: the lifecycle rule is the backstop.
+        }
+
         await notifier.SnapshotUpdatedAsync(sessionId, ct);
 
         var snapshot = mapper.Map(record.Session, record.Ttl);
