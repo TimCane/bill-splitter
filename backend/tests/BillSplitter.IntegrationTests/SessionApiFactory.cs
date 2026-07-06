@@ -189,6 +189,14 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
             // The concurrency tests hammer gestures far past the production
             // 10/sec throttle; the throttle itself is unit-scoped, not under test.
             ["Session:HubGesturesPerSecond"] = "10000",
+            // The shared collection creates far more than 5 sessions/hour; loosen
+            // every per-IP limit so only RateLimitTests (its own tight override)
+            // exercises the 429 path.
+            ["RateLimit:CreateSessionPerHour"] = "1000000",
+            ["RateLimit:JoinPerMinute"] = "1000000",
+            ["RateLimit:ResolveCodePerMinute"] = "1000000",
+            ["RateLimit:ResolveCodePerDay"] = "1000000",
+            ["RateLimit:GlobalPerMinute"] = "10000000",
         }));
         builder.ConfigureLogging(logging =>
         {

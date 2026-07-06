@@ -11,7 +11,6 @@ using BillSplitter.Infrastructure.Identity;
 using BillSplitter.Infrastructure.Ocr;
 using BillSplitter.Infrastructure.Redis;
 using BillSplitter.Infrastructure.Storage;
-using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
@@ -29,16 +28,16 @@ builder.Services.AddAppOptions(builder.Configuration);
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
-builder.Services.AddRateLimiter(options =>
-{
-    // The full per-IP policy set lands in M7 (docs/10-security-privacy.md); the
-    // code-resolve brute-force guard is needed now for the /join flow.
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddPolicy(RateLimitPolicies.CodeResolve, context =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1) }));
-});
+
+// Per-client-IP rate limits (docs/10-security-privacy.md#rate-limits). Bound
+// eagerly - the limiter is built here, not resolved from DI per request.
+var rateLimits = new RateLimitOptions();
+builder.Configuration.GetSection(RateLimitOptions.SectionName).Bind(rateLimits);
+builder.Services.AddRateLimiter(options => RateLimiting.Configure(options, rateLimits));
+
+// Trust the reverse proxy's X-Forwarded-For so the limiter keys on the real
+// client, not the proxy (off unless configured - docs/13-deployment.md).
+var trustProxy = builder.Services.AddProxyForwardedHeaders(builder.Configuration);
 
 // 3. Singletons. Session store, receipt storage, OCR queue, id generator and
 //    the scoped SnapshotMapper land with their implementations in M2+; the
@@ -162,7 +161,14 @@ var app = builder.Build();
 // cost on the request thread.
 _ = app.Services.GetRequiredService<IConnectionMultiplexer>();
 
-// 6. Pipeline: exception handling -> rate limiter -> auth -> endpoints.
+// 6. Pipeline: forwarded headers -> exception handling -> rate limiter -> auth.
+// Forwarded headers run first so every downstream stage (rate limiter keying,
+// HTTPS-aware redirects) sees the real client address and scheme.
+if (trustProxy)
+{
+    app.UseForwardedHeaders();
+}
+
 app.UseExceptionHandler();
 app.UseMiddleware<DomainExceptionMiddleware>();
 
