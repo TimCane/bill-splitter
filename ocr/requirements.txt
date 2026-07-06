@@ -1,6 +1,9 @@
-# Sidecar runtime. PaddleOCR/PaddlePaddle wheels are added here in M3 when real
-# inference is wired (docs/06-ocr-service.md); M1 runs the stub only.
+# Sidecar runtime. PaddlePaddle CPU wheels are ~600MB and the image lands at
+# ~2GB - pin them so a rebuild is reproducible (docs/06-ocr-service.md).
 fastapi==0.121.2
 uvicorn[standard]==0.40.0
 pillow==11.3.0
 pydantic==2.12.4
+numpy==1.26.4
+paddlepaddle==2.6.1
+paddleocr==2.7.3

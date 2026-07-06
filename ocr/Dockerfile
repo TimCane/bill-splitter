@@ -4,13 +4,17 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    OCR_STUB=true
+    OCR_STUB=false
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
 COPY fixtures ./fixtures
+
+# Bake the PP-OCRv4 English det+rec models into the image so cold start never
+# reaches the network (docs/06-ocr-service.md#stack).
+RUN python -c "from app.recognizer import warmup; warmup()"
 
 EXPOSE 8000
 
