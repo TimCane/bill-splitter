@@ -71,9 +71,7 @@ describe('JoinByCode', () => {
     await user.type(screen.getByLabelText('Split code'), 'K7MPQ2')
     await user.click(screen.getByRole('button', { name: /join/i }))
 
-    expect(
-      await screen.findByText(/too many attempts/i),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/too many attempts/i)).toBeInTheDocument()
     expect(navigate).not.toHaveBeenCalled()
   })
 })

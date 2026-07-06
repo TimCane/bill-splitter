@@ -8,7 +8,10 @@ const formatters = new Map<string, Intl.NumberFormat>()
 function formatterFor(currency: string): Intl.NumberFormat {
   let formatter = formatters.get(currency)
   if (formatter === undefined) {
-    formatter = new Intl.NumberFormat(undefined, { style: 'currency', currency })
+    formatter = new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+    })
     formatters.set(currency, formatter)
   }
   return formatter
