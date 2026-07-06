@@ -253,6 +253,9 @@ public sealed class Session
         EnsureHost(actingParticipantId);
         ShortCode = shortCode;
         State = SessionState.Open;
+        // Warnings and the failure reason are host-only Review aids; joining
+        // participants read the same snapshot, so drop them at the gate.
+        Ocr.ClearHostOnlyDetail();
     }
 
     public void Finalize(string actingParticipantId, DateTimeOffset finalizedAt)

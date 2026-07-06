@@ -30,4 +30,13 @@ public sealed class OcrInfo
     }
 
     internal void SetWarnings(IEnumerable<string> warnings) => _warnings = [.. warnings];
+
+    /// <summary>Drop the host-only parse detail (failure reason and discard
+    /// warnings) that only drives the Review gate, so it never rides the shared
+    /// snapshot once non-hosts can read it (docs/02-domain-model.md#ocrinfo).</summary>
+    internal void ClearHostOnlyDetail()
+    {
+        FailureReason = null;
+        _warnings = [];
+    }
 }
