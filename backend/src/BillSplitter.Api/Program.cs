@@ -4,6 +4,7 @@ using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Health;
 using BillSplitter.Api.Hubs;
 using BillSplitter.Api.Middleware;
+using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
 using BillSplitter.Infrastructure.Identity;
 using BillSplitter.Infrastructure.Ocr;
@@ -83,8 +84,14 @@ builder.Services.AddHttpClient<IOcrClient, HttpOcrClient>((sp, client) =>
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<SnapshotMapper>();
 builder.Services.AddScoped<ISessionNotifier, SignalRSessionNotifier>();
+builder.Services.AddScoped<StaleOcrRecovery>();
 
-// 4. Hosted services: OcrWorker lands in M3.
+// 4. Hosted services: the OCR worker consuming the queue (max 2 concurrent).
+builder.Services.AddHostedService(sp => new OcrWorker(
+    sp.GetRequiredService<OcrQueue>(),
+    sp.GetRequiredService<IServiceScopeFactory>(),
+    sp.GetRequiredService<IOptions<OcrOptions>>().Value.MaxConcurrency,
+    sp.GetRequiredService<ILogger<OcrWorker>>()));
 
 // 5. Authentication (participant token handler) + Participant / HostOnly policies.
 builder.Services.AddAuthentication(ParticipantAuth.Scheme)

@@ -10,4 +10,9 @@ public interface ISessionNotifier
     /// <summary>Broadcast the current snapshot to the session's hub group after a
     /// successful mutation (docs/05-realtime-contract.md#server---client-events).</summary>
     Task SnapshotUpdatedAsync(string sessionId, CancellationToken ct);
+
+    /// <summary>Broadcast an OCR status transition. A hint only: it is always paired
+    /// with a <c>SnapshotUpdated</c> carrying the authoritative state, so a stale
+    /// hint is harmless (docs/05-realtime-contract.md#server---client-events).</summary>
+    Task OcrStatusChangedAsync(string sessionId, OcrStatus status, string? failureReason, CancellationToken ct);
 }

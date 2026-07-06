@@ -1,7 +1,9 @@
 using BillSplitter.Api.Configuration;
 using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Http;
+using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
+using BillSplitter.Infrastructure.Ocr;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SessionOptions = BillSplitter.Api.Configuration.SessionOptions;
@@ -15,15 +17,17 @@ public sealed class SessionsController(
     IReceiptStorage storage,
     IIdGenerator ids,
     SnapshotMapper mapper,
-    ISessionNotifier notifier,
+    OcrQueue queue,
+    StaleOcrRecovery recovery,
     TimeProvider clock,
     IOptions<SessionOptions> sessionOptions)
     : ControllerBase
 {
     private readonly SessionOptions _options = sessionOptions.Value;
 
-    /// <summary>Create a session from a receipt photo. OCR is faked as
-    /// instant-empty-Review in M2 (docs/14-build-order.md#m2---session-core).</summary>
+    /// <summary>Create a session from a receipt photo, store the image and queue
+    /// the OCR job. The session stays in <c>Processing</c> until the worker lands
+    /// it in <c>Review</c> (docs/06-ocr-service.md#backend-job-flow).</summary>
     [HttpPost]
     public async Task<IActionResult> Create([FromForm] IFormFile? image, CancellationToken ct)
     {
@@ -52,12 +56,11 @@ public sealed class SessionsController(
         await store.CreateAsync(session, ct);
         await storage.PutAsync(sessionId, bytes, contentType, ct);
 
-        // Fake OCR: land straight in Review with no items (real pipeline is M3).
-        await store.MutateAsync(
-            sessionId,
-            s => s.CompleteOcr([], new Bill(0, 0, 0, 0), Session.DefaultCurrency),
-            ct);
-        await notifier.SnapshotUpdatedAsync(sessionId, ct);
+        // Queue OCR; the worker broadcasts progress. A full queue is backpressure.
+        if (!await queue.EnqueueAsync(new OcrJob(sessionId), ct))
+        {
+            throw new DomainException(ErrorCodes.RateLimited, "the OCR queue is full");
+        }
 
         return Accepted(new CreateSessionResponse(sessionId, hostId, token, "Host"));
     }
@@ -67,6 +70,8 @@ public sealed class SessionsController(
     {
         var record = await store.GetAsync(sessionId, ct)
             ?? throw new DomainException(ErrorCodes.SessionNotFound, sessionId);
+
+        record = await recovery.RecoverIfStaleAsync(record, ct);
 
         return Ok(mapper.Map(record.Session, record.Ttl));
     }

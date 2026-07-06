@@ -26,4 +26,13 @@ public sealed class SignalRSessionNotifier(
         var snapshot = mapper.Map(record.Session, record.Ttl);
         await hub.Clients.Group(GroupName(sessionId)).SendAsync("SnapshotUpdated", snapshot, ct);
     }
+
+    public Task OcrStatusChangedAsync(
+        string sessionId, OcrStatus status, string? failureReason, CancellationToken ct) =>
+        hub.Clients.Group(GroupName(sessionId)).SendAsync(
+            "OcrStatusChanged",
+            new OcrStatusChangedDto(status.ToString(), failureReason),
+            ct);
+
+    private sealed record OcrStatusChangedDto(string Status, string? FailureReason);
 }
