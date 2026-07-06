@@ -74,7 +74,7 @@ public sealed class OcrWorker(
 
             // 4. Apply the parse: Review/Done only while still Processing.
             var done = await store.MutateAsync(
-                job.SessionId, s => s.CompleteOcr(items, parsed.Bill, parsed.Currency), ct);
+                job.SessionId, s => s.CompleteOcr(items, parsed.Bill, parsed.Currency, parsed.Warnings), ct);
             await BroadcastAsync(notifier, done, ct);
         }
         // A sidecar timeout throws TaskCanceledException (an OperationCanceledException)

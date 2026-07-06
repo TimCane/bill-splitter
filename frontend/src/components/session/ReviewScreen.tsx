@@ -12,8 +12,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { BillEditSheet } from '@/components/session/BillEditSheet'
+import { ChecksumBanner } from '@/components/session/ChecksumBanner'
 import { ItemEditSheet } from '@/components/session/ItemEditSheet'
 import { NameSheet } from '@/components/session/NameSheet'
+import { ParserWarnings } from '@/components/session/ParserWarnings'
 import { ReceiptSheet } from '@/components/session/ReceiptSheet'
 import { getSession, openSplit } from '@/lib/api/client'
 import type { Item, SessionSnapshot } from '@/lib/api/schemas'
@@ -88,7 +90,8 @@ export function ReviewScreen({ snapshot, token }: Props) {
         <Pencil className="size-3.5" />
       </button>
 
-      {/* The checksum banner renders here (built in a following change). */}
+      <ChecksumBanner bill={bill} ocr={snapshot.ocr} currency={currency} />
+      <ParserWarnings warnings={snapshot.ocr.warnings} />
 
       <section className="flex flex-col gap-1">
         <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">

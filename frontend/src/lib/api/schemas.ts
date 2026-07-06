@@ -23,7 +23,9 @@ export type OcrStatus = z.infer<typeof OcrStatusSchema>
 export const OcrSchema = z.object({
   status: OcrStatusSchema,
   failureReason: z.string().nullable(),
+  warnings: z.array(z.string()).default([]),
 })
+export type Ocr = z.infer<typeof OcrSchema>
 
 export const ParticipantSchema = z.object({
   participantId: z.string(),

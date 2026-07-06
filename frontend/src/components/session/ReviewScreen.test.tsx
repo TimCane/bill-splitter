@@ -14,11 +14,25 @@ function snapshot(): SessionSnapshot {
     shortCode: null,
     joinUrl: null,
     hostParticipantId: 'host',
-    ocr: { status: 'Done', failureReason: null },
-    participants: [{ participantId: 'host', displayName: 'Host', isHost: true }],
+    ocr: { status: 'Done', failureReason: null, warnings: [] },
+    participants: [
+      { participantId: 'host', displayName: 'Host', isHost: true },
+    ],
     items: [
-      { itemId: 'i1', name: 'Margherita', quantity: 1, priceMinor: 1250, claims: [] },
-      { itemId: 'i2', name: 'Peroni 660ml', quantity: 2, priceMinor: 1100, claims: [] },
+      {
+        itemId: 'i1',
+        name: 'Margherita',
+        quantity: 1,
+        priceMinor: 1250,
+        claims: [],
+      },
+      {
+        itemId: 'i2',
+        name: 'Peroni 660ml',
+        quantity: 2,
+        priceMinor: 1100,
+        claims: [],
+      },
     ],
     bill: {
       subtotalMinor: 2350,
@@ -46,7 +60,9 @@ describe('ReviewScreen', () => {
   it('lists items with formatted prices and a quantity prefix', () => {
     renderReview()
 
-    expect(screen.getByRole('heading', { name: /check the items/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /check the items/i }),
+    ).toBeInTheDocument()
     expect(screen.getByText('Margherita')).toBeInTheDocument()
     expect(screen.getByText('£12.50')).toBeInTheDocument()
     expect(screen.getByText('2x')).toBeInTheDocument()
@@ -57,7 +73,11 @@ describe('ReviewScreen', () => {
 
     expect(screen.getByText('Printed total')).toBeInTheDocument()
     expect(screen.getByText('£54.50')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /open the split/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /add item/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /open the split/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /add item/i }),
+    ).toBeInTheDocument()
   })
 })

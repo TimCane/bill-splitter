@@ -22,7 +22,7 @@ public sealed record SessionSnapshotDto(
     long UnclaimedTotalMinor,
     IReadOnlyList<ParticipantTotalDto> Totals);
 
-public sealed record OcrDto(string Status, string? FailureReason);
+public sealed record OcrDto(string Status, string? FailureReason, IReadOnlyList<string> Warnings);
 
 public sealed record ParticipantDto(string ParticipantId, string DisplayName, bool IsHost);
 

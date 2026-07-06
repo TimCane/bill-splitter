@@ -119,7 +119,8 @@ public sealed class Session
     /// <summary>Apply a parse result and advance to <c>Review</c>. In M2 this is
     /// called with an empty result to fake OCR as instant-empty-Review
     /// (docs/14-build-order.md#m2---session-core).</summary>
-    public void CompleteOcr(IEnumerable<LineItem> items, Bill bill, string currency)
+    public void CompleteOcr(
+        IEnumerable<LineItem> items, Bill bill, string currency, IEnumerable<string>? warnings = null)
     {
         if (State != SessionState.Processing)
         {
@@ -131,6 +132,7 @@ public sealed class Session
         Bill = bill;
         Currency = currency;
         Ocr.Set(OcrStatus.Done, null);
+        Ocr.SetWarnings(warnings ?? []);
         State = SessionState.Review;
     }
 

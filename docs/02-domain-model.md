@@ -105,6 +105,7 @@ every allocation exact and the split reproducible
 | --- | --- | --- |
 | `Status` | `OcrStatus` | `Pending`, `Processing`, `Done`, `Failed` |
 | `FailureReason` | `string?` | human-readable, shown to host only |
+| `Warnings` | `List<string>` | parser discard lines shown to the host under the checksum banner; empty unless a parse landed |
 
 ## Checksum
 
