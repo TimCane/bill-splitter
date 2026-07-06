@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
 
 import { JoinByCode } from '@/routes/JoinByCode'
-import { resolveCode } from '@/lib/api/client'
+import { ApiError, resolveCode } from '@/lib/api/client'
 
 const navigate = vi.fn()
 
@@ -12,7 +12,8 @@ vi.mock('react-router', async (importOriginal) => ({
   useNavigate: () => navigate,
 }))
 
-vi.mock('@/lib/api/client', () => ({
+vi.mock('@/lib/api/client', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/api/client')>()),
   resolveCode: vi.fn(),
 }))
 
@@ -58,6 +59,20 @@ describe('JoinByCode', () => {
 
     expect(
       await screen.findByText("That code didn't match an active split."),
+    ).toBeInTheDocument()
+    expect(navigate).not.toHaveBeenCalled()
+  })
+
+  it('reports rate limiting rather than a wrong code on a 429', async () => {
+    const user = userEvent.setup()
+    resolveCodeMock.mockRejectedValue(new ApiError('rate-limited', 429))
+    render(<JoinByCode />)
+
+    await user.type(screen.getByLabelText('Split code'), 'K7MPQ2')
+    await user.click(screen.getByRole('button', { name: /join/i }))
+
+    expect(
+      await screen.findByText(/too many attempts/i),
     ).toBeInTheDocument()
     expect(navigate).not.toHaveBeenCalled()
   })

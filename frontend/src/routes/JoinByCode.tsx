@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { resolveCode } from '@/lib/api/client'
+import { ApiError, resolveCode } from '@/lib/api/client'
 
 // The short-code alphabet (no 0/O/1/I/L), so typed input is filtered to it
 // (docs/02-domain-model.md#entities).
@@ -35,8 +35,14 @@ export function JoinByCode() {
     try {
       const sessionId = await resolveCode(code)
       void navigate(`/s/${sessionId}`)
-    } catch {
-      setError("That code didn't match an active split.")
+    } catch (err) {
+      // The resolve endpoint is rate-limited as a brute-force guard; a 429 is
+      // not a bad code, so don't tell the user their code was wrong.
+      setError(
+        err instanceof ApiError && err.status === 429
+          ? 'Too many attempts. Wait a minute and try again.'
+          : "That code didn't match an active split.",
+      )
       setBusy(false)
     }
   }
