@@ -11,6 +11,11 @@ public interface ISessionNotifier
     /// successful mutation (docs/05-realtime-contract.md#server---client-events).</summary>
     Task SnapshotUpdatedAsync(string sessionId, CancellationToken ct);
 
+    /// <summary>Broadcast the terminal <c>SessionFinalized</c> event carrying the
+    /// finalized snapshot, so clients switch to the summary and stop accepting input
+    /// without diffing state (docs/05-realtime-contract.md#server---client-events).</summary>
+    Task SessionFinalizedAsync(string sessionId, CancellationToken ct);
+
     /// <summary>Broadcast an OCR status transition. A hint only: it is always paired
     /// with a <c>SnapshotUpdated</c> carrying the authoritative state, so a stale
     /// hint is harmless (docs/05-realtime-contract.md#server---client-events).</summary>

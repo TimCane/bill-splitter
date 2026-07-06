@@ -64,6 +64,7 @@ builder.Services.AddSingleton<ISessionStore>(sp =>
         mux,
         ids,
         TimeSpan.FromHours(session.TtlHours),
+        TimeSpan.FromMinutes(session.FinalizedTtlMinutes),
         sp.GetRequiredService<ILogger<RedisSessionStore>>());
 });
 

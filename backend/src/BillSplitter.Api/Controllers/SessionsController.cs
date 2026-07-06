@@ -8,6 +8,7 @@ using BillSplitter.Domain;
 using BillSplitter.Infrastructure.Ocr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using SessionOptions = BillSplitter.Api.Configuration.SessionOptions;
 
@@ -121,5 +122,27 @@ public sealed class SessionsController(
 
         var snapshot = mapper.Map(record.Session, record.Ttl);
         return Ok(new OpenResponse(snapshot.ShortCode!, snapshot.JoinUrl!));
+    }
+
+    /// <summary>Finalize the split: lock claims, split the unclaimed items equally,
+    /// shrink the session and code keys to ~1h and broadcast <c>SessionFinalized</c>.
+    /// Host, <c>Open</c> only; returns the finalized snapshot
+    /// (docs/04-api-contract.md#post-apiv1sessionssessionidfinalize).</summary>
+    [HttpPost("{sessionId}/finalize")]
+    [Authorize(Policy = ParticipantAuth.HostPolicy)]
+    public async Task<IActionResult> Finalize(
+        string sessionId,
+        [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] FinalizeRequest? request,
+        CancellationToken ct)
+    {
+        var participantId = User.FindFirstValue(ParticipantAuth.ParticipantIdClaim)!;
+
+        var record = await store.FinalizeAsync(
+            sessionId, s => s.Finalize(participantId, clock.GetUtcNow()), ct);
+
+        var snapshot = mapper.Map(record.Session, record.Ttl);
+        await notifier.SessionFinalizedAsync(sessionId, ct);
+
+        return Ok(snapshot);
     }
 }

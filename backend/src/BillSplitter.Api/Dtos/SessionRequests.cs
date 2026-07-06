@@ -36,6 +36,11 @@ public sealed record BillRequest(
 /// host shares (docs/04-api-contract.md#post-apiv1sessionssessionidopen).</summary>
 public sealed record OpenResponse(string ShortCode, string JoinUrl);
 
+/// <summary>Body for <c>POST .../finalize</c>. The optional address is used once to
+/// send the summary and is never stored or logged
+/// (docs/04-api-contract.md#post-apiv1sessionssessionidfinalize).</summary>
+public sealed record FinalizeRequest(string? Email);
+
 /// <summary>Returned by <c>GET /codes/{shortCode}</c>
 /// (docs/04-api-contract.md#get-apiv1codesshortcode).</summary>
 public sealed record ResolveCodeResponse(string SessionId);

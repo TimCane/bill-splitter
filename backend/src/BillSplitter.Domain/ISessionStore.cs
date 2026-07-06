@@ -29,6 +29,12 @@ public interface ISessionStore
     /// (docs/03-redis-schema.md#lifecycle-operations).</summary>
     Task<SessionRecord> OpenAsync(string sessionId, string actingParticipantId, CancellationToken ct);
 
+    /// <summary>Apply <paramref name="mutation"/> (the <c>Finalize</c> transition)
+    /// and CAS-commit while shrinking the session and code keys to the finalized TTL
+    /// in one atomic write - the terminal state ships with its own ~1h expiry, never
+    /// a follow-up step a crash could skip (docs/03-redis-schema.md#lifecycle-operations).</summary>
+    Task<SessionRecord> FinalizeAsync(string sessionId, Action<Session> mutation, CancellationToken ct);
+
     /// <summary>Resolve a typed-in short code to its session id, or null.</summary>
     Task<string?> ResolveCodeAsync(string shortCode, CancellationToken ct);
 }

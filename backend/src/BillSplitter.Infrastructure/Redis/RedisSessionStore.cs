@@ -37,17 +37,20 @@ public sealed class RedisSessionStore : ISessionStore
     private readonly IDatabase _db;
     private readonly IIdGenerator _ids;
     private readonly TimeSpan _sessionTtl;
+    private readonly TimeSpan _finalizedTtl;
     private readonly ILogger<RedisSessionStore> _logger;
 
     public RedisSessionStore(
         IConnectionMultiplexer redis,
         IIdGenerator ids,
         TimeSpan sessionTtl,
+        TimeSpan finalizedTtl,
         ILogger<RedisSessionStore> logger)
     {
         _db = redis.GetDatabase();
         _ids = ids;
         _sessionTtl = sessionTtl;
+        _finalizedTtl = finalizedTtl;
         _logger = logger;
     }
 
@@ -74,7 +77,17 @@ public sealed class RedisSessionStore : ISessionStore
         return new SessionRecord(session, _sessionTtl);
     }
 
-    public async Task<SessionRecord> MutateAsync(string sessionId, Action<Session> mutation, CancellationToken ct)
+    public Task<SessionRecord> MutateAsync(string sessionId, Action<Session> mutation, CancellationToken ct) =>
+        MutateAsync(sessionId, mutation, newTtl: null, ct);
+
+    public Task<SessionRecord> FinalizeAsync(string sessionId, Action<Session> mutation, CancellationToken ct) =>
+        MutateAsync(sessionId, mutation, newTtl: _finalizedTtl, ct);
+
+    // The one CAS write funnel. newTtl null preserves the key's TTL (KEEPTTL); a
+    // value shrinks the session and its code key together inside the same commit,
+    // the path finalize takes (docs/03-redis-schema.md#lifecycle-operations).
+    private async Task<SessionRecord> MutateAsync(
+        string sessionId, Action<Session> mutation, TimeSpan? newTtl, CancellationToken ct)
     {
         var key = SessionKey(sessionId);
 
@@ -100,15 +113,22 @@ public sealed class RedisSessionStore : ISessionStore
             session.IncrementVersion();
 
             var newJson = SessionSerialization.Serialize(session);
-            var outcome = (long)await _db.ScriptEvaluateAsync(
-                CasScript,
-                [key],
-                [expectedVersion, newJson]);
+            RedisKey[] keys = [key];
+            RedisValue[] argv = [expectedVersion, newJson];
+            if (newTtl is { } ttl)
+            {
+                // The code key rides along so it expires with the session; a session
+                // finalized before it was opened has none, so shrink the session key alone.
+                keys = session.ShortCode is { } code ? [key, CodeKey(code)] : [key];
+                argv = [expectedVersion, newJson, (long)ttl.TotalSeconds];
+            }
+
+            var outcome = (long)await _db.ScriptEvaluateAsync(CasScript, keys, argv);
 
             switch (outcome)
             {
                 case 1:
-                    return new SessionRecord(session, ttlTask.Result ?? _sessionTtl);
+                    return new SessionRecord(session, newTtl ?? ttlTask.Result ?? _sessionTtl);
                 case -1:
                     throw new DomainException(ErrorCodes.SessionNotFound, sessionId);
                 default:
