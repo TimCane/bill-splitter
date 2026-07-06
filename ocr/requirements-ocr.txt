@@ -1,0 +1,6 @@
+# Real inference wheels, baked into the image only (docs/06-ocr-service.md#stack).
+# PaddlePaddle CPU wheels are ~600MB; CI never installs these - it exercises the
+# stub path (docs/11-testing-strategy.md). Pinned for reproducible image builds.
+numpy==1.26.4
+paddlepaddle==2.6.2
+paddleocr==2.7.3
