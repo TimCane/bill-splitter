@@ -181,6 +181,14 @@ if (trustProxy)
     app.UseForwardedHeaders();
 }
 
+// HSTS only once TLS is in front (production); dev is plain HTTP. The same-origin
+// SPA needs no CORS in production - the dev-only policy opens the Vite origin.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
 app.UseMiddleware<DomainExceptionMiddleware>();
 
