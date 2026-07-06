@@ -9,13 +9,18 @@ set -euo pipefail
 COMPOSE=${COMPOSE:-docker compose -f docker-compose.prod.yml}
 BUCKET=${BUCKET:-bill-splitter}
 
-keys=$($COMPOSE exec -T redis redis-cli --scan | grep -c . || true)
+# dbsize returns the key count directly; an unreachable redis exits non-zero and
+# aborts the script (pipefail) rather than reading as an empty - a false PASS.
+keys=$($COMPOSE exec -T redis redis-cli dbsize)
 echo "redis keys: $keys"
 
 # minio has no mc; run a throwaway mc container on the stack network instead.
+# set -e inside the container so a failed alias/ls aborts loudly; wc -l counts an
+# empty listing as 0 without masking an error the way grep ... || true would.
 objects=$($COMPOSE run --rm --entrypoint sh minio-init -c "
-  mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD >/dev/null &&
-  mc ls --recursive local/$BUCKET | grep -c . || true
+  set -e
+  mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD >/dev/null
+  mc ls --recursive local/$BUCKET | wc -l | tr -d '[:space:]'
 ")
 echo "minio objects: $objects"
 

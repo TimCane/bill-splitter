@@ -36,6 +36,10 @@ ENV ASPNETCORE_HTTP_PORTS=8080
 COPY --from=build /app ./
 EXPOSE 8080
 
+# Drop to the image's built-in non-root user: the app writes nothing to disk
+# (Redis + MinIO hold all state), so an RCE in the upload path cannot run as root.
+USER $APP_UID
+
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 --start-period=20s \
     CMD curl -fsS http://localhost:8080/healthz || exit 1
 
