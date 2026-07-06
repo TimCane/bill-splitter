@@ -23,6 +23,11 @@ internet ──TLS──► reverse proxy ──► app (Kestrel :8080)
 - The proxy must forward `Upgrade`/`Connection` headers (WebSockets) and
   set `X-Forwarded-For`/`-Proto`; do not log query strings
   (`access_token` - [10-security-privacy.md](10-security-privacy.md#transport-and-headers)).
+- A ready-to-run proxy lives in `deploy/`: `deploy/Caddyfile` +
+  `deploy/docker-compose.caddy.yml` (host-networked Caddy, `SITE_ADDRESS` the
+  public host). It terminates TLS, relays the WebSocket upgrade, sets the
+  forwarded headers, and strips `access_token` from access logs. The app trusts
+  those headers via `ForwardedHeaders__*` (`.env.example`).
 
 ## Production compose shape
 
@@ -76,6 +81,9 @@ override only with reason.
 - **Monitoring (MVP)**: uptime check on `/healthz`; disk alert for the
   MinIO volume (should hover near zero - growth means the delete path is
   broken and ephemerality is silently failing).
+- **Ephemerality check**: `scripts/verify-ephemerality.sh` asserts Redis and
+  the MinIO bucket are empty an hour after a finalized session - the final M7
+  gate ([10-security-privacy.md](10-security-privacy.md#ephemerality-guarantees)).
 
 ## Scale-out (documented exit, not built)
 

@@ -1,0 +1,20 @@
+# TLS termination + reverse proxy in front of the app (docs/13-deployment.md).
+# Caddy gets a certificate automatically for SITE_ADDRESS and forwards to the
+# app's loopback publish. It relays the WebSocket Upgrade/Connection headers and
+# sets X-Forwarded-For / -Proto on every proxied request out of the box.
+{$SITE_ADDRESS} {
+	encode gzip
+
+	# Strip the SignalR access_token from access logs - it rides the query
+	# string (docs/10-security-privacy.md#transport-and-headers).
+	log {
+		output stdout
+		format filter {
+			request>uri query {
+				delete access_token
+			}
+		}
+	}
+
+	reverse_proxy 127.0.0.1:8080
+}
