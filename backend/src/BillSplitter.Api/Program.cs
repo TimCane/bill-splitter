@@ -6,6 +6,7 @@ using BillSplitter.Api.Hubs;
 using BillSplitter.Api.Middleware;
 using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
+using BillSplitter.Infrastructure.Email;
 using BillSplitter.Infrastructure.Identity;
 using BillSplitter.Infrastructure.Ocr;
 using BillSplitter.Infrastructure.Redis;
@@ -64,6 +65,7 @@ builder.Services.AddSingleton<ISessionStore>(sp =>
         mux,
         ids,
         TimeSpan.FromHours(session.TtlHours),
+        TimeSpan.FromMinutes(session.FinalizedTtlMinutes),
         sp.GetRequiredService<ILogger<RedisSessionStore>>());
 });
 
@@ -90,6 +92,28 @@ builder.Services.AddHttpClient<IOcrClient, HttpOcrClient>((sp, client) =>
     var ocr = sp.GetRequiredService<IOptions<OcrOptions>>().Value;
     client.BaseAddress = new Uri(ocr.BaseUrl);
     client.Timeout = TimeSpan.FromSeconds(ocr.TimeoutSeconds);
+});
+
+// Email is optional: a configured relay gets the MailKit sender, otherwise the
+// null sender backstops the (hidden) address field (docs/04-api-contract.md#get-healthz).
+builder.Services.AddSingleton<IEmailSender>(sp =>
+{
+    var smtp = sp.GetRequiredService<IOptions<SmtpOptions>>().Value;
+    if (!smtp.IsEnabled)
+    {
+        return new NullEmailSender();
+    }
+
+    return new MailKitEmailSender(
+        smtp.Host!,
+        smtp.Port,
+        smtp.Username,
+        smtp.Password,
+        // A bare Host enables the capability (docs/04-api-contract.md#get-healthz),
+        // so the sender must resolve to a parseable address even when From and
+        // Username are unset - Host alone is not one and would fault every send.
+        smtp.From ?? smtp.Username ?? $"no-reply@{smtp.Host}",
+        sp.GetRequiredService<ILogger<MailKitEmailSender>>());
 });
 
 builder.Services.AddSingleton(TimeProvider.System);

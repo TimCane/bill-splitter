@@ -7,15 +7,28 @@ import { NameSheet } from '@/components/session/NameSheet'
 import { ShareSheet } from '@/components/session/ShareSheet'
 import { Button } from '@/components/ui/button'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { useCapabilities } from '@/hooks/useCapabilities'
 import type { Identity } from '@/hooks/useParticipantToken'
 import { applySnapshot, sessionKey } from '@/hooks/useSession'
 import type { SessionHub } from '@/hooks/useSessionHub'
+import { finalizeSplit } from '@/lib/api/client'
 import type { Item, SessionSnapshot } from '@/lib/api/schemas'
+import { emailError, maskEmail, parseEmail } from '@/lib/email'
 import { formatMinor } from '@/lib/money'
 import { HubError } from '@/lib/realtime/contract'
 import { cn } from '@/lib/utils'
@@ -25,6 +38,9 @@ type Props = {
   identity: Identity
   isHost: boolean
   hub: SessionHub
+  // Called with the masked address when the host finalizes and asked for the
+  // summary email, so the summary screen can confirm it (docs/09-ux-flows.md#8).
+  onEmailedSummary: (maskedEmail: string) => void
 }
 
 // The main screen, everyone, state Open
@@ -32,10 +48,18 @@ type Props = {
 // straight from the snapshot - every amount here was computed on the server; the
 // screen only formats. Gestures go over the hub and are not optimistic: the
 // authoritative snapshot lands within the coalescing window.
-export function ClaimScreen({ snapshot, identity, isHost, hub }: Props) {
+export function ClaimScreen({
+  snapshot,
+  identity,
+  isHost,
+  hub,
+  onEmailedSummary,
+}: Props) {
   const queryClient = useQueryClient()
   const [renameOpen, setRenameOpen] = useState(false)
   const [everyoneOpen, setEveryoneOpen] = useState(false)
+  const [finalizeOpen, setFinalizeOpen] = useState(false)
+  const { emailEnabled } = useCapabilities(isHost)
   const waitingForTable = isHost && snapshot.participants.length <= 1
   // The Share sheet greets the host on entering Open while the table is empty;
   // after that it stays reachable from the footer.
@@ -148,14 +172,19 @@ export function ClaimScreen({ snapshot, identity, isHost, hub }: Props) {
             Everyone
           </Button>
           {isHost ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Show QR"
-              onClick={() => setShareOpen(true)}
-            >
-              <QrCode />
-            </Button>
+            <>
+              <Button className="flex-1" onClick={() => setFinalizeOpen(true)}>
+                Finalize
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Show QR"
+                onClick={() => setShareOpen(true)}
+              >
+                <QrCode />
+              </Button>
+            </>
           ) : null}
         </div>
       </footer>
@@ -184,7 +213,121 @@ export function ClaimScreen({ snapshot, identity, isHost, hub }: Props) {
           onOpenChange={setShareOpen}
         />
       ) : null}
+
+      {isHost ? (
+        <FinalizeDialog
+          snapshot={snapshot}
+          token={identity.participantToken}
+          emailEnabled={emailEnabled}
+          open={finalizeOpen}
+          onOpenChange={setFinalizeOpen}
+          onFinalized={(next) => applySnapshot(queryClient, next)}
+          onEmailedSummary={onEmailedSummary}
+        />
+      ) : null}
     </main>
+  )
+}
+
+type FinalizeDialogProps = {
+  snapshot: SessionSnapshot
+  token: string
+  emailEnabled: boolean
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onFinalized: (snapshot: SessionSnapshot) => void
+  onEmailedSummary: (maskedEmail: string) => void
+}
+
+// Host-only lock confirmation (docs/09-ux-flows.md#7). The email field only shows
+// when the server can send (the capability flag); the masked confirmation is
+// derived here and handed up before the summary screen takes over.
+function FinalizeDialog({
+  snapshot,
+  token,
+  emailEnabled,
+  open,
+  onOpenChange,
+  onFinalized,
+  onEmailedSummary,
+}: FinalizeDialogProps) {
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [finalizing, setFinalizing] = useState(false)
+
+  async function confirm() {
+    let address: string | null = null
+    if (emailEnabled && email.trim().length > 0) {
+      address = parseEmail(email)
+      if (address === null) {
+        setError(emailError)
+        return
+      }
+    }
+
+    setFinalizing(true)
+    setError(null)
+    try {
+      const next = await finalizeSplit(snapshot.sessionId, token, address)
+      if (address) {
+        onEmailedSummary(maskEmail(address))
+      }
+
+      // The finalized snapshot flips the route to the summary; this component
+      // unmounts with it, so there is no busy state to reset on success.
+      onFinalized(next)
+    } catch {
+      setError('Could not finalize. Try again.')
+      setFinalizing(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Lock the split?</DialogTitle>
+          <DialogDescription>
+            Unclaimed{' '}
+            {formatMinor(snapshot.unclaimedTotalMinor, snapshot.currency)} gets
+            split between everyone.
+          </DialogDescription>
+        </DialogHeader>
+
+        {emailEnabled ? (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="summary-email">
+              Email me the summary (optional)
+            </Label>
+            <Input
+              id="summary-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+            <p className="text-muted-foreground text-sm">
+              Deleted after sending. The split stays viewable for 1 hour.
+            </p>
+          </div>
+        ) : null}
+
+        {error ? <p className="text-destructive text-sm">{error}</p> : null}
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={finalizing}
+          >
+            Cancel
+          </Button>
+          <Button onClick={() => void confirm()} disabled={finalizing}>
+            Lock the split
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

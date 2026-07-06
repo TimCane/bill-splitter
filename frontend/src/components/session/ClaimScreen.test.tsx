@@ -6,6 +6,7 @@ import { vi } from 'vitest'
 import { storeIdentity } from '@/hooks/useParticipantToken'
 import { getSession } from '@/lib/api/client'
 import type { SessionSnapshot } from '@/lib/api/schemas'
+import { HubError } from '@/lib/realtime/contract'
 import { Session } from '@/routes/Session'
 
 // The hub is mocked at the contract.ts boundary
@@ -112,6 +113,36 @@ function pushSnapshot(next: SessionSnapshot) {
   })
 }
 
+function pushFinalized(next: SessionSnapshot) {
+  const handler = snapshotHandlers.SessionFinalized
+  if (!handler) {
+    throw new Error('SessionFinalized handler was never registered')
+  }
+
+  act(() => {
+    handler(next)
+  })
+}
+
+function finalized(version: number): SessionSnapshot {
+  return {
+    ...snapshot(version, []),
+    state: 'Finalized',
+    unclaimedTotalMinor: 0,
+    totals: [
+      {
+        participantId: 'me',
+        itemsMinor: 1250,
+        taxMinor: 0,
+        tipMinor: 0,
+        serviceMinor: 0,
+        unclaimedMinor: 0,
+        totalMinor: 1250,
+      },
+    ],
+  }
+}
+
 function renderClaimScreen() {
   return render(
     <QueryClientProvider client={new QueryClient()}>
@@ -191,5 +222,38 @@ describe('claim interactions', () => {
     )
 
     expect(screen.getByLabelText('Shares')).toHaveTextContent('2')
+  })
+
+  // A2: SessionFinalized navigates to the summary and stops input; a claim gesture
+  // rejected with wrong-state becomes a soft refresh, not an error toast
+  // (docs/09-ux-flows.md, docs/05-realtime-contract.md#hub-errors).
+  it('a SessionFinalized event switches to the read-only summary', async () => {
+    renderClaimScreen()
+    await screen.findByRole('button', { name: 'Mine' })
+
+    pushFinalized(finalized(2))
+
+    expect(
+      await screen.findByRole('heading', { name: /split locked/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Mine' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('a claim gesture rejected with wrong-state refreshes to the summary', async () => {
+    const user = userEvent.setup()
+    claimItemMock.mockRejectedValueOnce(
+      new HubError('wrong-state', new Error('wrong-state')),
+    )
+    renderClaimScreen()
+    // The refetch that the soft handling triggers now sees the finalized session.
+    vi.mocked(getSession).mockResolvedValue(finalized(2))
+
+    await user.click(await screen.findByRole('button', { name: 'Mine' }))
+
+    expect(
+      await screen.findByRole('heading', { name: /split locked/i }),
+    ).toBeInTheDocument()
   })
 })

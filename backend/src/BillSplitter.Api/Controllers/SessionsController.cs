@@ -8,6 +8,7 @@ using BillSplitter.Domain;
 using BillSplitter.Infrastructure.Ocr;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using SessionOptions = BillSplitter.Api.Configuration.SessionOptions;
 
@@ -23,6 +24,7 @@ public sealed class SessionsController(
     OcrQueue queue,
     StaleOcrRecovery recovery,
     ISessionNotifier notifier,
+    IEmailSender emailSender,
     TimeProvider clock,
     IOptions<SessionOptions> sessionOptions)
     : ControllerBase
@@ -121,5 +123,49 @@ public sealed class SessionsController(
 
         var snapshot = mapper.Map(record.Session, record.Ttl);
         return Ok(new OpenResponse(snapshot.ShortCode!, snapshot.JoinUrl!));
+    }
+
+    /// <summary>Finalize the split: lock claims, split the unclaimed items equally,
+    /// shrink the session and code keys to ~1h and broadcast <c>SessionFinalized</c>.
+    /// Host, <c>Open</c> only; returns the finalized snapshot
+    /// (docs/04-api-contract.md#post-apiv1sessionssessionidfinalize).</summary>
+    [HttpPost("{sessionId}/finalize")]
+    [Authorize(Policy = ParticipantAuth.HostPolicy)]
+    public async Task<IActionResult> Finalize(
+        string sessionId,
+        [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] FinalizeRequest? request,
+        CancellationToken ct)
+    {
+        var participantId = User.FindFirstValue(ParticipantAuth.ParticipantIdClaim)!;
+
+        var record = await store.FinalizeAsync(
+            sessionId, s => s.Finalize(participantId, clock.GetUtcNow()), ct);
+
+        var snapshot = mapper.Map(record.Session, record.Ttl);
+        await notifier.SessionFinalizedAsync(sessionId, ct);
+
+        if (!string.IsNullOrWhiteSpace(request?.Email))
+        {
+            // Fire and forget: the send outlives the request and never faults it.
+            // The address is used only for this call - it reaches neither Redis nor
+            // the logs (docs/04-api-contract.md, docs/10-security-privacy.md).
+            _ = emailSender.SendSummaryAsync(request.Email, BuildSummary(snapshot), CancellationToken.None);
+        }
+
+        return Ok(snapshot);
+    }
+
+    // The email reconciles against its own rows: its total is the sum of the
+    // per-person finalized totals, which the finalize invariant fixes to the whole
+    // bill (docs/02-domain-model.md#invariants-property-test-these).
+    private static SummaryEmail BuildSummary(SessionSnapshotDto snapshot)
+    {
+        var nameById = snapshot.Participants.ToDictionary(p => p.ParticipantId, p => p.DisplayName);
+        var lines = snapshot.Totals
+            .Select(t => new SummaryEmailLine(nameById.GetValueOrDefault(t.ParticipantId, "?"), t.TotalMinor))
+            .ToList();
+
+        return new SummaryEmail(
+            snapshot.Currency, lines.Sum(l => l.TotalMinor), snapshot.UnclaimedTotalMinor, lines);
     }
 }
