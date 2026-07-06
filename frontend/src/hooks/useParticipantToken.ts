@@ -50,9 +50,9 @@ export function storeIdentity(
   localStorage.setItem(keyFor(sessionId), JSON.stringify(stored))
 }
 
-/** Drop identities for sessions that must have expired. Called opportunistically
- * on Landing mount (docs/08-frontend-design.md#identity) - there is no other
- * cleanup, so this is what keeps localStorage from accumulating dead tokens. */
+/** Drop identities for sessions that must have expired. Called once at app
+ * bootstrap (docs/08-frontend-design.md#identity) - there is no other cleanup,
+ * so this is what keeps localStorage from accumulating dead tokens. */
 export function pruneStaleIdentities(now: number): void {
   const stale: string[] = []
   for (let i = 0; i < localStorage.length; i++) {
