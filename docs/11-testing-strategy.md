@@ -37,6 +37,23 @@ One parameterized test runs the whole corpus.
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt
   photo (should yield zero items + warnings, not garbage).
 
+**Recording a fixture** (repeatable loop, docs/06-ocr-service.md#preprocessing):
+
+1. Drop the receipt image next to a running sidecar and record its response:
+   `python -m tools.record_fixture <image> <fixture-name>` (from `ocr/`). This
+   writes `Fixtures/receipts/<fixture-name>/ocr.json` and copies the image in as
+   `receipt.jpg`.
+2. Hand-author `<fixture-name>/expected.json` - the ground-truth `ParsedReceipt`,
+   money in integer minor units.
+3. Run `ReceiptParserCorpusTests`. Fix `ReceiptParser` for parser misses; fix the
+   sidecar preprocessing and **re-record** `ocr.json` for raw-text misreads.
+   Repeat until green.
+
+Fixture images are permanent repo history - use only receipts free of personal
+data (no cardholder names, full card numbers, emails, phones): synthetic,
+self-owned or public. Raw misreads that no preprocessing recovers are parked as
+`Warnings`, never silently dropped.
+
 ### `Session` aggregate
 
 State-machine table tests: every mutation x every state -> allowed or the

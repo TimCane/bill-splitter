@@ -15,6 +15,35 @@ backend where it is strongly typed and unit-testable
   backend queue, not here
 - Reachable only on the internal compose network - never exposed publicly
 
+## Preprocessing
+
+Real photos of thermal receipts are small, low-contrast and often rotated.
+Before inference the sidecar runs a pure-Pillow pipeline
+(`recognizer.preprocess_image`, numpy-free so it unit-tests without the
+inference wheels):
+
+1. **Grayscale** - colour carries no signal for printed text.
+2. **Median denoise** (3x3) - removes the speckle of a phone photo.
+3. **Autocontrast** - spreads a flat, greyed-out histogram.
+4. **Upscale** so the shorter side reaches `OCR_UPSCALE_MIN_SIDE` px - never
+   downscales a large, sharp photo.
+
+Skew and rotation are left to PaddleOCR's **angle classifier**, not corrected
+in pixels. Binarization is opt-in: it helps clean scans but erases faint print,
+so it is off by default.
+
+Flags (env, read per request):
+
+| Flag | Default | Effect |
+| --- | --- | --- |
+| `OCR_PREPROCESS` | `true` | run the pipeline above |
+| `OCR_ANGLE_CLS` | `true` | PaddleOCR angle classifier for rotated crops |
+| `OCR_BINARIZE` | `false` | Otsu black-and-white (clean scans only) |
+| `OCR_UPSCALE_MIN_SIDE` | `1000` | target shorter-side length in px |
+
+The `/ocr` response shape is unchanged - preprocessing only affects the pixels
+fed to inference.
+
 ## HTTP contract
 
 ### `POST /ocr`
@@ -96,26 +125,29 @@ the fixture corpus.
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a
    currency symbol. Amount = digits as minor units. Reject rows whose money
    token is immediately followed by more text (e.g. `11.00%`).
-2. **Keyword rows** (case-insensitive, checked before item classification):
-   - `SUBTOTAL|SUB TOTAL` -> ignore (we compute our own)
+2. **Grand total first.** The grand total is the **lowest** `TOTAL|AMOUNT
+   DUE|BALANCE DUE|TO PAY` row on the receipt (not `SUBTOTAL`, not an
+   `N Item(s)` count); a same-height tie takes the larger amount. Everything
+   **at or below** it - VAT breakdowns, payment lines, "divide by N" hints -
+   is trailing noise and is dropped, so a `VAT: 0.67` line printed under the
+   total never lands in `bill.taxMinor`.
+3. **Keyword rows** above the total (case-insensitive):
+   - `SUBTOTAL|SUB TOTAL`, `N Item(s)`, intermediate `TOTAL` rows -> ignore
+     (we compute our own)
    - `TAX|VAT|GST` -> `bill.taxMinor`
    - `TIP|GRATUITY` -> `bill.tipMinor`
    - `SERVICE` -> `bill.serviceMinor`
-   - `TOTAL|AMOUNT DUE|BALANCE DUE|TO PAY` (and not `SUBTOTAL`) ->
-     `bill.totalMinor`; if several match, the **lowest on the receipt**
-     wins (grand totals print last); same-height ties take the larger
-     amount
    - `CASH|CHANGE|CARD|VISA|MASTERCARD|AUTH` -> ignore (payment noise)
-3. **Item rows**: any remaining candidate row above the total row. Name =
-   text before the money token, trimmed of dot leaders and `#` codes.
-   Quantity: leading `(\d{1,2})\s?[xX]?\s` -> `quantity`, stripped from the
-   name; `priceMinor` is always the row's printed amount (already the line
-   total on virtually all receipts).
-4. **Discards** produce `Warnings` (shown on the review screen so the host
+4. **Item rows**: any remaining candidate row above the total row. Name =
+   text before the money token, trimmed of dot leaders, `#` codes and `@ 6.50`
+   unit-price annotations. Quantity: leading `(\d{1,2})\s?[xX]?\s` ->
+   `quantity`, stripped from the name; `priceMinor` is always the row's printed
+   amount (already the line total on virtually all receipts).
+5. **Discards** produce `Warnings` (shown on the review screen so the host
    knows what to double-check): rows with a price but no name, negative
    amounts (discount rows - parked as a warning in MVP, not modeled),
    confidence < 0.5.
-5. **Currency guess**: first currency symbol seen (`£ -> GBP`, `€ -> EUR`,
+6. **Currency guess**: first currency symbol seen (`£ -> GBP`, `€ -> EUR`,
    `$ -> USD`); default `GBP`. Host confirms at review.
 
 Every rule above is deterministic on the sidecar's JSON - fixtures are
