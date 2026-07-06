@@ -29,6 +29,48 @@ export const OcrStatusChangedSchema = z.object({
 })
 export type OcrStatusChanged = z.infer<typeof OcrStatusChangedSchema>
 
+// The stable codes from docs/05-realtime-contract.md#hub-errors. Longer codes
+// first so `session-not-found` wins over any shorter substring.
+const hubErrorCodes = [
+  'conflict-retry-exhausted',
+  'session-not-found',
+  'item-not-found',
+  'rate-limited',
+  'unauthorized',
+  'wrong-state',
+  'validation',
+] as const
+
+export type HubErrorCode = (typeof hubErrorCodes)[number]
+
+/** A gesture the server rejected with a stable code. The server puts the code
+ * in the HubException message, but the wire error arrives wrapped in SignalR
+ * prose ("An unexpected error occurred invoking ... HubException: wrong-state."),
+ * so the code is extracted here once - consumers switch on `code`, never on
+ * message text. */
+export class HubError extends Error {
+  readonly code: HubErrorCode
+
+  constructor(code: HubErrorCode, cause: Error) {
+    super(cause.message)
+    this.name = 'HubError'
+    this.code = code
+  }
+}
+
+function withHubError(invocation: Promise<void>): Promise<void> {
+  return invocation.catch((cause: unknown) => {
+    if (cause instanceof Error) {
+      const code = hubErrorCodes.find((c) => cause.message.includes(c))
+      if (code) {
+        throw new HubError(code, cause)
+      }
+    }
+
+    throw cause
+  })
+}
+
 // --- Client -> server gestures (docs/05-realtime-contract.md#client---server-methods)
 
 /** Upsert my claim with one share. */
@@ -36,7 +78,7 @@ export function claimItem(
   connection: HubConnection,
   itemId: string,
 ): Promise<void> {
-  return connection.invoke(HubMethods.ClaimItem, itemId)
+  return withHubError(connection.invoke(HubMethods.ClaimItem, itemId))
 }
 
 /** Remove my claim; the server no-ops if I hold none. */
@@ -44,7 +86,7 @@ export function unclaimItem(
   connection: HubConnection,
   itemId: string,
 ): Promise<void> {
-  return connection.invoke(HubMethods.UnclaimItem, itemId)
+  return withHubError(connection.invoke(HubMethods.UnclaimItem, itemId))
 }
 
 /** Upsert my claim at the given weight (1-99). */
@@ -53,7 +95,7 @@ export function setShares(
   itemId: string,
   shares: number,
 ): Promise<void> {
-  return connection.invoke(HubMethods.SetShares, itemId, shares)
+  return withHubError(connection.invoke(HubMethods.SetShares, itemId, shares))
 }
 
 // --- Server -> client events (docs/05-realtime-contract.md#server---client-events)

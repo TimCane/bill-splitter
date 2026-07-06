@@ -15,9 +15,9 @@ import {
 import type { Identity } from '@/hooks/useParticipantToken'
 import { applySnapshot, sessionKey } from '@/hooks/useSession'
 import type { SessionHub } from '@/hooks/useSessionHub'
-import { ApiError } from '@/lib/api/client'
 import type { Item, SessionSnapshot } from '@/lib/api/schemas'
 import { formatMinor } from '@/lib/money'
+import { HubError } from '@/lib/realtime/contract'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -58,13 +58,10 @@ export function ClaimScreen({ snapshot, identity, isHost, hub }: Props) {
   // next snapshot corrects the UI.
   function gesture(run: () => Promise<void>) {
     run().catch((error: unknown) => {
-      const code =
-        error instanceof ApiError
-          ? error.type
-          : error instanceof Error
-            ? error.message
-            : ''
-      if (code.includes('wrong-state') || code.includes('session-not-found')) {
+      if (
+        error instanceof HubError &&
+        (error.code === 'wrong-state' || error.code === 'session-not-found')
+      ) {
         void queryClient.invalidateQueries({
           queryKey: sessionKey(snapshot.sessionId),
         })
