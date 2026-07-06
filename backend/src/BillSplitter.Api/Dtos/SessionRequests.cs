@@ -18,3 +18,16 @@ public sealed record JoinResponse(
     SessionSnapshotDto Snapshot);
 
 public sealed record RenameRequest(string DisplayName);
+
+/// <summary>Body for adding or replacing a line item; the id is route/server-owned
+/// (docs/04-api-contract.md#item-crud---host-only-state-review-only).</summary>
+public sealed record ItemRequest(string Name, int Quantity, long PriceMinor);
+
+/// <summary>Body for the extras + printed total edit
+/// (docs/04-api-contract.md#put-apiv1sessionssessionidbill).</summary>
+public sealed record BillRequest(
+    long TaxMinor,
+    long TipMinor,
+    long ServiceMinor,
+    long TotalMinor,
+    string Currency);

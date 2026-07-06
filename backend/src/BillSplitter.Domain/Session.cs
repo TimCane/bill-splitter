@@ -350,6 +350,11 @@ public sealed class Session
             throw new DomainException(ErrorCodes.Validation, "currency must be a 3-letter ISO 4217 code");
         }
 
+        if (!CurrencyCodes.IsKnown(currency))
+        {
+            throw new DomainException(ErrorCodes.Validation, $"'{currency}' is not a known ISO 4217 currency");
+        }
+
         return currency;
     }
 }
