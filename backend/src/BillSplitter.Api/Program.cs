@@ -48,8 +48,12 @@ var trustProxy = builder.Services.AddProxyForwardedHeaders(builder.Configuration
 // memory - the explicit per-image check is the precise gate on top
 // (docs/10-security-privacy.md#upload-hardening). The margin keeps a legitimate
 // image right at the limit from tripping the transport cap first.
-var maxUploadBytes = builder.Configuration.GetValue("Session:MaxUploadBytes", 10_485_760L);
-var maxRequestBody = maxUploadBytes + 1_048_576;
+var sessionOptions = builder.Configuration.GetSection(BillSplitter.Api.Configuration.SessionOptions.SectionName)
+    .Get<BillSplitter.Api.Configuration.SessionOptions>()
+    ?? new BillSplitter.Api.Configuration.SessionOptions();
+// A margin over the per-image cap so multipart boundaries and headers on an
+// otherwise-legal image do not trip the transport limit before the precise check.
+var maxRequestBody = sessionOptions.MaxUploadBytes + 1_048_576;
 builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(
     kestrel => kestrel.Limits.MaxRequestBodySize = maxRequestBody);
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(
@@ -224,8 +228,11 @@ app.MapGet("/healthz", async (HealthProbe probe, CancellationToken ct) =>
 });
 
 // SPA client-side routing: any non-file, non-API GET falls back to index.html.
-// /api and /hubs are matched endpoints, so the fallback never shadows them; with
-// an empty wwwroot (dev/test) it simply 404s, which those environments never hit.
+// An unmatched /api or /hubs path must 404, not fall through to the SPA shell -
+// these more specific fallbacks outrank the file fallback and keep API clients
+// from parsing index.html as a 200.
+app.MapFallback("/api/{**rest}", () => Results.NotFound());
+app.MapFallback("/hubs/{**rest}", () => Results.NotFound());
 app.MapFallbackToFile("index.html");
 
 app.Run();
