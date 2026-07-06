@@ -1,19 +1,33 @@
+using System.Threading.RateLimiting;
+using BillSplitter.Api.Configuration;
 using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
+using SessionOptions = BillSplitter.Api.Configuration.SessionOptions;
 
 namespace BillSplitter.Api.Hubs;
 
 /// <summary>
-/// Realtime endpoint for the session. In M3 it is connect-only: it authenticates
-/// the query-string token, joins the session group and pushes an immediate
-/// snapshot (docs/05-realtime-contract.md#connecting). The claim gesture methods
-/// land in M5; downstream events (SnapshotUpdated / OcrStatusChanged) already flow
-/// through <see cref="SignalRSessionNotifier"/>.
+/// Realtime endpoint for the session. Connect authenticates the query-string
+/// token, joins the session group and pushes an immediate snapshot
+/// (docs/05-realtime-contract.md#connecting). The claim gestures are idempotent
+/// upserts/deletes scoped to the connection's participant, allowed only while
+/// <c>Open</c>; errors surface as <see cref="HubException"/> whose message is the
+/// stable code (docs/05-realtime-contract.md#hub-errors).
 /// </summary>
-public sealed class SessionHub(ISessionStore store, StaleOcrRecovery recovery, SnapshotMapper mapper) : Hub
+public sealed class SessionHub(
+    ISessionStore store,
+    ISessionNotifier notifier,
+    StaleOcrRecovery recovery,
+    SnapshotMapper mapper,
+    IOptions<SessionOptions> sessionOptions) : Hub
 {
+    private const string SessionIdKey = "sessionId";
+    private const string ParticipantIdKey = "participantId";
+    private const string GestureLimiterKey = "gestureLimiter";
+
     public override async Task OnConnectedAsync()
     {
         var http = Context.GetHttpContext();
@@ -35,6 +49,17 @@ public sealed class SessionHub(ISessionStore store, StaleOcrRecovery recovery, S
         // A hub connect is a read: heal a session stuck in Processing (docs/06).
         record = await recovery.RecoverIfStaleAsync(record, Context.ConnectionAborted);
 
+        // The gesture methods trust these two values; they are set only here,
+        // after the token matched a participant.
+        Context.Items[SessionIdKey] = sessionId;
+        Context.Items[ParticipantIdKey] = participant.Id;
+        Context.Items[GestureLimiterKey] = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = sessionOptions.Value.HubGesturesPerSecond,
+            Window = TimeSpan.FromSeconds(1),
+            QueueLimit = 0,
+        });
+
         await Groups.AddToGroupAsync(Context.ConnectionId, SignalRSessionNotifier.GroupName(sessionId));
 
         // Immediate snapshot closes any gap between REST rehydrate and connect.
@@ -42,5 +67,54 @@ public sealed class SessionHub(ISessionStore store, StaleOcrRecovery recovery, S
         await Clients.Caller.SendAsync("SnapshotUpdated", snapshot, Context.ConnectionAborted);
 
         await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        if (Context.Items.TryGetValue(GestureLimiterKey, out var limiter))
+        {
+            ((FixedWindowRateLimiter)limiter!).Dispose();
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
+
+    /// <summary>Upsert my claim with one share - sugar for <c>SetShares(itemId, 1)</c>.</summary>
+    public Task ClaimItem(string itemId) =>
+        MutateAsync((session, participantId) => session.ClaimItem(itemId, participantId));
+
+    /// <summary>Remove my claim; no-op if I hold none.</summary>
+    public Task UnclaimItem(string itemId) =>
+        MutateAsync((session, participantId) => session.UnclaimItem(itemId, participantId));
+
+    /// <summary>Upsert my claim at the given weight (1-99).</summary>
+    public Task SetShares(string itemId, int shares) =>
+        MutateAsync((session, participantId) => session.SetShares(itemId, participantId, shares));
+
+    // One funnel for the three gestures: throttle, mutate under CAS, broadcast.
+    // Domain rules throw DomainException before anything is written; SignalR has
+    // no middleware, so the stable code is re-thrown here as the HubException.
+    private async Task MutateAsync(Action<Session, string> gesture)
+    {
+        var sessionId = (string)Context.Items[SessionIdKey]!;
+        var participantId = (string)Context.Items[ParticipantIdKey]!;
+        var limiter = (FixedWindowRateLimiter)Context.Items[GestureLimiterKey]!;
+
+        using var lease = limiter.AttemptAcquire();
+        if (!lease.IsAcquired)
+        {
+            throw new HubException(ErrorCodes.RateLimited);
+        }
+
+        try
+        {
+            await store.MutateAsync(sessionId, s => gesture(s, participantId), Context.ConnectionAborted);
+        }
+        catch (DomainException ex)
+        {
+            throw new HubException(ex.Code);
+        }
+
+        await notifier.SnapshotUpdatedAsync(sessionId, Context.ConnectionAborted);
     }
 }

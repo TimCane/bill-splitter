@@ -109,7 +109,7 @@ missing required config kills startup, loudly.
 | `MinioOptions` | `Minio__Endpoint`, `__AccessKey`, `__SecretKey`, `__Bucket` | bucket `bill-splitter` |
 | `OcrOptions` | `Ocr__BaseUrl`, `__TimeoutSeconds`, `__MaxConcurrency`, `__QueueCapacity` | 60 / 2 / 16 |
 | `SmtpOptions` | `Smtp__Host`, `__Port`, `__Username`, `__Password`, `__From` | required only if email enabled |
-| `SessionOptions` | `Session__TtlHours`, `__FinalizedTtlMinutes`, `__MaxParticipants`, `__MaxItems`, `__MaxUploadBytes` | 24 / 60 / 20 / 100 / 10485760 |
+| `SessionOptions` | `Session__TtlHours`, `__FinalizedTtlMinutes`, `__MaxParticipants`, `__MaxItems`, `__MaxUploadBytes`, `__HubGesturesPerSecond` | 24 / 60 / 20 / 100 / 10485760 / 10 |
 
 Secrets (Redis/MinIO/SMTP credentials) come from environment only - never
 committed ([13-deployment.md](13-deployment.md#environment)).
