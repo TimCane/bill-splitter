@@ -123,7 +123,19 @@ public sealed class RedisSessionStore : ISessionStore
 
         var code = await MintCodeAsync(sessionId, current.Ttl, ct);
 
-        return await MutateAsync(sessionId, s => s.Open(actingParticipantId, code), ct);
+        try
+        {
+            return await MutateAsync(sessionId, s => s.Open(actingParticipantId, code), ct);
+        }
+        catch
+        {
+            // The code is minted before the transition guards run, so a rejected
+            // Open (wrong state, non-host, CAS conflict) would leave an orphan key
+            // that still resolves to the session. Drop it so only the code the
+            // host was shown ever resolves (docs/03-redis-schema.md#lifecycle-operations).
+            await _db.KeyDeleteAsync(CodeKey(code));
+            throw;
+        }
     }
 
     public async Task<string?> ResolveCodeAsync(string shortCode, CancellationToken ct)
