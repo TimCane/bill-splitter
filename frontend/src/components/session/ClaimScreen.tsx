@@ -36,11 +36,10 @@ export function ClaimScreen({ snapshot, identity, isHost, hub }: Props) {
   const queryClient = useQueryClient()
   const [renameOpen, setRenameOpen] = useState(false)
   const [everyoneOpen, setEveryoneOpen] = useState(false)
+  const waitingForTable = isHost && snapshot.participants.length <= 1
   // The Share sheet greets the host on entering Open while the table is empty;
   // after that it stays reachable from the footer.
-  const [shareOpen, setShareOpen] = useState(
-    isHost && snapshot.participants.length <= 1,
-  )
+  const [shareOpen, setShareOpen] = useState(waitingForTable)
 
   const me = snapshot.participants.find(
     (p) => p.participantId === identity.participantId,
@@ -70,8 +69,6 @@ export function ClaimScreen({ snapshot, identity, isHost, hub }: Props) {
       }
     })
   }
-
-  const waitingForTable = isHost && snapshot.participants.length <= 1
 
   return (
     <main className="mx-auto flex min-h-svh max-w-md flex-col">
@@ -346,8 +343,9 @@ type EveryoneSheetProps = {
   onOpenChange: (open: boolean) => void
 }
 
-// Per-person totals straight from snapshot.totals; the extras column is the
-// display sum of the server-allocated tax/tip/service components.
+// Per-person totals straight from snapshot.totals; every amount is a
+// server-allocated component rendered as-is - the sheet formats, never sums
+// (CLAUDE.md: the frontend never calculates).
 function EveryoneSheet({
   snapshot,
   nameOf,
@@ -370,11 +368,11 @@ function EveryoneSheet({
               <span className="text-muted-foreground text-sm">
                 items {formatMinor(total.itemsMinor, snapshot.currency)}
                 {' / '}
-                extras{' '}
-                {formatMinor(
-                  total.taxMinor + total.tipMinor + total.serviceMinor,
-                  snapshot.currency,
-                )}
+                tax {formatMinor(total.taxMinor, snapshot.currency)}
+                {' / '}
+                tip {formatMinor(total.tipMinor, snapshot.currency)}
+                {' / '}
+                service {formatMinor(total.serviceMinor, snapshot.currency)}
               </span>
               <span className="font-medium">
                 {formatMinor(total.totalMinor, snapshot.currency)}
