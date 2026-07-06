@@ -205,11 +205,10 @@ export function finalizeSplit(
 }
 
 /** The server capability flags. Read once to know whether to offer the summary
- * email field; a failure or a degraded 503 just means no email
- * (docs/04-api-contract.md#get-healthz). */
-export async function getHealth(): Promise<Health> {
-  const response = await fetch(`${API_BASE}/healthz`)
-  return HealthSchema.parse(await response.json())
+ * email field; a failure or a degraded 503 throws (like every other call) and
+ * useCapabilities reads that as no email (docs/04-api-contract.md#get-healthz). */
+export function getHealth(): Promise<Health> {
+  return json('/healthz', { method: 'GET' }, (d) => HealthSchema.parse(d))
 }
 
 export function resolveCode(shortCode: string): Promise<string> {
