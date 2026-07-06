@@ -76,7 +76,8 @@ Returns the snapshot.
 
 Validation per
 [02-domain-model.md](02-domain-model.md#domain-rules-enforced-in-the-aggregate-surfaced-as-400409):
-name 1-80 chars, `quantity >= 1`, `priceMinor >= 0`, max 100 items.
+name 1-80 chars, `quantity >= 1`, `0 <= priceMinor <= 100000000` (minor units),
+max 100 items.
 
 ### `PUT /api/v1/sessions/{sessionId}/bill`
 
@@ -86,7 +87,8 @@ Host, `Review` only.
 { "taxMinor": 0, "tipMinor": 500, "serviceMinor": 0, "totalMinor": 5450, "currency": "GBP" }
 ```
 
-Returns the snapshot. `currency` must be a known ISO 4217 code.
+Returns the snapshot. `currency` must be a known ISO 4217 code; each amount is
+`0 <= x <= 100000000` minor units.
 
 ### `POST /api/v1/sessions/{sessionId}/open`
 
