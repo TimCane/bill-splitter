@@ -192,6 +192,11 @@ app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseExceptionHandler();
 app.UseMiddleware<DomainExceptionMiddleware>();
 
+// The production image bakes the built SPA into wwwroot and serves it here, one
+// origin with /api and /hubs (docs/13-deployment.md#topology). Harmless in dev
+// and test, where Vite serves the SPA and wwwroot is empty.
+app.UseStaticFiles();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseCors();
@@ -213,6 +218,11 @@ app.MapGet("/healthz", async (HealthProbe probe, CancellationToken ct) =>
         new { redis = report.Redis, minio = report.Minio, ocr = report.Ocr, email = report.Email },
         statusCode: report.IsHealthy ? StatusCodes.Status200OK : StatusCodes.Status503ServiceUnavailable);
 });
+
+// SPA client-side routing: any non-file, non-API GET falls back to index.html.
+// /api and /hubs are matched endpoints, so the fallback never shadows them; with
+// an empty wwwroot (dev/test) it simply 404s, which those environments never hit.
+app.MapFallbackToFile("index.html");
 
 app.Run();
 
