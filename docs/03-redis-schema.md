@@ -50,7 +50,7 @@ Example (trimmed):
     }
   ],
   "bill": { "taxMinor": 0, "tipMinor": 500, "serviceMinor": 0, "totalMinor": 5450 },
-  "ocr": { "status": "Done", "failureReason": null }
+  "ocr": { "status": "Done", "failureReason": null, "warnings": [] }
 }
 ```
 

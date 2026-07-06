@@ -1,0 +1,72 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "backend: build",
+      "detail": "dotnet build the solution",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/backend/BillSplitter.sln"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$msCompile",
+      "presentation": { "reveal": "silent", "clear": true }
+    },
+    {
+      "label": "backend: run",
+      "detail": "dotnet watch the API on http://localhost:5205",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["watch", "run", "--non-interactive"],
+      "options": { "cwd": "${workspaceFolder}/backend/src/BillSplitter.Api" },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "dotnet",
+        "pattern": { "regexp": "^\\b$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "(Building|Restore|dotnet watch)",
+          "endsPattern": "(Now listening on|Application started|Hot reload)"
+        }
+      },
+      "presentation": { "group": "dev", "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "frontend: dev",
+      "detail": "Vite dev server on http://localhost:5173",
+      "type": "process",
+      "command": "pnpm",
+      "args": ["dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/frontend",
+        "env": { "VITE_API_BASE_URL": "http://localhost:5205" }
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^\\b$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "(VITE|vite)",
+          "endsPattern": "(Local:|ready in)"
+        }
+      },
+      "presentation": { "group": "dev", "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "dev: all",
+      "detail": "Run the API and the web app together",
+      "dependsOn": ["backend: run", "frontend: dev"],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
+      "label": "dev: seed a demo session",
+      "detail": "Create a session and print a console snippet to view it as host",
+      "type": "process",
+      "command": "bash",
+      "args": ["${workspaceFolder}/.vscode/seed-session.sh"],
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+      "problemMatcher": []
+    }
+  ]
+}

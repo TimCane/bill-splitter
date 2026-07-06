@@ -22,6 +22,13 @@ public interface ISessionStore
     /// retrying on version conflicts. Preserves the key's TTL (KEEPTTL).</summary>
     Task<SessionRecord> MutateAsync(string sessionId, Action<Session> mutation, CancellationToken ct);
 
+    /// <summary>Mint a fresh short code (retrying on the rare collision) whose key
+    /// carries the session's remaining TTL, then CAS-commit the session into
+    /// <c>Open</c> with that code. The code is minted before the commit, so a failed
+    /// CAS leaves only an orphan code key that expires on its own
+    /// (docs/03-redis-schema.md#lifecycle-operations).</summary>
+    Task<SessionRecord> OpenAsync(string sessionId, string actingParticipantId, CancellationToken ct);
+
     /// <summary>Resolve a typed-in short code to its session id, or null.</summary>
     Task<string?> ResolveCodeAsync(string shortCode, CancellationToken ct);
 }

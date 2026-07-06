@@ -166,7 +166,7 @@ fields marked (c).
   "shortCode": "K7MPQ2",            // null until open
   "joinUrl": "https://...",         // (c) null until open
   "hostParticipantId": "aB3x...",
-  "ocr": { "status": "Done", "failureReason": null },
+  "ocr": { "status": "Done", "failureReason": null, "warnings": [] }, // warnings: parser discard lines, host-only
   "participants": [
     { "participantId": "aB3x...", "displayName": "Tim", "isHost": true } // isHost (c) = participantId == hostParticipantId
   ],

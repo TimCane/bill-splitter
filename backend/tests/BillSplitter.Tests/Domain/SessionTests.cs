@@ -177,6 +177,32 @@ public sealed class SessionTests
         act.Should().Throw<DomainException>().Which.Code.Should().Be(ErrorCodes.ItemNotFound);
     }
 
+    [Theory]
+    [InlineData("USD")]
+    [InlineData("EUR")]
+    [InlineData("GBP")]
+    public void SetBill_accepts_a_known_iso_currency(string currency)
+    {
+        var session = SessionBuilder.InState(SessionState.Review);
+
+        session.SetBill(0, 500, 0, 5450, currency);
+
+        session.Currency.Should().Be(currency);
+    }
+
+    [Theory]
+    [InlineData("XYZ")]  // well-formed but not an assigned code
+    [InlineData("gbp")]  // wrong case
+    [InlineData("GB")]   // too short
+    public void SetBill_rejects_a_non_iso_currency(string currency)
+    {
+        var session = SessionBuilder.InState(SessionState.Review);
+
+        var act = () => session.SetBill(0, 0, 0, 0, currency);
+
+        act.Should().Throw<DomainException>().Which.Code.Should().Be(ErrorCodes.Validation);
+    }
+
     // --- Claims ------------------------------------------------------------
 
     [Fact]

@@ -57,7 +57,7 @@ public sealed class SnapshotMapper
             ShortCode: session.ShortCode,
             JoinUrl: session.ShortCode is null ? null : $"{_publicBaseUrl}/s/{session.Id}",
             HostParticipantId: session.HostParticipantId,
-            Ocr: new OcrDto(session.Ocr.Status.ToString(), session.Ocr.FailureReason),
+            Ocr: new OcrDto(session.Ocr.Status.ToString(), session.Ocr.FailureReason, session.Ocr.Warnings),
             Participants: participants,
             Items: items,
             Bill: new BillDto(

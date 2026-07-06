@@ -119,7 +119,8 @@ public sealed class Session
     /// <summary>Apply a parse result and advance to <c>Review</c>. In M2 this is
     /// called with an empty result to fake OCR as instant-empty-Review
     /// (docs/14-build-order.md#m2---session-core).</summary>
-    public void CompleteOcr(IEnumerable<LineItem> items, Bill bill, string currency)
+    public void CompleteOcr(
+        IEnumerable<LineItem> items, Bill bill, string currency, IEnumerable<string>? warnings = null)
     {
         if (State != SessionState.Processing)
         {
@@ -131,6 +132,7 @@ public sealed class Session
         Bill = bill;
         Currency = currency;
         Ocr.Set(OcrStatus.Done, null);
+        Ocr.SetWarnings(warnings ?? []);
         State = SessionState.Review;
     }
 
@@ -251,6 +253,9 @@ public sealed class Session
         EnsureHost(actingParticipantId);
         ShortCode = shortCode;
         State = SessionState.Open;
+        // Warnings and the failure reason are host-only Review aids; joining
+        // participants read the same snapshot, so drop them at the gate.
+        Ocr.ClearHostOnlyDetail();
     }
 
     public void Finalize(string actingParticipantId, DateTimeOffset finalizedAt)
@@ -348,6 +353,11 @@ public sealed class Session
         if (currency is not { Length: 3 } || !currency.All(char.IsAsciiLetterUpper))
         {
             throw new DomainException(ErrorCodes.Validation, "currency must be a 3-letter ISO 4217 code");
+        }
+
+        if (!CurrencyCodes.IsKnown(currency))
+        {
+            throw new DomainException(ErrorCodes.Validation, $"'{currency}' is not a known ISO 4217 currency");
         }
 
         return currency;
