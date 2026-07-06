@@ -164,7 +164,6 @@ export function ReviewScreen({ snapshot, token }: Props) {
       <ItemEditSheet
         sessionId={sessionId}
         token={token}
-        currency={currency}
         item={sheet.kind === 'item' ? sheet.item : null}
         open={sheet.kind === 'item'}
         onOpenChange={(v) =>

@@ -61,22 +61,20 @@ function BillEditForm({
   bill,
   onSaved,
 }: Omit<Props, 'open' | 'onOpenChange'>) {
-  const [tax, setTax] = useState(minorToInput(bill.taxMinor, currency))
-  const [tip, setTip] = useState(minorToInput(bill.tipMinor, currency))
-  const [service, setService] = useState(
-    minorToInput(bill.serviceMinor, currency),
-  )
-  const [total, setTotal] = useState(minorToInput(bill.totalMinor, currency))
+  const [tax, setTax] = useState(minorToInput(bill.taxMinor))
+  const [tip, setTip] = useState(minorToInput(bill.tipMinor))
+  const [service, setService] = useState(minorToInput(bill.serviceMinor))
+  const [total, setTotal] = useState(minorToInput(bill.totalMinor))
   const [code, setCode] = useState(currency)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   function save() {
     const nextCurrency = code.trim().toUpperCase()
-    const taxMinor = inputToMinor(tax, nextCurrency)
-    const tipMinor = inputToMinor(tip, nextCurrency)
-    const serviceMinor = inputToMinor(service, nextCurrency)
-    const totalMinor = inputToMinor(total, nextCurrency)
+    const taxMinor = inputToMinor(tax)
+    const tipMinor = inputToMinor(tip)
+    const serviceMinor = inputToMinor(service)
+    const totalMinor = inputToMinor(total)
 
     if (
       taxMinor === null ||

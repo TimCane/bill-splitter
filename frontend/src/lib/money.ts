@@ -1,11 +1,19 @@
 // The only money formatter. Amounts are integer minor units on the wire; the
 // server owns all math (docs/08-frontend-design.md, docs/09-ux-flows.md#copy-rules).
-// Nothing here computes - it divides by the currency's fraction scale and formats.
+// The backend stores every amount as hundredths of the major unit regardless of
+// currency (ReceiptParser.ToMinor multiplies by 100), so display divides by a
+// fixed 100 and lets Intl render the currency's own symbol and digits.
+const formatters = new Map<string, Intl.NumberFormat>()
+
+function formatterFor(currency: string): Intl.NumberFormat {
+  let formatter = formatters.get(currency)
+  if (formatter === undefined) {
+    formatter = new Intl.NumberFormat(undefined, { style: 'currency', currency })
+    formatters.set(currency, formatter)
+  }
+  return formatter
+}
+
 export function formatMinor(amountMinor: number, currency: string): string {
-  const formatter = new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency,
-  })
-  const fractionDigits = formatter.resolvedOptions().maximumFractionDigits ?? 2
-  return formatter.format(amountMinor / 10 ** fractionDigits)
+  return formatterFor(currency).format(amountMinor / 100)
 }

@@ -18,7 +18,6 @@ import { inputToMinor, minorToInput } from '@/lib/moneyInput'
 type Props = {
   sessionId: string
   token: string
-  currency: string
   // The item being edited, or null to add a new one.
   item: Item | null
   open: boolean
@@ -31,7 +30,6 @@ type Props = {
 export function ItemEditSheet({
   sessionId,
   token,
-  currency,
   item,
   open,
   onOpenChange,
@@ -45,7 +43,6 @@ export function ItemEditSheet({
           key={item?.itemId ?? 'new'}
           sessionId={sessionId}
           token={token}
-          currency={currency}
           item={item}
           onSaved={(snapshot) => {
             onSaved(snapshot)
@@ -60,15 +57,12 @@ export function ItemEditSheet({
 function ItemEditForm({
   sessionId,
   token,
-  currency,
   item,
   onSaved,
 }: Omit<Props, 'open' | 'onOpenChange'>) {
   const [name, setName] = useState(item?.name ?? '')
   const [quantity, setQuantity] = useState(item?.quantity ?? 1)
-  const [price, setPrice] = useState(
-    item ? minorToInput(item.priceMinor, currency) : '',
-  )
+  const [price, setPrice] = useState(item ? minorToInput(item.priceMinor) : '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -84,7 +78,7 @@ function ItemEditForm({
   }
 
   function save() {
-    const priceMinor = inputToMinor(price, currency)
+    const priceMinor = inputToMinor(price)
     if (name.trim() === '' || priceMinor === null) {
       setError('Enter a name and a price.')
       return
