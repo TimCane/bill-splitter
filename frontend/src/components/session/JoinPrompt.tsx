@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import type { Identity } from '@/hooks/useParticipantToken'
 import { applySnapshot } from '@/hooks/useSession'
 import { ApiError, joinSession } from '@/lib/api/client'
+import { displayNameError, parseDisplayName } from '@/lib/displayName'
 
 type Props = {
   sessionId: string
@@ -24,9 +25,9 @@ export function JoinPrompt({ sessionId, onJoined }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   function join() {
-    const trimmed = name.trim()
-    if (trimmed.length < 1 || trimmed.length > 30) {
-      setError('Use 1 to 30 characters.')
+    const trimmed = parseDisplayName(name)
+    if (trimmed === null) {
+      setError(displayNameError)
       return
     }
 
