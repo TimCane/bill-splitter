@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BillSplitter.Api.Auth;
 using BillSplitter.Api.Configuration;
 using BillSplitter.Api.Dtos;
@@ -21,6 +22,7 @@ public sealed class SessionsController(
     SnapshotMapper mapper,
     OcrQueue queue,
     StaleOcrRecovery recovery,
+    ISessionNotifier notifier,
     TimeProvider clock,
     IOptions<SessionOptions> sessionOptions)
     : ControllerBase
@@ -89,5 +91,24 @@ public sealed class SessionsController(
             ?? throw new DomainException(ErrorCodes.ReceiptNotFound, sessionId);
 
         return File(receipt.Content, receipt.ContentType);
+    }
+
+    /// <summary>Open the split: mint the short code, commit the transition, then
+    /// delete the receipt image. Returns the code and the join URL the host shares
+    /// (docs/04-api-contract.md#post-apiv1sessionssessionidopen).</summary>
+    [HttpPost("{sessionId}/open")]
+    [Authorize(Policy = ParticipantAuth.HostPolicy)]
+    public async Task<IActionResult> Open(string sessionId, CancellationToken ct)
+    {
+        var participantId = User.FindFirstValue(ParticipantAuth.ParticipantIdClaim)!;
+
+        var record = await store.OpenAsync(sessionId, participantId, ct);
+
+        // The image only exists to drive Review; once Open, it is gone for good.
+        await storage.DeleteAsync(sessionId, ct);
+        await notifier.SnapshotUpdatedAsync(sessionId, ct);
+
+        var snapshot = mapper.Map(record.Session, record.Ttl);
+        return Ok(new OpenResponse(snapshot.ShortCode!, snapshot.JoinUrl!));
     }
 }

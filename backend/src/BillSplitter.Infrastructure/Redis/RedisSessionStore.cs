@@ -34,11 +34,13 @@ public sealed class RedisSessionStore : ISessionStore
         """;
 
     private readonly IDatabase _db;
+    private readonly IIdGenerator _ids;
     private readonly TimeSpan _sessionTtl;
 
-    public RedisSessionStore(IConnectionMultiplexer redis, TimeSpan sessionTtl)
+    public RedisSessionStore(IConnectionMultiplexer redis, IIdGenerator ids, TimeSpan sessionTtl)
     {
         _db = redis.GetDatabase();
+        _ids = ids;
         _sessionTtl = sessionTtl;
     }
 
@@ -112,10 +114,40 @@ public sealed class RedisSessionStore : ISessionStore
         throw new DomainException(ErrorCodes.ConflictRetryExhausted, sessionId);
     }
 
+    public async Task<SessionRecord> OpenAsync(string sessionId, string actingParticipantId, CancellationToken ct)
+    {
+        // Read once for the remaining TTL the code key must inherit. The mutation
+        // below re-reads under CAS, so this value only needs to be the mint TTL.
+        var current = await GetAsync(sessionId, ct)
+            ?? throw new DomainException(ErrorCodes.SessionNotFound, sessionId);
+
+        var code = await MintCodeAsync(sessionId, current.Ttl, ct);
+
+        return await MutateAsync(sessionId, s => s.Open(actingParticipantId, code), ct);
+    }
+
     public async Task<string?> ResolveCodeAsync(string shortCode, CancellationToken ct)
     {
         var value = await _db.StringGetAsync(CodeKey(shortCode));
         return value.IsNull ? null : value.ToString();
+    }
+
+    // SET code:{code} {sessionId} NX EX {remaining-ttl}: claim a fresh code, retrying
+    // on the lottery-rare collision (docs/03-redis-schema.md#lifecycle-operations).
+    private async Task<string> MintCodeAsync(string sessionId, TimeSpan ttl, CancellationToken ct)
+    {
+        for (var attempt = 0; attempt < MaxAttempts; attempt++)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var code = _ids.NewShortCode();
+            if (await _db.StringSetAsync(CodeKey(code), sessionId, ttl, When.NotExists))
+            {
+                return code;
+            }
+        }
+
+        throw new DomainException(ErrorCodes.ConflictRetryExhausted, sessionId);
     }
 
     // Tiny jittered delay (1-10ms base, doubling per attempt) so lockstep writers
