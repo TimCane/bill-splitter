@@ -1,0 +1,14 @@
+name: bill-splitter
+
+# CI-only overrides for the e2e job (docs/12-ci.md). Layered on top of
+# docker-compose.prod.yml: no reverse proxy in CI, so drop the forwarded-header
+# trust, and loosen the per-IP rate limits since both browsers share the runner's
+# single IP.
+services:
+  app:
+    environment:
+      ForwardedHeaders__Enabled: "false"
+      RateLimit__CreateSessionPerHour: "100000"
+      RateLimit__JoinPerMinute: "100000"
+      RateLimit__ResolveCodePerMinute: "100000"
+      RateLimit__GlobalPerMinute: "1000000"

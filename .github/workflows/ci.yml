@@ -121,8 +121,45 @@ jobs:
     # Expensive full-stack run: only on main or when a PR is labeled 'e2e'.
     if: ${{ github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'e2e') }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      # The prod compose builds app and pulls the prebuilt OCR image from GHCR;
+      # the e2e override loosens rate limits and drops proxy trust.
+      COMPOSE_FILES: "-f docker-compose.prod.yml -f docker-compose.e2e.yml"
+      APP_PUBLIC_BASE_URL: http://localhost:8080
+      MINIO_ROOT_USER: ciminio
+      MINIO_ROOT_PASSWORD: ciminio-secret-key
+      E2E_BASE_URL: http://localhost:8080
     steps:
       - uses: actions/checkout@v4
-      # Puppeteer specs and the full compose stack land in M7
-      # (docs/11-testing-strategy.md#end-to-end-puppeteer).
-      - run: echo "e2e specs are stubbed until M7"
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Start the full stack
+        run: docker compose $COMPOSE_FILES up -d --build
+      - name: Wait for the app to be healthy
+        run: |
+          for _ in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/healthz; then echo; echo ready; exit 0; fi
+            sleep 5
+          done
+          echo "app did not become healthy"; exit 1
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.9.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install e2e deps
+        working-directory: e2e
+        run: pnpm install --no-frozen-lockfile
+      - name: Run Puppeteer specs
+        working-directory: e2e
+        run: pnpm test
+      - name: Dump stack logs on failure
+        if: failure()
+        run: docker compose $COMPOSE_FILES logs --no-color
+      - name: Tear down
+        if: always()
+        run: docker compose $COMPOSE_FILES down -v
