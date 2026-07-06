@@ -1,0 +1,10 @@
+{
+  "durationMs": 2730,
+  "lines": [
+    { "text": "TRATTORIA VERDE", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 560, "height": 44 } },
+    { "text": "BRUSCHETTA............6.00", "confidence": 0.95, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "SPAGHETTI.............11.50", "confidence": 0.95, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "TIRAMISU..............5.50", "confidence": 0.94, "box": { "x": 40, "y": 200, "width": 820, "height": 38 } },
+    { "text": "TOTAL ................23.00", "confidence": 0.96, "box": { "x": 40, "y": 260, "width": 820, "height": 40 } }
+  ]
+}

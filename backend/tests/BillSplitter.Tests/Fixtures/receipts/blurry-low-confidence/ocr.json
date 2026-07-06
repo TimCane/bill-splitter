@@ -1,0 +1,9 @@
+{
+  "durationMs": 4100,
+  "lines": [
+    { "text": "BLURRY CAFE", "confidence": 0.30, "box": { "x": 120, "y": 40, "width": 500, "height": 44 } },
+    { "text": "COFFEE 3.00", "confidence": 0.40, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "MUFFIN 2.50", "confidence": 0.35, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "TOTAL 5.50", "confidence": 0.42, "box": { "x": 40, "y": 220, "width": 820, "height": 40 } }
+  ]
+}

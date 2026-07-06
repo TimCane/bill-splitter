@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "name": "BRUSCHETTA", "quantity": 1, "priceMinor": 600 },
+    { "name": "SPAGHETTI", "quantity": 1, "priceMinor": 1150 },
+    { "name": "TIRAMISU", "quantity": 1, "priceMinor": 550 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 2300 },
+  "currency": "GBP",
+  "warnings": []
+}

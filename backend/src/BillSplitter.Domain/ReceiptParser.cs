@@ -63,7 +63,7 @@ public static partial class ReceiptParser
             }
 
             var name = text[..money.Index].Trim();
-            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name));
+            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text));
         }
 
         long tax = 0, tip = 0, service = 0;
@@ -120,7 +120,7 @@ public static partial class ReceiptParser
             var (quantity, name) = ExtractQuantity(CleanName(row.Name));
             if (name.Length == 0)
             {
-                warnings.Add($"price with no name ignored: {row.Amount}");
+                warnings.Add($"price with no name ignored: {row.Text}");
                 continue;
             }
 
@@ -188,5 +188,5 @@ public static partial class ReceiptParser
         u.Contains("CASH") || u.Contains("CHANGE") || u.Contains("CARD")
         || u.Contains("VISA") || u.Contains("MASTERCARD") || u.Contains("AUTH");
 
-    private sealed record Candidate(int Y, long Amount, string Name);
+    private sealed record Candidate(int Y, long Amount, string Name, string Text);
 }

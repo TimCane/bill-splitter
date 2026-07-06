@@ -1,0 +1,9 @@
+{
+  "durationMs": 1980,
+  "lines": [
+    { "text": "STOP", "confidence": 0.94, "box": { "x": 120, "y": 40, "width": 300, "height": 60 } },
+    { "text": "MAIN STREET", "confidence": 0.91, "box": { "x": 100, "y": 120, "width": 400, "height": 40 } },
+    { "text": "45.00", "confidence": 0.88, "box": { "x": 60, "y": 200, "width": 200, "height": 38 } },
+    { "text": "12.00", "confidence": 0.85, "box": { "x": 60, "y": 260, "width": 200, "height": 38 } }
+  ]
+}

@@ -19,6 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Recorded sidecar responses + expected parses; the ReceiptParser spec. -->
+    <Content Include="Fixtures\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\BillSplitter.Domain\BillSplitter.Domain.csproj" />
   </ItemGroup>
 

@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "name": "FLAT WHITE", "quantity": 2, "priceMinor": 700 },
+    { "name": "CROISSANT", "quantity": 3, "priceMinor": 900 },
+    { "name": "ORANGE JUICE", "quantity": 1, "priceMinor": 350 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 1950 },
+  "currency": "GBP",
+  "warnings": []
+}
