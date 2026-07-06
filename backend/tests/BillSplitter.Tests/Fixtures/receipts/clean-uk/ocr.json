@@ -1,0 +1,11 @@
+{
+  "durationMs": 2810,
+  "lines": [
+    { "text": "THE RED LION", "confidence": 0.97, "box": { "x": 120, "y": 40, "width": 600, "height": 44 } },
+    { "text": "FISH & CHIPS          £12.95", "confidence": 0.96, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "PIE & MASH            £10.50", "confidence": 0.95, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "LEMONADE               £3.20", "confidence": 0.94, "box": { "x": 40, "y": 200, "width": 820, "height": 38 } },
+    { "text": "SUBTOTAL              £26.65", "confidence": 0.96, "box": { "x": 40, "y": 260, "width": 820, "height": 38 } },
+    { "text": "TOTAL                 £26.65", "confidence": 0.97, "box": { "x": 40, "y": 300, "width": 820, "height": 40 } }
+  ]
+}

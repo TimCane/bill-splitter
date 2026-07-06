@@ -4,8 +4,10 @@ using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Health;
 using BillSplitter.Api.Hubs;
 using BillSplitter.Api.Middleware;
+using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
 using BillSplitter.Infrastructure.Identity;
+using BillSplitter.Infrastructure.Ocr;
 using BillSplitter.Infrastructure.Redis;
 using BillSplitter.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication;
@@ -68,11 +70,28 @@ builder.Services.AddSingleton<IReceiptStorage>(sp => new MinioReceiptStorage(
     sp.GetRequiredService<IMinioClient>(),
     sp.GetRequiredService<IOptions<MinioOptions>>().Value.Bucket));
 
+// Bounded OCR work queue (producer: create endpoint; consumer: OcrWorker) and
+// the typed sidecar client with its own base URL and timeout.
+builder.Services.AddSingleton(sp =>
+    new OcrQueue(sp.GetRequiredService<IOptions<OcrOptions>>().Value.QueueCapacity));
+builder.Services.AddHttpClient<IOcrClient, HttpOcrClient>((sp, client) =>
+{
+    var ocr = sp.GetRequiredService<IOptions<OcrOptions>>().Value;
+    client.BaseAddress = new Uri(ocr.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(ocr.TimeoutSeconds);
+});
+
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<SnapshotMapper>();
 builder.Services.AddScoped<ISessionNotifier, SignalRSessionNotifier>();
+builder.Services.AddScoped<StaleOcrRecovery>();
 
-// 4. Hosted services: OcrWorker lands in M3.
+// 4. Hosted services: the OCR worker consuming the queue (max 2 concurrent).
+builder.Services.AddHostedService(sp => new OcrWorker(
+    sp.GetRequiredService<OcrQueue>(),
+    sp.GetRequiredService<IServiceScopeFactory>(),
+    sp.GetRequiredService<IOptions<OcrOptions>>().Value.MaxConcurrency,
+    sp.GetRequiredService<ILogger<OcrWorker>>()));
 
 // 5. Authentication (participant token handler) + Participant / HostOnly policies.
 builder.Services.AddAuthentication(ParticipantAuth.Scheme)

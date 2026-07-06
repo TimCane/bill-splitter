@@ -1,5 +1,7 @@
-# Sidecar runtime. PaddleOCR/PaddlePaddle wheels are added here in M3 when real
-# inference is wired (docs/06-ocr-service.md); M1 runs the stub only.
+# Sidecar runtime deps that CI installs to run the stub tests. The heavy
+# PaddleOCR/PaddlePaddle inference wheels live in requirements-ocr.txt and are
+# baked into the image only - the real sidecar is too heavy for CI
+# (docs/06-ocr-service.md, docs/11-testing-strategy.md).
 fastapi==0.121.2
 uvicorn[standard]==0.40.0
 pillow==11.3.0

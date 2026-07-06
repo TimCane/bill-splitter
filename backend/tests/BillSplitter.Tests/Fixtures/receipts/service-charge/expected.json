@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "STEAK FRITES", "quantity": 1, "priceMinor": 1800 },
+    { "name": "HOUSE RED", "quantity": 1, "priceMinor": 650 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 306, "totalMinor": 2756 },
+  "currency": "GBP",
+  "warnings": []
+}

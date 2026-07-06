@@ -1,0 +1,10 @@
+{
+  "items": [],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 0 },
+  "currency": "GBP",
+  "warnings": [
+    "low-confidence line ignored: COFFEE 3.00",
+    "low-confidence line ignored: MUFFIN 2.50",
+    "low-confidence line ignored: TOTAL 5.50"
+  ]
+}

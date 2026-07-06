@@ -1,0 +1,10 @@
+{
+  "durationMs": 2640,
+  "lines": [
+    { "text": "CORNER CAFE", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 500, "height": 44 } },
+    { "text": "2x FLAT WHITE          7.00", "confidence": 0.95, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "3 CROISSANT            9.00", "confidence": 0.95, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "1 x ORANGE JUICE       3.50", "confidence": 0.94, "box": { "x": 40, "y": 200, "width": 820, "height": 38 } },
+    { "text": "TOTAL                 19.50", "confidence": 0.96, "box": { "x": 40, "y": 260, "width": 820, "height": 40 } }
+  ]
+}

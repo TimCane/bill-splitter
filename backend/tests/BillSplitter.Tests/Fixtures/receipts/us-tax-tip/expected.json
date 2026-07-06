@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "name": "BURGER", "quantity": 1, "priceMinor": 900 },
+    { "name": "FRIES", "quantity": 1, "priceMinor": 450 },
+    { "name": "SODA", "quantity": 1, "priceMinor": 250 }
+  ],
+  "bill": { "taxMinor": 132, "tipMinor": 300, "serviceMinor": 0, "totalMinor": 2032 },
+  "currency": "USD",
+  "warnings": []
+}

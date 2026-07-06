@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Testcontainers.Redis" />
     <PackageReference Include="Testcontainers.Minio" />
+    <PackageReference Include="WireMock.Net" />
   </ItemGroup>
 
   <ItemGroup>

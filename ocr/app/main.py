@@ -3,6 +3,8 @@ no MinIO (docs/06-ocr-service.md)."""
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from io import BytesIO
 
 from fastapi import FastAPI, HTTPException, Request
@@ -10,9 +12,20 @@ from PIL import Image, UnidentifiedImageError
 
 from .config import get_settings
 from .models import OcrResponse
-from .recognizer import load_stub_response
+from .recognizer import load_stub_response, run_inference, warmup
 
-app = FastAPI(title="bill-splitter ocr", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    # Load the models before uvicorn accepts traffic so /healthz answers only
+    # once inference is ready (readiness, not just liveness -
+    # docs/06-ocr-service.md). Stub mode has no models to load.
+    if not get_settings().stub:
+        warmup()
+    yield
+
+
+app = FastAPI(title="bill-splitter ocr", version="1.0.0", lifespan=lifespan)
 
 
 @app.get("/healthz")
@@ -33,8 +46,10 @@ async def ocr(request: Request) -> OcrResponse:
     if settings.stub:
         return load_stub_response()
 
-    # Real inference lands in M3; a build without stub mode has nothing to run.
-    raise HTTPException(status_code=501, detail="real OCR inference is not enabled")
+    try:
+        return run_inference(body)
+    except Exception as error:  # noqa: BLE001 - any inference failure is a 500.
+        raise HTTPException(status_code=500, detail="OCR inference failed") from error
 
 
 async def _read_bounded(request: Request, max_bytes: int) -> bytes | None:

@@ -137,5 +137,8 @@ Added to `docker-compose.yml` **together with** the `ocr/` scaffold
 ```
 
 Image size warning for the handoff developer: PaddlePaddle CPU wheels are
-~600MB; expect a 1.5-2GB image and a multi-minute first build. Pin wheel
-versions in `requirements.txt`.
+~600MB; expect a 1.5-2GB image and a multi-minute first build. The inference
+wheels are pinned in `requirements-ocr.txt` and installed into the image only;
+`requirements.txt` holds just the light web-serving deps so CI can run the stub
+tests without pulling PaddlePaddle
+([11-testing-strategy.md](11-testing-strategy.md)).

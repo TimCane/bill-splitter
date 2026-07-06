@@ -1,0 +1,9 @@
+{
+  "items": [],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 0 },
+  "currency": "GBP",
+  "warnings": [
+    "price with no name ignored: 45.00",
+    "price with no name ignored: 12.00"
+  ]
+}

@@ -16,6 +16,7 @@ public sealed class OcrOptions
     [Range(1, 16)]
     public int MaxConcurrency { get; set; } = 2;
 
-    [Range(0, 1024)]
+    // Lower bound is 1: Channel.CreateBounded rejects a capacity of 0.
+    [Range(1, 1024)]
     public int QueueCapacity { get; set; } = 16;
 }

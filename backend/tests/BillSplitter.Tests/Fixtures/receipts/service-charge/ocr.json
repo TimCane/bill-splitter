@@ -1,0 +1,11 @@
+{
+  "durationMs": 2905,
+  "lines": [
+    { "text": "LA BRASSERIE", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 520, "height": 44 } },
+    { "text": "STEAK FRITES         18.00", "confidence": 0.96, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "HOUSE RED            £6.50", "confidence": 0.95, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "SUBTOTAL             24.50", "confidence": 0.95, "box": { "x": 40, "y": 220, "width": 820, "height": 38 } },
+    { "text": "SERVICE 12.5%         3.06", "confidence": 0.93, "box": { "x": 40, "y": 260, "width": 820, "height": 38 } },
+    { "text": "TOTAL                27.56", "confidence": 0.96, "box": { "x": 40, "y": 300, "width": 820, "height": 40 } }
+  ]
+}
