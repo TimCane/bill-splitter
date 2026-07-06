@@ -77,7 +77,11 @@ public sealed class OcrWorker(
                 job.SessionId, s => s.CompleteOcr(items, parsed.Bill, parsed.Currency), ct);
             await BroadcastAsync(notifier, done, ct);
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        // A sidecar timeout throws TaskCanceledException (an OperationCanceledException)
+        // whose token is not ct, so filter on ct instead of the type: only a real
+        // shutdown (ct cancelled) is left to unwind; every other failure - timeout
+        // included - lands the session in Review/Failed.
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
             await FailAsync(store, notifier, job.SessionId, ReasonFor(ex), ct);
         }
