@@ -35,3 +35,7 @@ public sealed record BillRequest(
 /// <summary>Returned by <c>POST .../open</c>: the minted code and the join URL the
 /// host shares (docs/04-api-contract.md#post-apiv1sessionssessionidopen).</summary>
 public sealed record OpenResponse(string ShortCode, string JoinUrl);
+
+/// <summary>Returned by <c>GET /codes/{shortCode}</c>
+/// (docs/04-api-contract.md#get-apiv1codesshortcode).</summary>
+public sealed record ResolveCodeResponse(string SessionId);

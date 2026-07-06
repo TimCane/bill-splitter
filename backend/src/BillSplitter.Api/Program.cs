@@ -10,6 +10,7 @@ using BillSplitter.Infrastructure.Identity;
 using BillSplitter.Infrastructure.Ocr;
 using BillSplitter.Infrastructure.Redis;
 using BillSplitter.Infrastructure.Storage;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
@@ -29,8 +30,13 @@ builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddRateLimiter(options =>
 {
-    // Per-IP policies land in M7 (docs/10-security-privacy.md).
+    // The full per-IP policy set lands in M7 (docs/10-security-privacy.md); the
+    // code-resolve brute-force guard is needed now for the /join flow.
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy(RateLimitPolicies.CodeResolve, context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1) }));
 });
 
 // 3. Singletons. Session store, receipt storage, OCR queue, id generator and
