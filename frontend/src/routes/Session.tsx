@@ -2,9 +2,11 @@ import { Link, useParams } from 'react-router'
 
 import { Button } from '@/components/ui/button'
 import { OpenHostScreen } from '@/components/session/OpenHostScreen'
+import { ProcessingScreen } from '@/components/session/ProcessingScreen'
 import { ReviewScreen } from '@/components/session/ReviewScreen'
 import { useParticipantToken } from '@/hooks/useParticipantToken'
 import { useSession } from '@/hooks/useSession'
+import { useSessionHub } from '@/hooks/useSessionHub'
 import { ApiError } from '@/lib/api/client'
 
 // One container for /s/:sessionId. Deep links, refreshes and QR scans all land here
@@ -15,6 +17,9 @@ export function Session() {
   const sessionId = params.sessionId ?? ''
   const { identity } = useParticipantToken(sessionId)
   const query = useSession(sessionId)
+  // A participant with a token gets live updates; the Processing screen advances to
+  // Review off the hub without polling. Visitors render from the REST snapshot only.
+  useSessionHub(sessionId, identity?.participantToken ?? null)
 
   if (query.isPending) {
     return <Centered title="Loading..." />
@@ -37,11 +42,7 @@ export function Session() {
         <HoldingCard />
       )
     case 'Processing':
-      return isHost ? (
-        <Centered title="Reading your receipt..." />
-      ) : (
-        <HoldingCard />
-      )
+      return isHost ? <ProcessingScreen /> : <HoldingCard />
     case 'Open':
       return isHost ? (
         <OpenHostScreen snapshot={snapshot} />

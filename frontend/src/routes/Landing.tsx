@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { Receipt } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,15 @@ export function Landing() {
         </p>
       </div>
       <Button size="lg">Scan a receipt</Button>
+      <p className="text-muted-foreground text-sm">
+        Joining someone&apos;s split?{' '}
+        <Link
+          to="/join"
+          className="text-foreground underline underline-offset-4"
+        >
+          Enter code
+        </Link>
+      </p>
     </main>
   )
 }
