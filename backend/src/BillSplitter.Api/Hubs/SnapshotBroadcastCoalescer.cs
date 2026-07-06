@@ -113,7 +113,7 @@ public sealed class SnapshotBroadcastCoalescer(
 
         var snapshot = mapper.Map(record.Session, record.Ttl);
         await hub.Clients.Group(SignalRSessionNotifier.GroupName(sessionId))
-            .SendAsync("SnapshotUpdated", snapshot);
+            .SendAsync(SignalRSessionNotifier.SnapshotUpdatedEvent, snapshot);
     }
 
     private sealed class PendingFlush

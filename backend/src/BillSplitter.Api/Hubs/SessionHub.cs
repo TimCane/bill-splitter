@@ -58,7 +58,8 @@ public sealed class SessionHub(
 
         // Immediate snapshot closes any gap between REST rehydrate and connect.
         var snapshot = mapper.Map(record.Session, record.Ttl);
-        await Clients.Caller.SendAsync("SnapshotUpdated", snapshot, Context.ConnectionAborted);
+        await Clients.Caller.SendAsync(
+            SignalRSessionNotifier.SnapshotUpdatedEvent, snapshot, Context.ConnectionAborted);
 
         await base.OnConnectedAsync();
     }

@@ -13,6 +13,8 @@ public sealed class SignalRSessionNotifier(
     SnapshotBroadcastCoalescer coalescer)
     : ISessionNotifier
 {
+    public const string SnapshotUpdatedEvent = "SnapshotUpdated";
+
     public static string GroupName(string sessionId) => $"session:{sessionId}";
 
     public Task SnapshotUpdatedAsync(string sessionId, CancellationToken ct)
