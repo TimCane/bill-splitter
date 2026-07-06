@@ -88,6 +88,16 @@ export const SessionSnapshotSchema = z.object({
 })
 export type SessionSnapshot = z.infer<typeof SessionSnapshotSchema>
 
+// POST /api/v1/sessions response (docs/04-api-contract.md#post-apiv1sessions).
+// The creator is always the Host; the token is the caller's credential thereafter.
+export const CreateSessionResponseSchema = z.object({
+  sessionId: z.string(),
+  participantId: z.string(),
+  participantToken: z.string(),
+  displayName: z.string(),
+})
+export type CreateSessionResponse = z.infer<typeof CreateSessionResponseSchema>
+
 export const JoinResponseSchema = z.object({
   participantId: z.string(),
   participantToken: z.string(),

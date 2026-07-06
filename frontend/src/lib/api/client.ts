@@ -1,9 +1,11 @@
 import {
+  CreateSessionResponseSchema,
   HealthSchema,
   JoinResponseSchema,
   OpenResponseSchema,
   ResolveCodeResponseSchema,
   SessionSnapshotSchema,
+  type CreateSessionResponse,
   type Health,
   type JoinResponse,
   type OpenResponse,
@@ -82,6 +84,50 @@ async function json<T>(
 
 const jsonHeaders = { 'Content-Type': 'application/json' }
 const sessionBase = (sessionId: string) => `/api/v1/sessions/${sessionId}`
+
+/** Create a session from a preprocessed receipt image. Goes over XHR rather than
+ * fetch because only XHR reports upload progress (docs/08-frontend-design.md#uploads);
+ * `onProgress` gets a 0-1 fraction, or is left alone when the size is unknown. */
+export function createSession(
+  image: Blob,
+  onProgress?: (fraction: number) => void,
+): Promise<CreateSessionResponse> {
+  const form = new FormData()
+  form.append('image', image, 'receipt.jpg')
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `${API_BASE}/api/v1/sessions`)
+    xhr.responseType = 'json'
+
+    if (onProgress) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          onProgress(e.loaded / e.total)
+        }
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(CreateSessionResponseSchema.parse(xhr.response))
+        } catch (err) {
+          reject(
+            err instanceof Error ? err : new ApiError('unknown', xhr.status),
+          )
+        }
+        return
+      }
+      const problem = (xhr.response ?? {}) as { type?: string; detail?: string }
+      reject(
+        new ApiError(problem.type ?? 'unknown', xhr.status, problem.detail),
+      )
+    }
+    xhr.onerror = () => reject(new ApiError('network', 0))
+    xhr.send(form)
+  })
+}
 
 export function getSession(sessionId: string): Promise<SessionSnapshot> {
   return json(sessionBase(sessionId), { method: 'GET' }, (d) =>
