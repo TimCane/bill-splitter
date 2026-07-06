@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router'
 
 import { Button } from '@/components/ui/button'
+import { OpenHostScreen } from '@/components/session/OpenHostScreen'
 import { ReviewScreen } from '@/components/session/ReviewScreen'
 import { useParticipantToken } from '@/hooks/useParticipantToken'
 import { useSession } from '@/hooks/useSession'
@@ -42,7 +43,11 @@ export function Session() {
         <HoldingCard />
       )
     case 'Open':
-      return <Centered title="The split is open." />
+      return isHost ? (
+        <OpenHostScreen snapshot={snapshot} />
+      ) : (
+        <Centered title="The split is open." />
+      )
     case 'Finalized':
       return <Centered title="Split locked." />
   }
