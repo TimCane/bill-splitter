@@ -42,6 +42,17 @@ public static class ForwardedHeadersConfiguration
             return false;
         }
 
+        // Fail fast: enabled with nothing trusted clears the loopback defaults and
+        // trusts no peer, so X-Forwarded-For is never applied and every client
+        // collapses onto the proxy's IP - one shared rate-limit bucket for the
+        // whole internet. A misconfiguration must not read as "working".
+        if (options.KnownProxies.Length == 0 && options.KnownNetworks.Length == 0)
+        {
+            throw new InvalidOperationException(
+                $"{ForwardedProxyOptions.SectionName}:Enabled is true but no KnownProxies or "
+                + "KnownNetworks are configured; name the reverse proxy so its X-Forwarded-For is trusted.");
+        }
+
         services.Configure<ForwardedHeadersOptions>(forwarded =>
         {
             forwarded.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
