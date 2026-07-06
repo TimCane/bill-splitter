@@ -11,7 +11,7 @@ namespace BillSplitter.Api.Hubs;
 /// snapshot, ~100ms after the first request in the window
 /// (docs/05-realtime-contract.md#ordering-and-idempotency). The snapshot is
 /// re-read at fire time, so versions stay strictly increasing. Only the group
-/// fan-out is coalesced - mutation responses carry their own snapshot inline.
+/// fan-out is coalesced - REST mutation responses carry their own snapshot inline.
 /// </summary>
 public sealed class SnapshotBroadcastCoalescer(
     IServiceScopeFactory scopes,
@@ -19,6 +19,11 @@ public sealed class SnapshotBroadcastCoalescer(
     ILogger<SnapshotBroadcastCoalescer> logger)
 {
     public static readonly TimeSpan Window = TimeSpan.FromMilliseconds(100);
+
+    // A failed send is the last word on a burst - without it every listener
+    // renders stale claims until the next mutation. Retry a few windows before
+    // conceding to reconnect-snapshot healing.
+    private const int MaxConsecutiveFailures = 3;
 
     private readonly ConcurrentDictionary<string, PendingFlush> _pending = new();
 
@@ -54,6 +59,7 @@ public sealed class SnapshotBroadcastCoalescer(
 
     private async Task FlushLoopAsync(string sessionId, PendingFlush flush)
     {
+        var failures = 0;
         while (true)
         {
             await Task.Delay(Window);
@@ -66,18 +72,21 @@ public sealed class SnapshotBroadcastCoalescer(
             try
             {
                 await BroadcastAsync(sessionId);
+                failures = 0;
             }
             catch (Exception ex)
             {
-                // Listeners heal on the next mutation or reconnect snapshot.
-                logger.LogWarning(ex, "coalesced snapshot broadcast failed for a session");
+                failures++;
+                logger.LogWarning(
+                    ex, "coalesced snapshot broadcast failed, attempt {Attempt}", failures);
             }
 
             lock (flush)
             {
-                if (flush.Dirty)
+                if (flush.Dirty || (failures > 0 && failures < MaxConsecutiveFailures))
                 {
-                    // Mutations landed while broadcasting: run another window.
+                    // Mutations landed while broadcasting, or the send failed
+                    // with retries left: run another window.
                     continue;
                 }
 
