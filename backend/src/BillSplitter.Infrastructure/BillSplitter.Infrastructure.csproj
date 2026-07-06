@@ -3,9 +3,14 @@
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" />
     <PackageReference Include="Minio" />
+    <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Email\SummaryTemplate.html" />
   </ItemGroup>
 
   <ItemGroup>

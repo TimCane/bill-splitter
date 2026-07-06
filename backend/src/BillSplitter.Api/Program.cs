@@ -6,6 +6,7 @@ using BillSplitter.Api.Hubs;
 using BillSplitter.Api.Middleware;
 using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
+using BillSplitter.Infrastructure.Email;
 using BillSplitter.Infrastructure.Identity;
 using BillSplitter.Infrastructure.Ocr;
 using BillSplitter.Infrastructure.Redis;
@@ -91,6 +92,25 @@ builder.Services.AddHttpClient<IOcrClient, HttpOcrClient>((sp, client) =>
     var ocr = sp.GetRequiredService<IOptions<OcrOptions>>().Value;
     client.BaseAddress = new Uri(ocr.BaseUrl);
     client.Timeout = TimeSpan.FromSeconds(ocr.TimeoutSeconds);
+});
+
+// Email is optional: a configured relay gets the MailKit sender, otherwise the
+// null sender backstops the (hidden) address field (docs/04-api-contract.md#get-healthz).
+builder.Services.AddSingleton<IEmailSender>(sp =>
+{
+    var smtp = sp.GetRequiredService<IOptions<SmtpOptions>>().Value;
+    if (!smtp.IsEnabled)
+    {
+        return new NullEmailSender();
+    }
+
+    return new MailKitEmailSender(
+        smtp.Host!,
+        smtp.Port,
+        smtp.Username,
+        smtp.Password,
+        smtp.From ?? smtp.Username ?? smtp.Host!,
+        sp.GetRequiredService<ILogger<MailKitEmailSender>>());
 });
 
 builder.Services.AddSingleton(TimeProvider.System);
