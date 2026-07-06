@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { Receipt } from 'lucide-react'
 
@@ -10,54 +10,67 @@ import { storeIdentity } from '@/hooks/useParticipantToken'
 // Landing / Capture (docs/09-ux-flows.md#1-landing--capture). Pick a photo, preview
 // it, then preprocess + upload with a progress bar; on 202 the host token lands in
 // localStorage and we navigate to the session, which shows the Processing screen.
-type Phase =
-  | { kind: 'idle' }
-  | { kind: 'preview'; file: File; url: string }
-  | { kind: 'uploading'; url: string; progress: number }
-
 const RATE_LIMITED =
   'Too many sessions from this network - try again in a few minutes.'
 const UPLOAD_FAILED =
   "Couldn't start the split. Check your connection and try again."
+const IMAGE_FAILED = "We couldn't read that photo - try another."
 
 export function Landing() {
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [phase, setPhase] = useState<Phase>({ kind: 'idle' })
+  const [file, setFile] = useState<File | null>(null)
+  const [progress, setProgress] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  function onPick(file: File | undefined) {
-    if (!file) {
+  // The preview URL is owned by the chosen file: minted on change, revoked when
+  // the file changes or the component unmounts, so no path can leak it.
+  const previewUrl = useMemo(
+    () => (file ? URL.createObjectURL(file) : null),
+    [file],
+  )
+  useEffect(() => {
+    if (!previewUrl) {
+      return
+    }
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [previewUrl])
+
+  const uploading = progress !== null
+
+  function onPick(picked: File | undefined) {
+    if (!picked) {
       return
     }
     setError(null)
-    setPhase({ kind: 'preview', file, url: URL.createObjectURL(file) })
+    setFile(picked)
   }
 
   function retake() {
-    if (phase.kind !== 'idle') {
-      URL.revokeObjectURL(phase.url)
-    }
     setError(null)
-    setPhase({ kind: 'idle' })
+    setFile(null)
     inputRef.current?.click()
   }
 
   async function upload() {
-    if (phase.kind !== 'preview') {
+    if (!file || uploading) {
       return
     }
-    const { file, url } = phase
     setError(null)
-    setPhase({ kind: 'uploading', url, progress: 0 })
+
+    let image: Blob
     try {
-      const image = await preprocess(file)
-      const created = await createSession(image, (fraction) =>
-        setPhase((prev) =>
-          prev.kind === 'uploading' ? { ...prev, progress: fraction } : prev,
-        ),
-      )
-      URL.revokeObjectURL(url)
+      image = await preprocess(file)
+    } catch {
+      // A decode/re-encode failure is local (unsupported codec, corrupt file),
+      // not a network problem - don't send the user off to check their signal.
+      setError(IMAGE_FAILED)
+      return
+    }
+
+    setProgress(0)
+    try {
+      const created = await createSession(image, setProgress)
       storeIdentity(
         created.sessionId,
         {
@@ -73,10 +86,12 @@ export function Landing() {
           ? RATE_LIMITED
           : UPLOAD_FAILED,
       )
-      setPhase({ kind: 'preview', file, url })
+      setProgress(null)
     }
   }
 
+  // Reset the value after every pick so choosing the same file again (e.g. after
+  // Retake) still fires onChange.
   const input = (
     <input
       ref={inputRef}
@@ -84,17 +99,20 @@ export function Landing() {
       accept="image/*"
       capture="environment"
       className="hidden"
-      onChange={(e) => onPick(e.target.files?.[0])}
+      onChange={(e) => {
+        onPick(e.target.files?.[0])
+        e.target.value = ''
+      }}
     />
   )
 
-  if (phase.kind !== 'idle') {
-    const uploading = phase.kind === 'uploading'
+  if (file) {
+    const pct = Math.round((progress ?? 0) * 100)
     return (
       <main className="mx-auto flex min-h-svh max-w-md flex-col justify-center gap-6 p-6">
         {input}
         <img
-          src={phase.url}
+          src={previewUrl ?? undefined}
           alt="Receipt preview"
           className="max-h-[60svh] w-full rounded-lg object-contain"
         />
@@ -103,13 +121,13 @@ export function Landing() {
             className="bg-muted h-2 w-full overflow-hidden rounded-full"
             role="progressbar"
             aria-label="Upload progress"
-            aria-valuenow={Math.round(phase.progress * 100)}
+            aria-valuenow={pct}
             aria-valuemin={0}
             aria-valuemax={100}
           >
             <div
               className="bg-primary h-full transition-[width]"
-              style={{ width: `${Math.round(phase.progress * 100)}%` }}
+              style={{ width: `${pct}%` }}
             />
           </div>
         ) : null}

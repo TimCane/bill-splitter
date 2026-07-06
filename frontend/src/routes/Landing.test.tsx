@@ -130,4 +130,25 @@ describe('Landing', () => {
     ).toBeInTheDocument()
     expect(navigate).not.toHaveBeenCalled()
   })
+
+  it('reports an unreadable photo without attempting an upload', async () => {
+    const user = userEvent.setup()
+    preprocessMock.mockRejectedValue(new Error('decode failed'))
+    const { container } = renderLanding()
+
+    const input = container.querySelector(
+      'input[type=file]',
+    ) as HTMLInputElement
+    await user.upload(
+      input,
+      new File(['bytes'], 'receipt.heic', { type: 'image/heic' }),
+    )
+    await user.click(screen.getByRole('button', { name: /use photo/i }))
+
+    expect(
+      await screen.findByText(/couldn't read that photo/i),
+    ).toBeInTheDocument()
+    expect(createSessionMock).not.toHaveBeenCalled()
+    expect(navigate).not.toHaveBeenCalled()
+  })
 })

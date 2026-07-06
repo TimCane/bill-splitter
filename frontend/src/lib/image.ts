@@ -7,7 +7,11 @@ const JPEG_QUALITY = 0.85
 
 /** Decode, downscale to <= 2000px on the longest edge, re-encode JPEG 0.85. */
 export async function preprocess(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file)
+  // `from-image` bakes the EXIF orientation into the pixels; re-encoding then
+  // strips the tag, so the receipt can't reach OCR rotated.
+  const bitmap = await createImageBitmap(file, {
+    imageOrientation: 'from-image',
+  })
   try {
     const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height))
     const width = Math.round(bitmap.width * scale)

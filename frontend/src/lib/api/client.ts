@@ -56,17 +56,16 @@ async function request(
   return response
 }
 
+/** Map a parsed problem+json body to an ApiError; `type` falls back to 'unknown'
+ * when the body is missing or not the expected shape. */
+function problemToApiError(body: unknown, status: number): ApiError {
+  const problem = (body ?? {}) as { type?: string; detail?: string }
+  return new ApiError(problem.type ?? 'unknown', status, problem.detail)
+}
+
 async function toApiError(response: Response): Promise<ApiError> {
   try {
-    const problem = (await response.json()) as {
-      type?: string
-      detail?: string
-    }
-    return new ApiError(
-      problem.type ?? 'unknown',
-      response.status,
-      problem.detail,
-    )
+    return problemToApiError(await response.json(), response.status)
   } catch {
     return new ApiError('unknown', response.status)
   }
@@ -112,19 +111,18 @@ export function createSession(
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           resolve(CreateSessionResponseSchema.parse(xhr.response))
-        } catch (err) {
-          reject(
-            err instanceof Error ? err : new ApiError('unknown', xhr.status),
-          )
+        } catch {
+          // A 2xx whose body isn't the expected shape - status 0 since no HTTP
+          // error status applies; the caller only distinguishes 429 anyway.
+          reject(new ApiError('invalid-response', 0))
         }
         return
       }
-      const problem = (xhr.response ?? {}) as { type?: string; detail?: string }
-      reject(
-        new ApiError(problem.type ?? 'unknown', xhr.status, problem.detail),
-      )
+      reject(problemToApiError(xhr.response, xhr.status))
     }
     xhr.onerror = () => reject(new ApiError('network', 0))
+    xhr.ontimeout = () => reject(new ApiError('timeout', 0))
+    xhr.timeout = 120000
     xhr.send(form)
   })
 }
