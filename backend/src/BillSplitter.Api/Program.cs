@@ -60,7 +60,11 @@ builder.Services.AddSingleton<ISessionStore>(sp =>
     var mux = sp.GetRequiredService<IConnectionMultiplexer>();
     var ids = sp.GetRequiredService<IIdGenerator>();
     var session = sp.GetRequiredService<IOptions<BillSplitter.Api.Configuration.SessionOptions>>().Value;
-    return new RedisSessionStore(mux, ids, TimeSpan.FromHours(session.TtlHours));
+    return new RedisSessionStore(
+        mux,
+        ids,
+        TimeSpan.FromHours(session.TtlHours),
+        sp.GetRequiredService<ILogger<RedisSessionStore>>());
 });
 
 builder.Services.AddSingleton<IMinioClient>(sp =>

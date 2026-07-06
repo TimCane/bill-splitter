@@ -2,10 +2,14 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using BillSplitter.Domain;
+using BillSplitter.Infrastructure.Redis;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Testcontainers.Minio;
 using Testcontainers.Redis;
@@ -27,6 +31,12 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
     private readonly RedisContainer _redis = new RedisBuilder().WithImage("redis:7-alpine").Build();
     private readonly MinioContainer _minio = new MinioBuilder().Build();
     private WireMockServer _ocr = null!;
+    private int _casConflicts;
+
+    /// <summary>Count of CAS conflict retries logged by the session store since
+    /// startup - how the concurrency tests observe that writers really raced
+    /// (docs/11-testing-strategy.md#backend-integration).</summary>
+    public int CasConflictCount => Volatile.Read(ref _casConflicts);
 
     public string RedisConnectionString => _redis.GetConnectionString();
 
@@ -130,6 +140,26 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
         throw new TimeoutException($"session {sessionId} did not reach state {state}");
     }
 
+    /// <summary>Open a hub connection as the given participant. The in-memory
+    /// TestServer has no real sockets, so the transport is long polling over the
+    /// server's handler.</summary>
+    public async Task<HubConnection> ConnectHubAsync(string sessionId, string participantToken)
+    {
+        var url = new Uri(
+            Server.BaseAddress,
+            $"/hubs/session?sessionId={Uri.EscapeDataString(sessionId)}" +
+            $"&access_token={Uri.EscapeDataString(participantToken)}");
+        var connection = new HubConnectionBuilder()
+            .WithUrl(url, options =>
+            {
+                options.HttpMessageHandlerFactory = _ => Server.CreateHandler();
+                options.Transports = HttpTransportType.LongPolling;
+            })
+            .Build();
+        await connection.StartAsync();
+        return connection;
+    }
+
     /// <summary>Advance a session to Open through the store (the open endpoint is M4).</summary>
     public async Task OpenAsync(string sessionId, string hostParticipantId)
     {
@@ -154,7 +184,48 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
             ["Minio:SecretKey"] = _minio.GetSecretKey(),
             ["Minio:Bucket"] = "bill-splitter",
             ["Ocr:BaseUrl"] = _ocr.Url,
+            // The concurrency tests hammer gestures far past the production
+            // 10/sec throttle; the throttle itself is unit-scoped, not under test.
+            ["Session:HubGesturesPerSecond"] = "10000",
         }));
+        builder.ConfigureLogging(logging =>
+        {
+            logging.AddProvider(new CasConflictCountingProvider(() => Interlocked.Increment(ref _casConflicts)));
+            logging.AddFilter<CasConflictCountingProvider>(
+                typeof(RedisSessionStore).FullName, LogLevel.Debug);
+        });
+    }
+
+    /// <summary>Counts the session store's "CAS conflict" debug lines; everything
+    /// else is filtered out before it reaches this provider.</summary>
+    private sealed class CasConflictCountingProvider(Action increment) : ILoggerProvider
+    {
+        public ILogger CreateLogger(string categoryName) => new CountingLogger(increment);
+
+        public void Dispose()
+        {
+        }
+
+        private sealed class CountingLogger(Action increment) : ILogger
+        {
+            public IDisposable? BeginScope<TState>(TState state)
+                where TState : notnull => null;
+
+            public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Debug;
+
+            public void Log<TState>(
+                LogLevel logLevel,
+                EventId eventId,
+                TState state,
+                Exception? exception,
+                Func<TState, Exception?, string> formatter)
+            {
+                if (formatter(state, exception).StartsWith("CAS conflict", StringComparison.Ordinal))
+                {
+                    increment();
+                }
+            }
+        }
     }
 }
 

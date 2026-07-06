@@ -1,4 +1,5 @@
 using BillSplitter.Domain;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace BillSplitter.Infrastructure.Redis;
@@ -36,12 +37,18 @@ public sealed class RedisSessionStore : ISessionStore
     private readonly IDatabase _db;
     private readonly IIdGenerator _ids;
     private readonly TimeSpan _sessionTtl;
+    private readonly ILogger<RedisSessionStore> _logger;
 
-    public RedisSessionStore(IConnectionMultiplexer redis, IIdGenerator ids, TimeSpan sessionTtl)
+    public RedisSessionStore(
+        IConnectionMultiplexer redis,
+        IIdGenerator ids,
+        TimeSpan sessionTtl,
+        ILogger<RedisSessionStore> logger)
     {
         _db = redis.GetDatabase();
         _ids = ids;
         _sessionTtl = sessionTtl;
+        _logger = logger;
     }
 
     public async Task<SessionRecord?> GetAsync(string sessionId, CancellationToken ct)
@@ -105,6 +112,9 @@ public sealed class RedisSessionStore : ISessionStore
                 case -1:
                     throw new DomainException(ErrorCodes.SessionNotFound, sessionId);
                 default:
+                    // Expected under contention; the count is what tests and
+                    // alerting watch, so keep the message stable.
+                    _logger.LogDebug("CAS conflict on session write, attempt {Attempt}", attempt + 1);
                     await BackoffAsync(attempt, ct);
                     break;
             }
