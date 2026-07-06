@@ -89,6 +89,7 @@ builder.Services.AddHttpClient<IOcrClient, HttpOcrClient>((sp, client) =>
 });
 
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<SnapshotBroadcastCoalescer>();
 builder.Services.AddScoped<SnapshotMapper>();
 builder.Services.AddScoped<ISessionNotifier, SignalRSessionNotifier>();
 builder.Services.AddScoped<StaleOcrRecovery>();
