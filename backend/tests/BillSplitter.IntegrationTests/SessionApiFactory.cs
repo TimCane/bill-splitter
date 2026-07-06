@@ -77,14 +77,29 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
     public async Task<CreatedSession> PostCreateAsync()
     {
         using var client = CreateClient();
-        using var form = new MultipartFormDataContent();
-        var jpeg = new ByteArrayContent([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]);
-        jpeg.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-        form.Add(jpeg, "image", "receipt.jpg");
-
+        using var form = ImageForm();
         var response = await client.PostAsync("/api/v1/sessions", form);
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<CreatedSession>())!;
+    }
+
+    /// <summary>Post the create form and return just the status - for the overflow
+    /// burst where some uploads are expected to 429.</summary>
+    public async Task<HttpStatusCode> TryCreateAsync()
+    {
+        using var client = CreateClient();
+        using var form = ImageForm();
+        var response = await client.PostAsync("/api/v1/sessions", form);
+        return response.StatusCode;
+    }
+
+    private static MultipartFormDataContent ImageForm()
+    {
+        var form = new MultipartFormDataContent();
+        var jpeg = new ByteArrayContent([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]);
+        jpeg.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+        form.Add(jpeg, "image", "receipt.jpg");
+        return form;
     }
 
     public async Task WaitForStateAsync(string sessionId, string state, TimeSpan? timeout = null)
