@@ -5,6 +5,7 @@ import { ClaimScreen } from '@/components/session/ClaimScreen'
 import { JoinPrompt } from '@/components/session/JoinPrompt'
 import { ProcessingScreen } from '@/components/session/ProcessingScreen'
 import { ReviewScreen } from '@/components/session/ReviewScreen'
+import { SummaryScreen } from '@/components/session/SummaryScreen'
 import { useParticipantToken } from '@/hooks/useParticipantToken'
 import { useSession } from '@/hooks/useSession'
 import { useSessionHub } from '@/hooks/useSessionHub'
@@ -56,7 +57,7 @@ export function Session() {
         <JoinPrompt sessionId={sessionId} onJoined={store} />
       )
     case 'Finalized':
-      return <Centered title="Split locked." />
+      return <SummaryScreen snapshot={snapshot} />
   }
 }
 

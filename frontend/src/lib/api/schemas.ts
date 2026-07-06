@@ -68,6 +68,7 @@ export const ParticipantTotalSchema = z.object({
   unclaimedMinor: z.number().int(),
   totalMinor: z.number().int(),
 })
+export type ParticipantTotal = z.infer<typeof ParticipantTotalSchema>
 
 export const SessionSnapshotSchema = z.object({
   sessionId: z.string(),
