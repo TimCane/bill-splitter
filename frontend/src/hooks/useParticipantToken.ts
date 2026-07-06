@@ -10,7 +10,12 @@ export type Identity = {
 
 type StoredIdentity = Identity & { storedAt: number }
 
-const keyFor = (sessionId: string) => `bs:${sessionId}`
+const keyPrefix = 'bs:'
+const keyFor = (sessionId: string) => `${keyPrefix}${sessionId}`
+
+// Sessions live at most 24h; anything older than 25h is a dead session's
+// credential. One extra hour of slack keeps a clock skew from pruning a live one.
+const maxAgeMs = 25 * 60 * 60 * 1000
 
 export function readIdentity(sessionId: string): Identity | null {
   const raw = localStorage.getItem(keyFor(sessionId))
@@ -43,6 +48,34 @@ export function storeIdentity(
 ): void {
   const stored: StoredIdentity = { ...identity, storedAt: now }
   localStorage.setItem(keyFor(sessionId), JSON.stringify(stored))
+}
+
+/** Drop identities for sessions that must have expired. Called once at app
+ * bootstrap (docs/08-frontend-design.md#identity) - there is no other cleanup,
+ * so this is what keeps localStorage from accumulating dead tokens. */
+export function pruneStaleIdentities(now: number): void {
+  const stale: string[] = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (!key?.startsWith(keyPrefix)) {
+      continue
+    }
+
+    let storedAt: unknown
+    try {
+      storedAt = (JSON.parse(localStorage.getItem(key) ?? '') as StoredIdentity)
+        .storedAt
+    } catch {
+      // Corrupt entry - age unknowable, treat as stale.
+    }
+    if (typeof storedAt !== 'number' || now - storedAt > maxAgeMs) {
+      stale.push(key)
+    }
+  }
+
+  for (const key of stale) {
+    localStorage.removeItem(key)
+  }
 }
 
 export function useParticipantToken(sessionId: string) {

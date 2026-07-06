@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sheet'
 import { renameMe } from '@/lib/api/client'
 import type { SessionSnapshot } from '@/lib/api/schemas'
+import { displayNameError, parseDisplayName } from '@/lib/displayName'
 
 type Props = {
   sessionId: string
@@ -60,9 +61,9 @@ function NameForm({
   const [error, setError] = useState<string | null>(null)
 
   function save() {
-    const trimmed = name.trim()
-    if (trimmed.length < 1 || trimmed.length > 30) {
-      setError('Use 1 to 30 characters.')
+    const trimmed = parseDisplayName(name)
+    if (trimmed === null) {
+      setError(displayNameError)
       return
     }
 

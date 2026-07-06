@@ -1,7 +1,9 @@
 import {
+  JoinResponseSchema,
   OpenResponseSchema,
   ResolveCodeResponseSchema,
   SessionSnapshotSchema,
+  type JoinResponse,
   type OpenResponse,
   type SessionSnapshot,
 } from '@/lib/api/schemas'
@@ -82,6 +84,24 @@ const sessionBase = (sessionId: string) => `/api/v1/sessions/${sessionId}`
 export function getSession(sessionId: string): Promise<SessionSnapshot> {
   return json(sessionBase(sessionId), { method: 'GET' }, (d) =>
     SessionSnapshotSchema.parse(d),
+  )
+}
+
+/** Join an open session. Anonymous; the returned token is the caller's
+ * credential thereafter and goes straight into localStorage
+ * (docs/04-api-contract.md#post-apiv1sessionssessionidparticipants). */
+export function joinSession(
+  sessionId: string,
+  displayName: string,
+): Promise<JoinResponse> {
+  return json(
+    `${sessionBase(sessionId)}/participants`,
+    {
+      method: 'POST',
+      headers: jsonHeaders,
+      body: JSON.stringify({ displayName }),
+    },
+    (d) => JoinResponseSchema.parse(d),
   )
 }
 

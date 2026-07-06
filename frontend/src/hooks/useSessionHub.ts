@@ -1,47 +1,108 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import type { HubConnection } from '@microsoft/signalr'
 
 import { applySnapshot, sessionKey } from '@/hooks/useSession'
-import { SessionSnapshotSchema } from '@/lib/api/schemas'
 import { createConnection } from '@/lib/realtime/connection'
-import { HubEvents } from '@/lib/realtime/contract'
+import {
+  HubEvents,
+  claimItem,
+  onOcrStatusChanged,
+  onSnapshot,
+  setShares,
+  unclaimItem,
+} from '@/lib/realtime/contract'
 
-// Live session updates for a participant with a token. Snapshots land in the query
-// cache under the version guard; the OcrStatusChanged hint just triggers a refetch
-// as a backstop (docs/05-realtime-contract.md#server---client-events). Visitors
-// without a token render from the REST snapshot only and never connect.
-export function useSessionHub(sessionId: string, token: string | null): void {
+export type HubStatus =
+  'connecting' | 'connected' | 'reconnecting' | 'disconnected'
+
+export type SessionHub = {
+  /** Feeds the connection pill: connecting / live / reconnecting / offline
+   * (docs/09-ux-flows.md#7-claim---state-open-the-main-screen-everyone).
+   * 'disconnected' means a connect or reconnect actually gave up - the initial
+   * handshake reports 'connecting', never a false offline. */
+  status: HubStatus
+  claimItem: (itemId: string) => Promise<void>
+  unclaimItem: (itemId: string) => Promise<void>
+  setShares: (itemId: string, shares: number) => Promise<void>
+}
+
+// Live session wiring for a participant with a token. Inbound snapshots land in
+// the query cache under the version guard; outbound claim gestures ride the same
+// connection and are never applied optimistically - the authoritative snapshot
+// follows within the coalescing window (docs/08-frontend-design.md#server-state).
+// Visitors without a token render from the REST snapshot only and never connect.
+export function useSessionHub(
+  sessionId: string,
+  token: string | null,
+): SessionHub {
   const queryClient = useQueryClient()
+  const [status, setStatus] = useState<HubStatus>(
+    token ? 'connecting' : 'disconnected',
+  )
+  const connectionRef = useRef<HubConnection | null>(null)
 
   useEffect(() => {
     if (!token) {
       return
     }
 
+    setStatus('connecting')
     const connection = createConnection(sessionId, token)
+    connectionRef.current = connection
 
-    function applyFromEvent(payload: unknown) {
-      const result = SessionSnapshotSchema.safeParse(payload)
-      if (result.success) {
-        applySnapshot(queryClient, result.data)
-      } else {
-        console.warn('Ignoring an unparseable session snapshot', result.error)
+    // Status callbacks can fire after this connection is torn down (stop() is
+    // async); only the current connection may drive the pill.
+    function setStatusIfCurrent(next: HubStatus) {
+      if (connectionRef.current === connection) {
+        setStatus(next)
       }
     }
 
-    connection.on(HubEvents.SnapshotUpdated, applyFromEvent)
-    connection.on(HubEvents.SessionFinalized, applyFromEvent)
-    connection.on(HubEvents.OcrStatusChanged, () => {
+    onSnapshot(connection, HubEvents.SnapshotUpdated, (snapshot) =>
+      applySnapshot(queryClient, snapshot),
+    )
+    onSnapshot(connection, HubEvents.SessionFinalized, (snapshot) =>
+      applySnapshot(queryClient, snapshot),
+    )
+    onOcrStatusChanged(connection, () => {
       void queryClient.invalidateQueries({ queryKey: sessionKey(sessionId) })
     })
 
-    connection.start().catch(() => {
-      // A failed connect is not fatal: the REST snapshot still renders and
-      // automatic reconnect keeps retrying.
-    })
+    connection.onreconnecting(() => setStatusIfCurrent('reconnecting'))
+    connection.onreconnected(() => setStatusIfCurrent('connected'))
+    connection.onclose(() => setStatusIfCurrent('disconnected'))
+
+    connection
+      .start()
+      .then(() => setStatusIfCurrent('connected'))
+      .catch(() => {
+        // A failed connect is not fatal: the REST snapshot still renders and
+        // the pill offers a reload.
+        setStatusIfCurrent('disconnected')
+      })
 
     return () => {
+      connectionRef.current = null
+      setStatus('disconnected')
       void connection.stop()
     }
   }, [sessionId, token, queryClient])
+
+  return useMemo(() => {
+    // Without a live connection a gesture quietly resolves; the tap simply has
+    // no effect until the pill shows live again.
+    const withConnection = (invoke: (c: HubConnection) => Promise<void>) => {
+      const connection = connectionRef.current
+      return connection ? invoke(connection) : Promise.resolve()
+    }
+
+    return {
+      status,
+      claimItem: (itemId) => withConnection((c) => claimItem(c, itemId)),
+      unclaimItem: (itemId) => withConnection((c) => unclaimItem(c, itemId)),
+      setShares: (itemId, shares) =>
+        withConnection((c) => setShares(c, itemId, shares)),
+    }
+  }, [status])
 }

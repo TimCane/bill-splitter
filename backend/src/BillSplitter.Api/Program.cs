@@ -60,7 +60,11 @@ builder.Services.AddSingleton<ISessionStore>(sp =>
     var mux = sp.GetRequiredService<IConnectionMultiplexer>();
     var ids = sp.GetRequiredService<IIdGenerator>();
     var session = sp.GetRequiredService<IOptions<BillSplitter.Api.Configuration.SessionOptions>>().Value;
-    return new RedisSessionStore(mux, ids, TimeSpan.FromHours(session.TtlHours));
+    return new RedisSessionStore(
+        mux,
+        ids,
+        TimeSpan.FromHours(session.TtlHours),
+        sp.GetRequiredService<ILogger<RedisSessionStore>>());
 });
 
 builder.Services.AddSingleton<IMinioClient>(sp =>
@@ -89,6 +93,7 @@ builder.Services.AddHttpClient<IOcrClient, HttpOcrClient>((sp, client) =>
 });
 
 builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton<SnapshotBroadcastCoalescer>();
 builder.Services.AddScoped<SnapshotMapper>();
 builder.Services.AddScoped<ISessionNotifier, SignalRSessionNotifier>();
 builder.Services.AddScoped<StaleOcrRecovery>();

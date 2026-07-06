@@ -1,7 +1,8 @@
 import { Link, useParams } from 'react-router'
 
 import { Button } from '@/components/ui/button'
-import { OpenHostScreen } from '@/components/session/OpenHostScreen'
+import { ClaimScreen } from '@/components/session/ClaimScreen'
+import { JoinPrompt } from '@/components/session/JoinPrompt'
 import { ProcessingScreen } from '@/components/session/ProcessingScreen'
 import { ReviewScreen } from '@/components/session/ReviewScreen'
 import { useParticipantToken } from '@/hooks/useParticipantToken'
@@ -15,11 +16,11 @@ import { ApiError } from '@/lib/api/client'
 export function Session() {
   const params = useParams()
   const sessionId = params.sessionId ?? ''
-  const { identity } = useParticipantToken(sessionId)
+  const { identity, store } = useParticipantToken(sessionId)
   const query = useSession(sessionId)
   // A participant with a token gets live updates; the Processing screen advances to
   // Review off the hub without polling. Visitors render from the REST snapshot only.
-  useSessionHub(sessionId, identity?.participantToken ?? null)
+  const hub = useSessionHub(sessionId, identity?.participantToken ?? null)
 
   if (query.isPending) {
     return <Centered title="Loading..." />
@@ -44,10 +45,15 @@ export function Session() {
     case 'Processing':
       return isHost ? <ProcessingScreen /> : <HoldingCard />
     case 'Open':
-      return isHost ? (
-        <OpenHostScreen snapshot={snapshot} />
+      return identity ? (
+        <ClaimScreen
+          snapshot={snapshot}
+          identity={identity}
+          isHost={isHost}
+          hub={hub}
+        />
       ) : (
-        <Centered title="The split is open." />
+        <JoinPrompt sessionId={sessionId} onJoined={store} />
       )
     case 'Finalized':
       return <Centered title="Split locked." />

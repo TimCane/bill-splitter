@@ -12,7 +12,9 @@ gestures upstream and all live updates downstream
 ```
 
 - `access_token` is the standard SignalR query-string auth slot (WebSockets
-  cannot send an Authorization header).
+  cannot send an Authorization header). On the long-polling fallback the JS
+  client sends the token as an `Authorization: Bearer` header instead; the
+  hub accepts both.
 - `OnConnectedAsync`: resolve the session, hash the token, match a
   participant. No match or no session -> the connection is rejected
   (`HubException`, code `unauthorized`).
@@ -52,6 +54,7 @@ so the common gesture is a single argument.
 | `wrong-state` | claim gesture outside `Open` |
 | `item-not-found` | stale item id |
 | `validation` | `shares` outside 1-99 |
+| `rate-limited` | gesture throttle exceeded (see [10-security-privacy.md](10-security-privacy.md#rate-limits-aspnet-rate-limiter-per-client-ip)) |
 | `conflict-retry-exhausted` | CAS gave up (see [03-redis-schema.md](03-redis-schema.md#concurrency)) |
 
 The client surfaces `wrong-state` after finalize as a soft "session was

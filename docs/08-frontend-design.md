@@ -55,8 +55,9 @@ card. Full matrix in [09-ux-flows.md](09-ux-flows.md).
   works.
 - No token + `Open` -> join flow. No token + anything else -> spectator
   states above.
-- localStorage entries for expired sessions are pruned opportunistically on
-  Landing mount (any entry older than 25h by a stored timestamp).
+- localStorage entries for expired sessions are pruned once at app bootstrap
+  (any entry older than 25h by a stored timestamp) - guests deep-link straight
+  into `/s/:sessionId`, so no single route sees every visitor.
 
 ## Server state
 
