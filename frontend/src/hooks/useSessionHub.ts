@@ -13,11 +13,14 @@ import {
   unclaimItem,
 } from '@/lib/realtime/contract'
 
-export type HubStatus = 'connected' | 'reconnecting' | 'disconnected'
+export type HubStatus =
+  'connecting' | 'connected' | 'reconnecting' | 'disconnected'
 
 export type SessionHub = {
-  /** Feeds the connection pill: live / reconnecting / offline
-   * (docs/09-ux-flows.md#7-claim---state-open-the-main-screen-everyone). */
+  /** Feeds the connection pill: connecting / live / reconnecting / offline
+   * (docs/09-ux-flows.md#7-claim---state-open-the-main-screen-everyone).
+   * 'disconnected' means a connect or reconnect actually gave up - the initial
+   * handshake reports 'connecting', never a false offline. */
   status: HubStatus
   claimItem: (itemId: string) => Promise<void>
   unclaimItem: (itemId: string) => Promise<void>
@@ -34,7 +37,9 @@ export function useSessionHub(
   token: string | null,
 ): SessionHub {
   const queryClient = useQueryClient()
-  const [status, setStatus] = useState<HubStatus>('disconnected')
+  const [status, setStatus] = useState<HubStatus>(
+    token ? 'connecting' : 'disconnected',
+  )
   const connectionRef = useRef<HubConnection | null>(null)
 
   useEffect(() => {
@@ -42,6 +47,7 @@ export function useSessionHub(
       return
     }
 
+    setStatus('connecting')
     const connection = createConnection(sessionId, token)
     connectionRef.current = connection
 

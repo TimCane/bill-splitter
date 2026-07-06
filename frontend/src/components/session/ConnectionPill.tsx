@@ -3,10 +3,20 @@ import { Loader2 } from 'lucide-react'
 import type { HubStatus } from '@/hooks/useSessionHub'
 import { cn } from '@/lib/utils'
 
-// Maps the hub status to the header pill: live / reconnecting / offline
-// (docs/09-ux-flows.md#7-claim---state-open-the-main-screen-everyone). Offline
-// means automatic reconnect gave up, so the only way back is a reload.
+// Maps the hub status to the header pill: connecting / live / reconnecting /
+// offline (docs/09-ux-flows.md#7-claim---state-open-the-main-screen-everyone).
+// Offline means a connect or reconnect gave up, so the only way back is a
+// reload; the initial handshake shows the muted connecting pill instead.
 export function ConnectionPill({ status }: { status: HubStatus }) {
+  if (status === 'connecting') {
+    return (
+      <span className={cn(pillClass, 'text-muted-foreground')}>
+        <Loader2 className="size-3 animate-spin" />
+        connecting
+      </span>
+    )
+  }
+
   if (status === 'disconnected') {
     return (
       <button

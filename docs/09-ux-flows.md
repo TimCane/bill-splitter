@@ -156,10 +156,12 @@ Name input (1-30 chars) + `Join the split`. Errors: session full
 
 Element inventory:
 
-- Connection pill: maps `useSession`'s `connected | reconnecting |
-  disconnected` status ([08-frontend-design.md](08-frontend-design.md#server-state))
-  to labels `live` (green) / `reconnecting` (amber, spinner) / `offline`
-  (red after reconnect gives up; tap = reload).
+- Connection pill: maps `useSession`'s `connecting | connected |
+  reconnecting | disconnected` status
+  ([08-frontend-design.md](08-frontend-design.md#server-state)) to labels
+  `connecting` (muted, spinner, initial handshake) / `live` (green) /
+  `reconnecting` (amber, spinner) / `offline` (red after a connect or
+  reconnect gives up; tap = reload).
 - Header name: the `You: {name}` label taps to rename via
   `PUT .../participants/me` - the one place the host can fix a still-`Host`
   name once the split is `Open`.
