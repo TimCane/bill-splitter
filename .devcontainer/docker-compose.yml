@@ -8,6 +8,11 @@ services:
     volumes:
       - ../..:/workspaces:cached
     command: sleep infinity
+    # Dev servers - Vite (5173) and the API (5205); published so the host
+    # browser and LAN devices can reach them without the VS Code forwarder.
+    ports:
+      - "5173:5173"
+      - "5205:5205"
     networks:
       - backend
 

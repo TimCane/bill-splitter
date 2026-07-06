@@ -5,6 +5,8 @@
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "shutdownAction": "stopCompose",
   "forwardPorts": [
+    5173,
+    5205,
     6379,
     9000,
     9001
