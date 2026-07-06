@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Identity } from '@/hooks/useParticipantToken'
-import { applySnapshot } from '@/hooks/useSession'
+import { applySnapshot, sessionKey } from '@/hooks/useSession'
 import { ApiError, joinSession } from '@/lib/api/client'
 import { displayNameError, parseDisplayName } from '@/lib/displayName'
 
@@ -51,7 +51,9 @@ export function JoinPrompt({ sessionId, onJoined }: Props) {
         if (cause instanceof ApiError && cause.type === 'wrong-state') {
           // Finalized while the visitor was typing: refetch and let the
           // route switch to the read-only summary.
-          void queryClient.invalidateQueries()
+          void queryClient.invalidateQueries({
+            queryKey: sessionKey(sessionId),
+          })
           return
         }
 
