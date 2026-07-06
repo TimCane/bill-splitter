@@ -109,7 +109,10 @@ builder.Services.AddSingleton<IEmailSender>(sp =>
         smtp.Port,
         smtp.Username,
         smtp.Password,
-        smtp.From ?? smtp.Username ?? smtp.Host!,
+        // A bare Host enables the capability (docs/04-api-contract.md#get-healthz),
+        // so the sender must resolve to a parseable address even when From and
+        // Username are unset - Host alone is not one and would fault every send.
+        smtp.From ?? smtp.Username ?? $"no-reply@{smtp.Host}",
         sp.GetRequiredService<ILogger<MailKitEmailSender>>());
 });
 
