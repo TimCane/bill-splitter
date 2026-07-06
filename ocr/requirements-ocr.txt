@@ -4,3 +4,5 @@
 numpy==1.26.4
 paddlepaddle==2.6.2
 paddleocr==2.7.3
+# paddle imports setuptools at import time; pip stopped bundling it on 3.12.
+setuptools==80.9.0

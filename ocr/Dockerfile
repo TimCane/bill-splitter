@@ -6,6 +6,12 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     OCR_STUB=false
 
+# Native libs the slim base lacks: paddle needs OpenMP (libgomp), and
+# paddleocr's opencv-python needs libGL + glib.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgomp1 libgl1 libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt requirements-ocr.txt ./
 RUN pip install --no-cache-dir -r requirements.txt -r requirements-ocr.txt
 
