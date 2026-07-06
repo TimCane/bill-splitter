@@ -1,5 +1,3 @@
-using System.Threading.RateLimiting;
-using BillSplitter.Api.Configuration;
 using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Ocr;
 using BillSplitter.Domain;
@@ -27,7 +25,7 @@ public sealed class SessionHub(
 {
     private const string SessionIdKey = "sessionId";
     private const string ParticipantIdKey = "participantId";
-    private const string GestureLimiterKey = "gestureLimiter";
+    private const string GestureWindowKey = "gestureWindow";
 
     public override async Task OnConnectedAsync()
     {
@@ -54,12 +52,7 @@ public sealed class SessionHub(
         // after the token matched a participant.
         Context.Items[SessionIdKey] = sessionId;
         Context.Items[ParticipantIdKey] = participant.Id;
-        Context.Items[GestureLimiterKey] = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions
-        {
-            PermitLimit = sessionOptions.Value.HubGesturesPerSecond,
-            Window = TimeSpan.FromSeconds(1),
-            QueueLimit = 0,
-        });
+        Context.Items[GestureWindowKey] = new GestureWindow(sessionOptions.Value.HubGesturesPerSecond);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, SignalRSessionNotifier.GroupName(sessionId));
 
@@ -87,16 +80,6 @@ public sealed class SessionHub(
             : null;
     }
 
-    public override async Task OnDisconnectedAsync(Exception? exception)
-    {
-        if (Context.Items.TryGetValue(GestureLimiterKey, out var limiter))
-        {
-            ((FixedWindowRateLimiter)limiter!).Dispose();
-        }
-
-        await base.OnDisconnectedAsync(exception);
-    }
-
     /// <summary>Upsert my claim with one share - sugar for <c>SetShares(itemId, 1)</c>.</summary>
     public Task ClaimItem(string itemId) =>
         MutateAsync((session, participantId) => session.ClaimItem(itemId, participantId));
@@ -116,10 +99,9 @@ public sealed class SessionHub(
     {
         var sessionId = (string)Context.Items[SessionIdKey]!;
         var participantId = (string)Context.Items[ParticipantIdKey]!;
-        var limiter = (FixedWindowRateLimiter)Context.Items[GestureLimiterKey]!;
+        var window = (GestureWindow)Context.Items[GestureWindowKey]!;
 
-        using var lease = limiter.AttemptAcquire();
-        if (!lease.IsAcquired)
+        if (!window.TryAcquire())
         {
             throw new HubException(ErrorCodes.RateLimited);
         }
@@ -134,5 +116,29 @@ public sealed class SessionHub(
         }
 
         await notifier.SnapshotUpdatedAsync(sessionId, Context.ConnectionAborted);
+    }
+
+    // Hand-rolled fixed window instead of a BCL rate limiter: no per-connection
+    // replenishment timer, and nothing to dispose - the limiter variant raced
+    // OnDisconnectedAsync's Dispose against in-flight gestures.
+    private sealed class GestureWindow(int permitsPerSecond)
+    {
+        private long _windowStart = Environment.TickCount64;
+        private int _count;
+
+        public bool TryAcquire()
+        {
+            lock (this)
+            {
+                var now = Environment.TickCount64;
+                if (now - _windowStart >= 1000)
+                {
+                    _windowStart = now;
+                    _count = 0;
+                }
+
+                return ++_count <= permitsPerSecond;
+            }
+        }
     }
 }
