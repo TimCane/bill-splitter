@@ -1,0 +1,13 @@
+{
+  "items": [
+    { "name": "Freedom 4 Pt", "quantity": 1, "priceMinor": 400 },
+    { "name": "Diet Coke Pint", "quantity": 1, "priceMinor": 270 },
+    { "name": "Chips", "quantity": 1, "priceMinor": 350 },
+    { "name": "Macaroni", "quantity": 1, "priceMinor": 550 },
+    { "name": "Olives & Tomatoes", "quantity": 1, "priceMinor": 400 },
+    { "name": "Iowa", "quantity": 1, "priceMinor": 1250 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 3220 },
+  "currency": "GBP",
+  "warnings": []
+}

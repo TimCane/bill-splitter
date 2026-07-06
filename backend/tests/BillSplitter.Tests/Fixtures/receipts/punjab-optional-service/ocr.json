@@ -1,0 +1,18 @@
+{
+  "durationMs": 2870,
+  "lines": [
+    { "text": "PUNJAB", "confidence": 0.95, "box": { "x": 160, "y": 40, "width": 420, "height": 46 } },
+    { "text": "TABLE 42", "confidence": 0.94, "box": { "x": 60, "y": 150, "width": 300, "height": 36 } },
+    { "text": "Qty Product          Total", "confidence": 0.92, "box": { "x": 60, "y": 190, "width": 620, "height": 34 } },
+    { "text": "1 COBRA PREM          5.15", "confidence": 0.95, "box": { "x": 60, "y": 230, "width": 660, "height": 36 } },
+    { "text": "2 COKE                5.30", "confidence": 0.95, "box": { "x": 60, "y": 268, "width": 660, "height": 36 } },
+    { "text": "1 PAPADUM PLAIN       1.70", "confidence": 0.94, "box": { "x": 60, "y": 306, "width": 660, "height": 36 } },
+    { "text": "1 BUTTER CHICKEN     10.75", "confidence": 0.95, "box": { "x": 60, "y": 344, "width": 660, "height": 36 } },
+    { "text": "1 CHICKEN TIKKA MASALA 10.50", "confidence": 0.94, "box": { "x": 60, "y": 382, "width": 660, "height": 36 } },
+    { "text": "1 PILAU RICE          3.30", "confidence": 0.95, "box": { "x": 60, "y": 420, "width": 660, "height": 36 } },
+    { "text": "1 BULLET NAAN         3.65", "confidence": 0.94, "box": { "x": 60, "y": 458, "width": 660, "height": 36 } },
+    { "text": "Subtotal             40.35", "confidence": 0.95, "box": { "x": 60, "y": 520, "width": 660, "height": 36 } },
+    { "text": "Optional Service 10%  4.04", "confidence": 0.93, "box": { "x": 60, "y": 558, "width": 660, "height": 36 } },
+    { "text": "Total                44.39", "confidence": 0.96, "box": { "x": 60, "y": 610, "width": 660, "height": 40 } }
+  ]
+}

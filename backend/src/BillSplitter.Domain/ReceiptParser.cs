@@ -30,6 +30,16 @@ public static partial class ReceiptParser
     [GeneratedRegex(@"#\S+")]
     private static partial Regex ItemCode();
 
+    // A "@ 6.50" per-unit price annotation printed alongside the line total
+    // ("5 CLASSIC BAO @6.50 ... 32.50"). Noise in the name; the row's own amount
+    // is already the line total.
+    [GeneratedRegex(@"@\s*[£€$]?\d{1,4}[.,]\d{2}")]
+    private static partial Regex AtUnitPrice();
+
+    // An item-count summary line ("6 Item(s)"). A subtotal in disguise - drop it.
+    [GeneratedRegex(@"^\d+\s+ITEM", RegexOptions.IgnoreCase)]
+    private static partial Regex ItemCount();
+
     [GeneratedRegex(@"\s+")]
     private static partial Regex Whitespace();
 
@@ -66,16 +76,43 @@ public static partial class ReceiptParser
             candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text));
         }
 
-        long tax = 0, tip = 0, service = 0;
+        // Locate the grand total first: it is the lowest TOTAL row on the receipt
+        // (grand totals print last); a same-row tie takes the larger amount.
         Candidate? total = null;
-        var itemRows = new List<Candidate>();
-
         foreach (var candidate in candidates)
         {
             var upper = candidate.Name.ToUpperInvariant();
-            if (IsSubtotal(upper))
+            if (IsSubtotal(upper) || IsItemCount(upper) || !IsTotal(upper))
             {
-                continue; // We compute our own subtotal.
+                continue;
+            }
+
+            if (total is null
+                || candidate.Y > total.Y
+                || (candidate.Y == total.Y && candidate.Amount > total.Amount))
+            {
+                total = candidate;
+            }
+        }
+
+        var totalY = total?.Y ?? int.MaxValue;
+
+        // Classify only what sits above the grand total. Everything at or below it
+        // - VAT breakdowns, payment lines, "divide by N" hints - is trailing noise
+        // the receipt prints after the amount due, not tax/tip/service or items.
+        long tax = 0, tip = 0, service = 0;
+        var itemRows = new List<Candidate>();
+        foreach (var candidate in candidates)
+        {
+            if (ReferenceEquals(candidate, total) || candidate.Y >= totalY)
+            {
+                continue;
+            }
+
+            var upper = candidate.Name.ToUpperInvariant();
+            if (IsSubtotal(upper) || IsItemCount(upper) || IsTotal(upper))
+            {
+                continue; // Subtotals and intermediate totals: we compute our own.
             }
 
             if (IsTax(upper))
@@ -90,33 +127,15 @@ public static partial class ReceiptParser
             {
                 service = candidate.Amount;
             }
-            else if (IsTotal(upper))
-            {
-                // Lowest on the receipt wins (grand totals print last); a
-                // same-row tie takes the larger amount.
-                if (total is null
-                    || candidate.Y > total.Y
-                    || (candidate.Y == total.Y && candidate.Amount > total.Amount))
-                {
-                    total = candidate;
-                }
-            }
             else if (!IsPaymentNoise(upper))
             {
                 itemRows.Add(candidate);
             }
         }
 
-        var totalY = total?.Y ?? int.MaxValue;
         var items = new List<ParsedItem>();
         foreach (var row in itemRows)
         {
-            if (row.Y >= totalY)
-            {
-                // Below the grand total: trailing noise, not an ordered item.
-                continue;
-            }
-
             var (quantity, name) = ExtractQuantity(CleanName(row.Name));
             if (name.Length == 0)
             {
@@ -156,6 +175,7 @@ public static partial class ReceiptParser
     private static string CleanName(string raw)
     {
         var name = ItemCode().Replace(raw, string.Empty);
+        name = AtUnitPrice().Replace(name, string.Empty); // strip "@ 6.50" unit prices
         name = name.Trim().TrimEnd('.', ' ', '-'); // strip dot leaders
         return Whitespace().Replace(name, " ").Trim();
     }
@@ -174,6 +194,8 @@ public static partial class ReceiptParser
     }
 
     private static bool IsSubtotal(string u) => u.Contains("SUBTOTAL") || u.Contains("SUB TOTAL");
+
+    private static bool IsItemCount(string u) => ItemCount().IsMatch(u);
 
     private static bool IsTax(string u) => u.Contains("TAX") || u.Contains("VAT") || u.Contains("GST");
 
