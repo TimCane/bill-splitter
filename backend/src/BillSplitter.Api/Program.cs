@@ -6,6 +6,7 @@ using BillSplitter.Api.Hubs;
 using BillSplitter.Api.Middleware;
 using BillSplitter.Domain;
 using BillSplitter.Infrastructure.Identity;
+using BillSplitter.Infrastructure.Ocr;
 using BillSplitter.Infrastructure.Redis;
 using BillSplitter.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication;
@@ -67,6 +68,17 @@ builder.Services.AddSingleton<IMinioClient>(sp =>
 builder.Services.AddSingleton<IReceiptStorage>(sp => new MinioReceiptStorage(
     sp.GetRequiredService<IMinioClient>(),
     sp.GetRequiredService<IOptions<MinioOptions>>().Value.Bucket));
+
+// Bounded OCR work queue (producer: create endpoint; consumer: OcrWorker) and
+// the typed sidecar client with its own base URL and timeout.
+builder.Services.AddSingleton(sp =>
+    new OcrQueue(sp.GetRequiredService<IOptions<OcrOptions>>().Value.QueueCapacity));
+builder.Services.AddHttpClient<IOcrClient, HttpOcrClient>((sp, client) =>
+{
+    var ocr = sp.GetRequiredService<IOptions<OcrOptions>>().Value;
+    client.BaseAddress = new Uri(ocr.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(ocr.TimeoutSeconds);
+});
 
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<SnapshotMapper>();
