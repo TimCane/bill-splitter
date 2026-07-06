@@ -1,9 +1,15 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router'
 import { Receipt } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { pruneStaleIdentities } from '@/hooks/useParticipantToken'
 
 export function Landing() {
+  useEffect(() => {
+    pruneStaleIdentities(Date.now())
+  }, [])
+
   return (
     <main className="mx-auto flex min-h-svh max-w-md flex-col items-center justify-center gap-6 p-6 text-center">
       <Receipt className="size-12 text-primary" />
