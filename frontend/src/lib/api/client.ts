@@ -1,9 +1,11 @@
 import {
+  CreateSessionResponseSchema,
   HealthSchema,
   JoinResponseSchema,
   OpenResponseSchema,
   ResolveCodeResponseSchema,
   SessionSnapshotSchema,
+  type CreateSessionResponse,
   type Health,
   type JoinResponse,
   type OpenResponse,
@@ -54,17 +56,16 @@ async function request(
   return response
 }
 
+/** Map a parsed problem+json body to an ApiError; `type` falls back to 'unknown'
+ * when the body is missing or not the expected shape. */
+function problemToApiError(body: unknown, status: number): ApiError {
+  const problem = (body ?? {}) as { type?: string; detail?: string }
+  return new ApiError(problem.type ?? 'unknown', status, problem.detail)
+}
+
 async function toApiError(response: Response): Promise<ApiError> {
   try {
-    const problem = (await response.json()) as {
-      type?: string
-      detail?: string
-    }
-    return new ApiError(
-      problem.type ?? 'unknown',
-      response.status,
-      problem.detail,
-    )
+    return problemToApiError(await response.json(), response.status)
   } catch {
     return new ApiError('unknown', response.status)
   }
@@ -82,6 +83,49 @@ async function json<T>(
 
 const jsonHeaders = { 'Content-Type': 'application/json' }
 const sessionBase = (sessionId: string) => `/api/v1/sessions/${sessionId}`
+
+/** Create a session from a preprocessed receipt image. Goes over XHR rather than
+ * fetch because only XHR reports upload progress (docs/08-frontend-design.md#uploads);
+ * `onProgress` gets a 0-1 fraction, or is left alone when the size is unknown. */
+export function createSession(
+  image: Blob,
+  onProgress?: (fraction: number) => void,
+): Promise<CreateSessionResponse> {
+  const form = new FormData()
+  form.append('image', image, 'receipt.jpg')
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `${API_BASE}/api/v1/sessions`)
+    xhr.responseType = 'json'
+
+    if (onProgress) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          onProgress(e.loaded / e.total)
+        }
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(CreateSessionResponseSchema.parse(xhr.response))
+        } catch {
+          // A 2xx whose body isn't the expected shape - status 0 since no HTTP
+          // error status applies; the caller only distinguishes 429 anyway.
+          reject(new ApiError('invalid-response', 0))
+        }
+        return
+      }
+      reject(problemToApiError(xhr.response, xhr.status))
+    }
+    xhr.onerror = () => reject(new ApiError('network', 0))
+    xhr.ontimeout = () => reject(new ApiError('timeout', 0))
+    xhr.timeout = 120000
+    xhr.send(form)
+  })
+}
 
 export function getSession(sessionId: string): Promise<SessionSnapshot> {
   return json(sessionBase(sessionId), { method: 'GET' }, (d) =>
