@@ -83,14 +83,20 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
         return (await response.Content.ReadFromJsonAsync<CreatedSession>())!;
     }
 
-    /// <summary>Post the create form and return just the status - for the overflow
-    /// burst where some uploads are expected to 429.</summary>
-    public async Task<HttpStatusCode> TryCreateAsync()
+    /// <summary>Post the create form and return the status plus the new session id
+    /// (null when rejected) - for the overflow burst where some uploads 429.</summary>
+    public async Task<(HttpStatusCode Status, string? SessionId)> TryCreateAsync()
     {
         using var client = CreateClient();
         using var form = ImageForm();
         var response = await client.PostAsync("/api/v1/sessions", form);
-        return response.StatusCode;
+        if (response.StatusCode != HttpStatusCode.Accepted)
+        {
+            return (response.StatusCode, null);
+        }
+
+        var created = (await response.Content.ReadFromJsonAsync<CreatedSession>())!;
+        return (response.StatusCode, created.SessionId);
     }
 
     private static MultipartFormDataContent ImageForm()

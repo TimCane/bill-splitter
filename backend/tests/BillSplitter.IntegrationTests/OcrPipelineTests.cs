@@ -65,24 +65,31 @@ public sealed class OcrPipelineTests(SessionApiFactory factory)
                 .WithStatusCode(200)
                 .WithBodyAsJson(new { durationMs = 1, lines = Array.Empty<object>() })
                 .WithDelay(TimeSpan.FromSeconds(5)));
+
+        var accepted = new List<string>();
         try
         {
-            var statuses = await Task.WhenAll(
+            var results = await Task.WhenAll(
                 Enumerable.Range(0, 19).Select(_ => factory.TryCreateAsync()));
-
-            var accepted = statuses.Count(s => s == HttpStatusCode.Accepted);
-            var rejected = statuses.Count(s => s == HttpStatusCode.TooManyRequests);
+            accepted.AddRange(results.Where(r => r.SessionId is not null).Select(r => r.SessionId!));
+            var rejected = results.Count(r => r.Status == HttpStatusCode.TooManyRequests);
 
             // 2 in flight + 16 queued = 18 accepted at most; the rest overflow.
-            accepted.Should().BeLessThanOrEqualTo(18);
+            accepted.Should().HaveCountLessThanOrEqualTo(18);
             rejected.Should().BeGreaterThanOrEqualTo(1);
-            (accepted + rejected).Should().Be(19);
-            statuses.Where(s => s != HttpStatusCode.Accepted)
+            (accepted.Count + rejected).Should().Be(19);
+            results.Select(r => r.Status).Where(s => s != HttpStatusCode.Accepted)
                 .Should().OnlyContain(s => s == HttpStatusCode.TooManyRequests);
         }
         finally
         {
+            // Drain the shared queue before yielding: restore the fast stub and let
+            // every accepted job finish, so later tests do not see a full queue.
             factory.StubOcrEmpty();
+            foreach (var sessionId in accepted)
+            {
+                await factory.WaitForStateAsync(sessionId, "Review", TimeSpan.FromSeconds(60));
+            }
         }
     }
 
