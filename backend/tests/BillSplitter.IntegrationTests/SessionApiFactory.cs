@@ -142,18 +142,20 @@ public sealed class SessionApiFactory : WebApplicationFactory<Program>, IAsyncLi
 
     /// <summary>Open a hub connection as the given participant. The in-memory
     /// TestServer has no real sockets, so the transport is long polling over the
-    /// server's handler.</summary>
+    /// server's handler. The token goes through AccessTokenProvider - on long
+    /// polling that is a bearer header, the same path the browser client falls
+    /// back to when WebSockets are blocked.</summary>
     public async Task<HubConnection> ConnectHubAsync(string sessionId, string participantToken)
     {
         var url = new Uri(
             Server.BaseAddress,
-            $"/hubs/session?sessionId={Uri.EscapeDataString(sessionId)}" +
-            $"&access_token={Uri.EscapeDataString(participantToken)}");
+            $"/hubs/session?sessionId={Uri.EscapeDataString(sessionId)}");
         var connection = new HubConnectionBuilder()
             .WithUrl(url, options =>
             {
                 options.HttpMessageHandlerFactory = _ => Server.CreateHandler();
                 options.Transports = HttpTransportType.LongPolling;
+                options.AccessTokenProvider = () => Task.FromResult<string?>(participantToken);
             })
             .Build();
         await connection.StartAsync();

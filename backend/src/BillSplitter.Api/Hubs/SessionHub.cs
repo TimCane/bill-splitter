@@ -10,9 +10,10 @@ using SessionOptions = BillSplitter.Api.Configuration.SessionOptions;
 namespace BillSplitter.Api.Hubs;
 
 /// <summary>
-/// Realtime endpoint for the session. Connect authenticates the query-string
-/// token, joins the session group and pushes an immediate snapshot
-/// (docs/05-realtime-contract.md#connecting). The claim gestures are idempotent
+/// Realtime endpoint for the session. Connect authenticates the participant
+/// token (query string, or the bearer header the JS client uses on the
+/// long-polling fallback), joins the session group and pushes an immediate
+/// snapshot (docs/05-realtime-contract.md#connecting). The claim gestures are idempotent
 /// upserts/deletes scoped to the connection's participant, allowed only while
 /// <c>Open</c>; errors surface as <see cref="HubException"/> whose message is the
 /// stable code (docs/05-realtime-contract.md#hub-errors).
@@ -32,7 +33,7 @@ public sealed class SessionHub(
     {
         var http = Context.GetHttpContext();
         var sessionId = http?.Request.Query["sessionId"].ToString();
-        var token = http?.Request.Query["access_token"].ToString();
+        var token = TokenFrom(http);
         if (string.IsNullOrEmpty(sessionId) || string.IsNullOrEmpty(token))
         {
             throw new HubException(ErrorCodes.Unauthorized);
@@ -67,6 +68,23 @@ public sealed class SessionHub(
         await Clients.Caller.SendAsync("SnapshotUpdated", snapshot, Context.ConnectionAborted);
 
         await base.OnConnectedAsync();
+    }
+
+    // The JS client puts the token in the query for WebSockets/SSE (no headers
+    // there) but sends a bearer header on the long-polling fallback.
+    private static string? TokenFrom(HttpContext? http)
+    {
+        var token = http?.Request.Query["access_token"].ToString();
+        if (!string.IsNullOrEmpty(token))
+        {
+            return token;
+        }
+
+        const string scheme = "Bearer ";
+        var authorization = http?.Request.Headers.Authorization.ToString();
+        return authorization?.StartsWith(scheme, StringComparison.OrdinalIgnoreCase) == true
+            ? authorization[scheme.Length..]
+            : null;
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

@@ -12,7 +12,9 @@ gestures upstream and all live updates downstream
 ```
 
 - `access_token` is the standard SignalR query-string auth slot (WebSockets
-  cannot send an Authorization header).
+  cannot send an Authorization header). On the long-polling fallback the JS
+  client sends the token as an `Authorization: Bearer` header instead; the
+  hub accepts both.
 - `OnConnectedAsync`: resolve the session, hash the token, match a
   participant. No match or no session -> the connection is rejected
   (`HubException`, code `unauthorized`).
