@@ -33,9 +33,10 @@ One parameterized test runs the whole corpus.
   This corpus is the parser's real spec
   ([known risk](00-overview.md#known-risks)).
 - The corpus is also the spec for the pipeline extraction (ADR-0006 Phase A):
-  each concern pulled out of the engine - the `BasicNormalizer` line normalizer
-  and the `KeywordClassifier` line classifier, then the item rules and detectors
-  - keeps the corpus byte-identical green, so no per-layer unit tests are added.
+  each concern pulled out of the engine - the `BasicNormalizer` line normalizer,
+  the `KeywordClassifier` line classifier and the `ItemSelectionEngine` item
+  rules, then the bill detectors - keeps the corpus byte-identical green, so no
+  per-layer unit tests are added.
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt
