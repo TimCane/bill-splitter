@@ -48,6 +48,49 @@ def test_response_handles_no_detections() -> None:
     assert _response_from_raw(None, duration_ms=5).lines == []
 
 
+def _detection(x: int, y: int, width: int, height: int, text: str, confidence: float) -> list:
+    return [[[x, y], [x + width, y], [x + width, y + height], [x, y + height]], (text, confidence)]
+
+
+def test_response_assembles_row_columns_into_one_line() -> None:
+    # A quantity, name and right-aligned price detected as separate boxes on the
+    # same row, deliberately out of left-to-right order in the raw list.
+    raw = [
+        [
+            _detection(643, 356, 109, 40, "$10.50", 0.99),
+            _detection(75, 360, 315, 30, "Hendrick Gin & Tonic", 0.95),
+            _detection(6, 362, 22, 31, "1", 0.98),
+        ]
+    ]
+
+    lines = _response_from_raw(raw, duration_ms=1).lines
+
+    assert len(lines) == 1
+    line = lines[0]
+    assert line.text == "1 Hendrick Gin & Tonic $10.50"
+    assert line.confidence == 0.95  # the weakest fragment sets the line confidence
+    # Box is the union of the fragments: leftmost x to the price column's right
+    # edge, topmost y to the lowest fragment bottom (the price box here).
+    assert (line.box.x, line.box.y) == (6, 356)
+    assert line.box.width == (643 + 109) - 6
+    assert line.box.height == (356 + 40) - 356
+
+
+def test_response_keeps_vertically_separated_rows_apart() -> None:
+    raw = [
+        [
+            _detection(75, 360, 200, 30, "Ginger Mule", 0.99),
+            _detection(664, 358, 87, 37, "$9.50", 0.99),
+            _detection(75, 419, 200, 30, "Glass Camus Zin", 0.96),
+            _detection(646, 418, 105, 35, "$24.00", 0.99),
+        ]
+    ]
+
+    lines = _response_from_raw(raw, duration_ms=1).lines
+
+    assert [line.text for line in lines] == ["Ginger Mule $9.50", "Glass Camus Zin $24.00"]
+
+
 def test_upscale_enlarges_small_images_to_min_side() -> None:
     upscaled = _upscale(Image.new("L", (100, 60), 255), min_side=300)
 

@@ -66,8 +66,13 @@ Body: raw image bytes, `Content-Type: image/jpeg` or `image/png`, max
 }
 ```
 
-- `lines` ordered top-to-bottom by box `y`. `box` is the axis-aligned
-  bounding rectangle of PaddleOCR's quad, in pixels of the submitted image.
+- `lines` ordered top-to-bottom by box `y`. Each is a whole reading row:
+  PaddleOCR detects a row's name, quantity and right-aligned price as separate
+  boxes, so the sidecar folds detections that share a horizontal band into one
+  line - read left-to-right by `x`, text joined, confidence taken from the
+  weakest fragment. `box` is the axis-aligned union of those detections' quads,
+  in pixels of the submitted image - so an item name and its price arrive on one
+  line (`2 PERONI 660ML 11.00`), the shape the parser expects.
 - `422` undecodable image or header dimensions over 8000x8000 (checked
   before full decode - the sidecar's half of the decode-bomb guard,
   [10-security-privacy.md](10-security-privacy.md#upload-hardening)),
