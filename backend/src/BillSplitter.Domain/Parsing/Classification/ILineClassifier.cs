@@ -10,4 +10,11 @@ namespace BillSplitter.Domain.Parsing.Classification;
 internal interface ILineClassifier
 {
     LineType Classify(Candidate candidate);
+
+    /// <summary>Whether the line could be the receipt's grand total: a total-word
+    /// row that is not a subtotal, item-count or VAT breakdown. Distinct from
+    /// <see cref="Classify"/>, which ranks a tax/service word ahead of the total
+    /// word ("Total Taxes" reads as tax) - grand-total detection must still see
+    /// "Total incl. VAT" as a total.</summary>
+    bool IsGrandTotalCandidate(Candidate candidate);
 }

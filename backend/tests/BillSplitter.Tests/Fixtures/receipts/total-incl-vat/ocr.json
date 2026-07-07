@@ -1,0 +1,9 @@
+{
+  "durationMs": 2740,
+  "lines": [
+    { "text": "THE CROWN INN", "confidence": 0.97, "box": { "x": 120, "y": 40, "width": 600, "height": 44 } },
+    { "text": "FISH & CHIPS          £12.95", "confidence": 0.96, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "PIE & MASH            £10.50", "confidence": 0.95, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "TOTAL incl VAT        £23.45", "confidence": 0.97, "box": { "x": 40, "y": 260, "width": 820, "height": 40 } }
+  ]
+}

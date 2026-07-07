@@ -101,6 +101,15 @@ internal sealed partial class KeywordClassifier : ILineClassifier
         return LineType.Item;
     }
 
+    // Grand-total detection is a looser question than Classify: a "Total incl.
+    // VAT" or "Total inc Service" row is the amount due, even though its tax or
+    // service word outranks the total word in Classify's precedence.
+    public bool IsGrandTotalCandidate(Candidate candidate)
+    {
+        var u = candidate.Name.ToUpperInvariant();
+        return IsTotal(u) && !IsSubtotal(u) && !IsItemCount(u) && !IsTaxBreakdown(u);
+    }
+
     private static bool IsSubtotal(string u) => u.Contains("SUBTOTAL") || u.Contains("SUB TOTAL");
 
     private static bool IsItemCount(string u) => ItemCount().IsMatch(u);

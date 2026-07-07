@@ -143,8 +143,11 @@ positional decisions of step 3 (subtotal, item-count, rollup, VAT breakdown,
 tax, tip, service, total, payment noise, bare charge). Highest-priority match
 wins, so a "Total Taxes" row reads as tax before total and a "20% VAT" breakdown
 is dropped before it is counted as payable tax. The engine consumes the
-`LineType` for both grand-total detection and the above-total classification;
-item-name shaping and unit-price rules stay in the engine until A4.
+`LineType` for the above-total classification, and the classifier's separate
+`IsGrandTotalCandidate` for grand-total detection - a looser test, since a
+"Total incl. VAT" row is the amount due even though its tax word outranks the
+total word in the `LineType` precedence. Item-name shaping and unit-price rules
+stay in the engine until A4.
 
 1. **Price extraction.** A line is a candidate item/amount row if it ends
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a

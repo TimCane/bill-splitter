@@ -107,7 +107,7 @@ internal static partial class ReceiptParseEngine
         Candidate? total = null;
         foreach (var candidate in candidates)
         {
-            if (Classifier.Classify(candidate) != LineType.Total)
+            if (!Classifier.IsGrandTotalCandidate(candidate))
             {
                 continue;
             }
@@ -164,7 +164,6 @@ internal static partial class ReceiptParseEngine
             else if (UnitPriceDetail().IsMatch(candidate.Name))
             {
                 // "2 @ $35.50" under its item: the item already has the line total.
-                // A unit-price concern, extracted with the item rules (A4).
             }
             else if (type == LineType.BareCharge)
             {
