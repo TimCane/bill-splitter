@@ -48,9 +48,13 @@ internal static partial class ReceiptParseEngine
         var warnings = new List<string>();
         var currency = GuessCurrency(result.Lines);
 
-        // Fold modifier lines ("+ Bacon", "No Onion") into the priced line above
-        // them before building candidates, so each enriched item reads as one row.
-        var lines = ModifierMerger.Merge(result.Lines);
+        // Two multi-line pre-passes run before candidates are built. First assemble
+        // any item name wrapped across lines onto its price line ("Classic" / "BAO"
+        // / "6.50" -> one row), then fold amount-less modifier lines ("+ Bacon",
+        // "No Onion") into the priced line above them. Order matters: names must be
+        // whole priced rows before modifiers attach, or a modifier would splice into
+        // a still-nameless price and block the wrapped-name fold.
+        var lines = ModifierMerger.Merge(WrappedNameMerger.Merge(result.Lines));
 
         var candidates = new List<Candidate>();
         var previousText = string.Empty;

@@ -105,8 +105,8 @@ ones (weight, PLU/barcode) are dropped.
 | item #code | `Burger #12 5.00` | current (`ItemCode()`) |
 | x-quantity | `Burger x2 £10.00` | planned |
 | quantity suffix | `Burger (2) £10.00` | planned |
-| name newline total | `Burger` / `£5.00` | planned (wrapped merge) |
-| wrapped description | `Large Double` / `Bacon` / `£15.99` | planned (wrapped merge) |
+| name newline total | `Burger` / `£5.00` | current (wrapped merge) |
+| wrapped description | `Large Double` / `Bacon` / `£15.99` | current (wrapped merge) |
 | modifier lines | `Burger` / `+ Bacon` / `No Onion` | current (modifier attach) |
 
 ## Classify, don't itemise
@@ -174,12 +174,19 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 ## Multi-line
 
-- **Wrapped names** *(planned)*: join amount-less lines onto the next priced
-  line until a price appears.
+- **Wrapped names** *(current)*: join amount-less lines onto the next priced
+  line until a price appears. Gated to a nameless price on a receipt that has a
+  structural total, borrowing a bounded run of letter-only fragments that sit
+  above the price and in its left column (by `Box.Y`/`Box.X`, not list order) -
+  so a centred store header, a trailing note, an already-inline receipt, a
+  non-receipt, or a fully drifted column layout (the box-sort pass's job) is
+  left untouched.
 - **Modifiers** *(current)*: a pre-pass folds amount-less modifier lines into the
   priced line above them before candidates are built (`ModifierMerger`), so the
   item reads enriched - `Burger` + `+ Bacon` + `No Onion` -> `Burger + Bacon No
-  Onion`, price unchanged. Only a leading `+`/`*` addition or a short
+  Onion`, price unchanged. Runs after the wrapped-name pass, so a modifier
+  attaches to a whole priced row rather than a still-nameless price. Only a
+  leading `+`/`*` addition or a short
   `NO`/`EXTRA`/`ADD`/`HOLD`/`SUB`/`LESS`/`W/O`/`WITHOUT` form (one or two words,
   excluding payment/status words) attaches, and only directly below a priced
   line, so footers like `No payment received` are left alone.
