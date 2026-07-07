@@ -69,10 +69,11 @@ def test_response_assembles_row_columns_into_one_line() -> None:
     line = lines[0]
     assert line.text == "1 Hendrick Gin & Tonic $10.50"
     assert line.confidence == 0.95  # the weakest fragment sets the line confidence
-    # Box spans from the leftmost fragment to the right edge of the price column.
+    # Box is the union of the fragments: leftmost x to the price column's right
+    # edge, topmost y to the lowest fragment bottom (the price box here).
     assert (line.box.x, line.box.y) == (6, 356)
-    assert line.box.width == 643 + 109 - 6
-    assert line.box.height == (362 + 31) - 356
+    assert line.box.width == (643 + 109) - 6
+    assert line.box.height == (356 + 40) - 356
 
 
 def test_response_keeps_vertically_separated_rows_apart() -> None:
