@@ -146,8 +146,19 @@ is dropped before it is counted as payable tax. The engine consumes the
 `LineType` for the above-total classification, and the classifier's separate
 `IsGrandTotalCandidate` for grand-total detection - a looser test, since a
 "Total incl. VAT" row is the amount due even though its tax word outranks the
-total word in the `LineType` precedence. Item-name shaping and unit-price rules
-stay in the engine until A4.
+total word in the `LineType` precedence.
+
+Each item row above the total is then read by the item rules (`Parsing/Rules`).
+Every `IReceiptRule` inspects the row and returns an `ItemCandidate` - a parsed
+item or a reject, with the confidence the `ItemSelectionEngine` ranks it by - or
+`null` when the row does not fit its layout. The engine keeps the
+highest-confidence candidate rather than the first rule to match; a reject that
+wins parks a warning instead of adding an item. The default set is
+`NamelessPriceRejectRule` (a price whose name shapes away to nothing) over
+`UnitPriceColumnRule` (a reconciling per-unit column to drop) over
+`QuantityNamePriceRule` (the everyday name reading, always applies). Confidences
+are calibrated so selection reproduces the old first-match order; the shared
+name-shaping primitives (clean, quantity, unit-price column) live in `ItemText`.
 
 1. **Price extraction.** A line is a candidate item/amount row if it ends
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a
