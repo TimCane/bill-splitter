@@ -41,12 +41,16 @@ internal static partial class ModifierMerger
         RegexOptions.IgnoreCase)]
     private static partial Regex KeywordModifier();
 
-    // Words that turn a keyword line into a payment or status footer, not a
-    // modifier - "No payment received", "No change due", "Less balance", etc.
-    private static readonly HashSet<string> StatusWords = new(StringComparer.OrdinalIgnoreCase)
+    // Words that name a bill line or a payment/status footer rather than an item
+    // note - "No payment received", "Add Gratuity", "Less Service", "Add Tax". A
+    // modifier carrying one of these must not fold: the enriched item name would
+    // then contain the classifier's own keyword and the whole row would read as
+    // that tip/service/tax line and drop out of the split.
+    private static readonly HashSet<string> ExcludedWords = new(StringComparer.OrdinalIgnoreCase)
     {
         "payment", "received", "change", "served", "charge",
         "total", "subtotal", "balance", "due",
+        "tip", "tax", "gratuity", "service", "vat", "gst", "discount", "fee",
     };
 
     /// <summary>Returns the lines with any modifier lines merged into the priced
@@ -87,19 +91,16 @@ internal static partial class ModifierMerger
 
     private static bool IsModifier(string text)
     {
-        if (LeadingAddition().IsMatch(text))
-        {
-            return true;
-        }
-
-        if (!KeywordModifier().IsMatch(text))
+        if (!LeadingAddition().IsMatch(text) && !KeywordModifier().IsMatch(text))
         {
             return false;
         }
 
+        // Applies to both shapes: a "* Service" or "Add Gratuity" line matches the
+        // modifier form but names a bill extra, so it is left for the classifier.
         foreach (var word in text.Split(' '))
         {
-            if (StatusWords.Contains(word.Trim('.', ',', ':')))
+            if (ExcludedWords.Contains(word.Trim('+', '*', '.', ',', ':')))
             {
                 return false;
             }

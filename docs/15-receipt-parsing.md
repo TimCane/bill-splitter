@@ -185,11 +185,13 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
   priced line above them before candidates are built (`ModifierMerger`), so the
   item reads enriched - `Burger` + `+ Bacon` + `No Onion` -> `Burger + Bacon No
   Onion`, price unchanged. Runs after the wrapped-name pass, so a modifier
-  attaches to a whole priced row rather than a still-nameless price. Only a
-  leading `+`/`*` addition or a short
-  `NO`/`EXTRA`/`ADD`/`HOLD`/`SUB`/`LESS`/`W/O`/`WITHOUT` form (one or two words,
-  excluding payment/status words) attaches, and only directly below a priced
-  line, so footers like `No payment received` are left alone.
+  attaches to a whole priced row rather than a still-nameless price. Only a short
+  (one or two word) leading `+`/`*` addition or a
+  `NO`/`EXTRA`/`ADD`/`HOLD`/`SUB`/`LESS`/`W/O`/`WITHOUT` form attaches, and only
+  directly below a priced line. A form naming a payment/status footer or a bill
+  extra (`payment`, `service`, `gratuity`, `tip`, `tax`, `discount`, ...) is left
+  alone, so `No payment received` or `Add Gratuity` never folds into the item and
+  flips it to a bill line.
 - **Duplicate copies** *(planned)*: de-dupe repeated item blocks
   (merchant/customer/kitchen) without collapsing a genuinely repeated dish.
 
