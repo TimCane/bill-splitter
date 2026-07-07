@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Detectors;
 using BillSplitter.Domain.Parsing.Models;
+using BillSplitter.Domain.Parsing.Multiline;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
 
@@ -47,10 +48,15 @@ internal static partial class ReceiptParseEngine
         var warnings = new List<string>();
         var currency = GuessCurrency(result.Lines);
 
+        // Fold any item name wrapped across lines onto its price line before we
+        // read candidates, so "Classic" / "BAO" / "6.50" is one item row. Gated to
+        // nameless prices, so already-inline receipts pass through unchanged.
+        var lines = WrappedNameMerger.Merge(result.Lines);
+
         var candidates = new List<Candidate>();
         var previousText = string.Empty;
         var previousHasAmount = false;
-        foreach (var line in result.Lines)
+        foreach (var line in lines)
         {
             var text = Normalizer.Normalize(line.Text ?? string.Empty);
             var priorText = previousText;
