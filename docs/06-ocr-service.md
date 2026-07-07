@@ -132,7 +132,14 @@ layer at a time, corpus green at every step, without changing `Parse`'s
 signature or output. The facade keeps the single call site (`OcrWorker`) and
 the no-DI, pure-Domain status quo unchanged.
 
-Every line is first run through `ITextNormalizer` (`Parsing/Normalization`); the
+A modifier pre-pass (`ModifierMerger`, `Parsing/Multiline`) runs first: amount-less
+modifier lines (`+ Bacon`, `No Onion`, `Extra Sauce`) directly below a priced line
+are folded into that line's name ahead of the money token, so the item reads
+enriched (`Burger + Bacon No Onion`) and no stray row is emitted. It is
+conservative by design - only leading `+`/`*` additions or a short keyword form
+attach, leaving footers such as `No payment received` untouched.
+
+Every line is then run through `ITextNormalizer` (`Parsing/Normalization`); the
 default `BasicNormalizer` trims surrounding whitespace and collapses internal
 runs to single spaces. This is generic line tidying only - item-name concerns
 (`#code`/`@unit` stripping, OCR-misread fixing) live in the item rules, not here.

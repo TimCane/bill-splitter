@@ -107,7 +107,7 @@ ones (weight, PLU/barcode) are dropped.
 | quantity suffix | `Burger (2) £10.00` | planned |
 | name newline total | `Burger` / `£5.00` | planned (wrapped merge) |
 | wrapped description | `Large Double` / `Bacon` / `£15.99` | planned (wrapped merge) |
-| modifier lines | `Burger` / `+ Bacon` / `No Onion` | planned (modifier attach) |
+| modifier lines | `Burger` / `+ Bacon` / `No Onion` | current (modifier attach) |
 
 ## Classify, don't itemise
 
@@ -176,7 +176,13 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 - **Wrapped names** *(planned)*: join amount-less lines onto the next priced
   line until a price appears.
-- **Modifiers** *(planned)*: attach `+ Bacon` / `No Onion` to the item above.
+- **Modifiers** *(current)*: a pre-pass folds amount-less modifier lines into the
+  priced line above them before candidates are built (`ModifierMerger`), so the
+  item reads enriched - `Burger` + `+ Bacon` + `No Onion` -> `Burger + Bacon No
+  Onion`, price unchanged. Only a leading `+`/`*` addition or a short
+  `NO`/`EXTRA`/`ADD`/`HOLD`/`SUB`/`LESS`/`W/O`/`WITHOUT` form (one or two words,
+  excluding payment/status words) attaches, and only directly below a priced
+  line, so footers like `No payment received` are left alone.
 - **Duplicate copies** *(planned)*: de-dupe repeated item blocks
   (merchant/customer/kitchen) without collapsing a genuinely repeated dish.
 
