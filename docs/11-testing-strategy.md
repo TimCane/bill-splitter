@@ -44,6 +44,11 @@ One parameterized test runs the whole corpus.
   unit-price column rule winning `2 Roast Beef 27.00 54.00`. The trace never rides
   the public `ParsedReceipt` and is never logged, so no receipt text leaves the
   process (docs/06-ocr-service.md#parsing, docs/15-receipt-parsing.md#diagnostics).
+- Phase B capabilities each land with their own fixtures: `duplicate-receipt-copy`
+  proves the copy de-duplicator (a receipt shot as merchant + customer copies
+  collapsed to one) and `repeated-order-not-copy` guards the negative case (a
+  genuine double order preserved), while the existing corpus - including
+  `jack-daniels-gratuity`'s legitimately repeated dishes - stays byte-for-byte green.
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

@@ -177,8 +177,11 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 - **Wrapped names** *(planned)*: join amount-less lines onto the next priced
   line until a price appears.
 - **Modifiers** *(planned)*: attach `+ Bacon` / `No Onion` to the item above.
-- **Duplicate copies** *(planned)*: de-dupe repeated item blocks
-  (merchant/customer/kitchen) without collapsing a genuinely repeated dish.
+- **Duplicate copies** *(current)*: `CopyDeduplicator` collapses repeated item
+  blocks (merchant/customer/kitchen) to one - but only when the whole item list is
+  K identical blocks (each at least two items) and one block reconciles with the
+  printed total while all of them do not. A genuinely repeated dish or a repeat
+  order is preserved, since its one block would not reconcile.
 
 ## Diagnostics
 
