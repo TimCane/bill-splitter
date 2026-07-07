@@ -1,0 +1,12 @@
+{
+  "durationMs": 2740,
+  "lines": [
+    { "text": "THE OLIVE TREE", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 540, "height": 44 } },
+    { "text": "GARDEN SALAD          £7.50", "confidence": 0.96, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "MUSHROOM RISOTTO     £13.50", "confidence": 0.95, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "SPARKLING WATER       £2.50", "confidence": 0.94, "box": { "x": 40, "y": 200, "width": 820, "height": 38 } },
+    { "text": "SUBTOTAL             £23.50", "confidence": 0.96, "box": { "x": 40, "y": 260, "width": 820, "height": 38 } },
+    { "text": "SERVICE 10%           £2.35", "confidence": 0.94, "box": { "x": 40, "y": 300, "width": 820, "height": 38 } },
+    { "text": "TOTAL                £25.85", "confidence": 0.97, "box": { "x": 40, "y": 340, "width": 820, "height": 40 } }
+  ]
+}

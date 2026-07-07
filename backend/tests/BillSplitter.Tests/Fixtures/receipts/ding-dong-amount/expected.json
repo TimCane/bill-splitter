@@ -28,5 +28,7 @@
     "totalMinor": 18040
   },
   "currency": "USD",
-  "warnings": []
+  "warnings": [
+    "totals do not reconcile: items and extras come to 20840 but the receipt total is 18040"
+  ]
 }

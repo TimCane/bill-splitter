@@ -44,6 +44,7 @@
   },
   "currency": "GBP",
   "warnings": [
-    "price with no name ignored: 6.50"
+    "price with no name ignored: 6.50",
+    "totals do not reconcile: items and extras come to 6578 but the receipt total is 7228"
   ]
 }

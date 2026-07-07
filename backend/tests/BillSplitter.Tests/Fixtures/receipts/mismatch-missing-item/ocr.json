@@ -1,0 +1,11 @@
+{
+  "durationMs": 2980,
+  "lines": [
+    { "text": "EL SOMBRERO", "confidence": 0.95, "box": { "x": 120, "y": 40, "width": 520, "height": 44 } },
+    { "text": "TACO                  $3.50", "confidence": 0.96, "box": { "x": 40, "y": 120, "width": 820, "height": 38 } },
+    { "text": "BURRITO               $8.00", "confidence": 0.95, "box": { "x": 40, "y": 160, "width": 820, "height": 38 } },
+    { "text": "LOADED NACHOS", "confidence": 0.94, "box": { "x": 40, "y": 200, "width": 820, "height": 38 } },
+    { "text": "TAX                   $1.15", "confidence": 0.96, "box": { "x": 40, "y": 260, "width": 820, "height": 38 } },
+    { "text": "TOTAL                $22.00", "confidence": 0.97, "box": { "x": 40, "y": 300, "width": 820, "height": 40 } }
+  ]
+}

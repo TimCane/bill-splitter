@@ -63,5 +63,7 @@
     "totalMinor": 17388
   },
   "currency": "GBP",
-  "warnings": []
+  "warnings": [
+    "totals do not reconcile: items and extras come to 17248 but the receipt total is 17388"
+  ]
 }

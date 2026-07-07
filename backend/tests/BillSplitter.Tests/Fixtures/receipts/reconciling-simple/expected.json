@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "name": "GARDEN SALAD", "quantity": 1, "priceMinor": 750 },
+    { "name": "MUSHROOM RISOTTO", "quantity": 1, "priceMinor": 1350 },
+    { "name": "SPARKLING WATER", "quantity": 1, "priceMinor": 250 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 235, "totalMinor": 2585 },
+  "currency": "GBP",
+  "warnings": []
+}

@@ -1,0 +1,11 @@
+{
+  "items": [
+    { "name": "TACO", "quantity": 1, "priceMinor": 350 },
+    { "name": "BURRITO", "quantity": 1, "priceMinor": 800 }
+  ],
+  "bill": { "taxMinor": 115, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 2200 },
+  "currency": "USD",
+  "warnings": [
+    "totals do not reconcile: items and extras come to 1265 but the receipt total is 2200"
+  ]
+}
