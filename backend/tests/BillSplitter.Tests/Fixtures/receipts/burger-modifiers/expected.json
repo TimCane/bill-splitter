@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "name": "Burger + Bacon No Onion", "quantity": 1, "priceMinor": 850 },
+    { "name": "Fries Extra Sauce", "quantity": 1, "priceMinor": 375 },
+    { "name": "Milkshake", "quantity": 1, "priceMinor": 425 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 1650 },
+  "currency": "GBP",
+  "warnings": []
+}

@@ -25,9 +25,9 @@ internal static partial class WrappedNameMerger
     private const int MaxFragments = 3;
 
     // A line that is only an amount ("£6.50", "6.50", "£ 5.50", "6.50 B"): a price
-    // whose name landed on the lines above it. The optional trailing letter is a
-    // VAT-class code, so this stays in step with the engine's MoneyAtEnd. Negative
-    // amounts are discounts, not wrapped items, so they are excluded.
+    // whose name landed on the lines above it. A deliberately tighter variant of
+    // ReceiptPatterns.Money - whole-line anchored and dropping the negative branch,
+    // since a discount is not a wrapped item and must not borrow a name.
     [GeneratedRegex(@"^[£€$]?\s*\d{1,4}[.,]\d{2}(?:\s+[A-Z])?\s*$")]
     private static partial Regex NamelessPrice();
 
@@ -67,9 +67,20 @@ internal static partial class WrappedNameMerger
 
         var merged = new List<OcrLine>(lines.Count);
         var fragments = new List<OcrLine>();
+        var deferred = new List<OcrLine>();
         foreach (var line in lines)
         {
             var text = (line.Text ?? string.Empty).Trim();
+
+            // A "+ Bacon" note printed between a wrapped name and its price is the
+            // modifier pass's job, not a name fragment. Hold it rather than let it
+            // break the name mid-assembly, and re-emit it just below the folded
+            // price so the modifier pass still folds it into the item.
+            if (fragments.Count > 0 && ModifierMerger.IsLeadingAddition(text))
+            {
+                deferred.Add(line);
+                continue;
+            }
 
             if (NamelessPrice().IsMatch(text) && fragments.Count > 0)
             {
@@ -87,12 +98,15 @@ internal static partial class WrappedNameMerger
                 {
                     // Nothing above the price belongs to it: leave the price alone.
                     merged.Add(line);
-                    fragments.Clear();
-                    continue;
+                }
+                else
+                {
+                    var name = string.Join(' ', fragments.Skip(flushed).Select(f => f.Text!.Trim()));
+                    merged.Add(line with { Text = $"{name} {text}" });
                 }
 
-                var name = string.Join(' ', fragments.Skip(flushed).Select(f => f.Text!.Trim()));
-                merged.Add(line with { Text = $"{name} {text}" });
+                merged.AddRange(deferred);
+                deferred.Clear();
                 fragments.Clear();
                 continue;
             }
@@ -105,10 +119,13 @@ internal static partial class WrappedNameMerger
 
             merged.AddRange(fragments);
             fragments.Clear();
+            merged.AddRange(deferred);
+            deferred.Clear();
             merged.Add(line);
         }
 
         merged.AddRange(fragments);
+        merged.AddRange(deferred);
         return merged;
     }
 

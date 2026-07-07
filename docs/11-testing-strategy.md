@@ -37,6 +37,17 @@ One parameterized test runs the whole corpus.
   the `KeywordClassifier` line classifier, the `ItemSelectionEngine` item rules
   and the `BillDetectionEngine`/`GrandTotalDetector` bill detectors - keeps the
   corpus byte-identical green, so no per-layer unit tests are added.
+- Multi-line handling has its own hand-authored fixtures. `burger-modifiers`
+  exercises the `ModifierMerger` happy path (an item followed by `+ Bacon` /
+  `No Onion` and another with `Extra Sauce`); the `No payment received` corpus
+  fixtures keep proving the pre-pass leaves payment-status footers alone. Each
+  hardening case has its own fixture pinning behaviour that would otherwise lose or
+  invent an item: `modifier-footnote` (a long `*` service-charge disclaimer must
+  not fold), `modifier-keyword-footer` (`Add Gratuity` must not fold and reclassify
+  the item), `modifier-nameless-price` (a note under a bare price parks a warning,
+  not a phantom item), `modifier-between-wrapped-name` (a `+ Bacon` between a
+  wrapped name and its price keeps the item), and `modifier-unit-price-column` (a
+  spliced modifier leaves the reconciling unit-price column strippable).
 - The pipeline's in-memory parse-decision trace (ADR-0006 Phase A, `ParseDecision`)
   has its own corpus-backed test, `ReceiptParseTraceTests`: it reads the trace off
   the internal `ReceiptParseEngine.ParseTraced` (exposed via `InternalsVisibleTo`)

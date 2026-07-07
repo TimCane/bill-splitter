@@ -1,0 +1,10 @@
+{
+  "durationMs": 3040,
+  "lines": [
+    { "text": "BISTRO NINE", "confidence": 0.97, "box": { "x": 120, "y": 40, "width": 600, "height": 44 } },
+    { "text": "Ribeye 22.00", "confidence": 0.96, "box": { "x": 40, "y": 150, "width": 620, "height": 36 } },
+    { "text": "Add Gratuity", "confidence": 0.92, "box": { "x": 40, "y": 190, "width": 300, "height": 30 } },
+    { "text": "Salad 6.50", "confidence": 0.95, "box": { "x": 40, "y": 250, "width": 620, "height": 36 } },
+    { "text": "TOTAL 28.50", "confidence": 0.97, "box": { "x": 40, "y": 320, "width": 620, "height": 40 } }
+  ]
+}

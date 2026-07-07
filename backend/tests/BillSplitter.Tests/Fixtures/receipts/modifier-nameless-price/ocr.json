@@ -1,0 +1,9 @@
+{
+  "durationMs": 2870,
+  "lines": [
+    { "text": "Coffee 3.00", "confidence": 0.96, "box": { "x": 40, "y": 150, "width": 620, "height": 34 } },
+    { "text": "6.50", "confidence": 0.95, "box": { "x": 560, "y": 190, "width": 120, "height": 34 } },
+    { "text": "+ Bacon", "confidence": 0.93, "box": { "x": 40, "y": 230, "width": 300, "height": 30 } },
+    { "text": "TOTAL 9.50", "confidence": 0.97, "box": { "x": 40, "y": 300, "width": 620, "height": 40 } }
+  ]
+}
