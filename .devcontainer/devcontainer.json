@@ -7,6 +7,7 @@
   "forwardPorts": [
     5173,
     5205,
+    8000,
     6379,
     9000,
     9001
@@ -23,7 +24,8 @@
       "extensions": [
         "ms-dotnettools.csharp",
         "ms-dotnettools.csdevkit",
-        "ms-dotnettools.vscode-dotnet-runtime"
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-python.python"
       ]
     }
   },

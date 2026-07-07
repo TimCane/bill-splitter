@@ -16,12 +16,14 @@ Scope: repo skeleton and the walking skeleton of every process.
   Tailwind + shadcn/ui + router + query wired, placeholder Landing.
 - `ocr/`: FastAPI app with `/healthz` and a stubbed `/ocr` (echoes fixture
   JSON behind an env flag; real PaddleOCR wiring lands here too if quick).
-- Devcontainer compose gains the `ocr` service
-  ([06-ocr-service.md](06-ocr-service.md#compose-service)); CI per
+- Devcontainer runs the OCR sidecar as an in-container dev process (venv +
+  uvicorn), not a compose service
+  ([06-ocr-service.md](06-ocr-service.md#running-the-service)); CI per
   [12-ci.md](12-ci.md) (all jobs, e2e job stubbed).
 
 Accept:
-- [ ] `docker compose up` in the devcontainer: all four services healthy
+- [ ] `dev: all` in the devcontainer: API, web and OCR all serving; redis and
+      minio compose services healthy
 - [ ] `GET /healthz` returns `200` with redis/minio/ocr probes true (the
       `email` capability flag stays false until SMTP is wired in M6)
 - [ ] CI green on a PR touching all three trees

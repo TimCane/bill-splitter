@@ -8,11 +8,13 @@ services:
     volumes:
       - ../..:/workspaces:cached
     command: sleep infinity
-    # Dev servers - Vite (5173) and the API (5205); published so the host
+    # Dev servers - Vite (5173), the API (5205) and the OCR sidecar (8000), all
+    # run in-container as processes ("dev: all" task); published so the host
     # browser and LAN devices can reach them without the VS Code forwarder.
     ports:
       - "5173:5173"
       - "5205:5205"
+      - "8000:8000"
     networks:
       - backend
 
@@ -58,15 +60,6 @@ services:
       mc mb --ignore-existing local/bill-splitter;
       exit 0;
       "
-    networks:
-      - backend
-
-  # PaddleOCR sidecar - internal only, no published ports. Healthcheck is
-  # inherited from the image's HEALTHCHECK (ocr/Dockerfile).
-  ocr:
-    build:
-      context: ../ocr
-    restart: unless-stopped
     networks:
       - backend
 

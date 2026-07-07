@@ -254,24 +254,26 @@ the process ([10-security-privacy.md](10-security-privacy.md),
 Every rule above is deterministic on the sidecar's JSON - fixtures are
 recorded sidecar responses, so parser tests run without Python or images.
 
-## Compose service
+## Running the service
 
-Added to `docker-compose.yml` **together with** the `ocr/` scaffold
-(milestone 1, [14-build-order.md](14-build-order.md)):
+**Dev (devcontainer).** The sidecar runs in-container as a plain uvicorn
+process alongside the API and Vite dev servers, not as its own compose
+service. The devcontainer image carries Python 3.12 and paddle's native libs
+(`libgomp1`, `libgl1`, `libglib2.0-0`); `post-create.sh` builds `ocr/.venv`
+from all three requirements files - light web deps, the ~600MB PaddleOCR
+inference wheels, and the dev tools - and bakes the PP-OCRv4 models so the
+first request never reaches the network. Start it with the `ocr` shell alias,
+the `ocr: dev` VS Code task, or the `dev: all` task that runs all three
+servers. The backend reaches it at `http://localhost:8000` in Development
+(`appsettings.Development.json`).
 
-```yaml
-  # PaddleOCR sidecar - internal only, no published ports.
-  ocr:
-    build:
-      context: ../ocr
-    restart: unless-stopped
-    networks:
-      - backend
-```
+**Prod.** The sidecar is prebuilt in CI, pushed to GHCR, and run as an
+internal-only container from `ocr/Dockerfile` (`docker-compose.prod.yml`,
+[docs/12-ci.md](12-ci.md), [docs/13-deployment.md](13-deployment.md)); the
+backend reaches it at `http://ocr:8000` over the internal network.
 
-Image size warning for the handoff developer: PaddlePaddle CPU wheels are
-~600MB; expect a 1.5-2GB image and a multi-minute first build. The inference
-wheels are pinned in `requirements-ocr.txt` and installed into the image only;
-`requirements.txt` holds just the light web-serving deps so CI can run the stub
-tests without pulling PaddlePaddle
-([11-testing-strategy.md](11-testing-strategy.md)).
+Image/venv size warning for the handoff developer: PaddlePaddle CPU wheels are
+~600MB; expect a 1.5-2GB image (or venv) and a multi-minute first build. The
+inference wheels are pinned in `requirements-ocr.txt`; `requirements.txt` holds
+just the light web-serving deps so CI can run the stub tests without pulling
+PaddlePaddle ([11-testing-strategy.md](11-testing-strategy.md)).
