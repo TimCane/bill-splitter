@@ -27,8 +27,11 @@ internal static partial class ModifierMerger
     [GeneratedRegex(@"\s+")]
     private static partial Regex Whitespace();
 
-    // A leading addition: "+ Bacon", "+Bacon", "*Extra Cheese".
-    [GeneratedRegex(@"^[+*]\s*\S")]
+    // A leading addition: "+ Bacon", "+Bacon", "*Extra Cheese". Bounded to one or
+    // two words like KeywordModifier - a longer "* 12.5% service charge added for
+    // large parties" footnote is a disclaimer, not a modifier, and must not fold
+    // into the item above.
+    [GeneratedRegex(@"^[+*]\s*\S+(?:\s+\S+)?$")]
     private static partial Regex LeadingAddition();
 
     // A short instruction modifier: a leading keyword and one or two following
