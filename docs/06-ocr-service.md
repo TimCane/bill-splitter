@@ -132,7 +132,14 @@ layer at a time, corpus green at every step, without changing `Parse`'s
 signature or output. The facade keeps the single call site (`OcrWorker`) and
 the no-DI, pure-Domain status quo unchanged.
 
-Every line is first run through `ITextNormalizer` (`Parsing/Normalization`); the
+Before candidates are read, a gated pre-pass (`Parsing/Multiline`) folds an item
+name wrapped across lines onto its price row (`WrappedNameMerger`: `Classic` /
+`BAO` / `£6.50` -> one `Classic BAO £6.50`). It fires only for a nameless priced
+line on a receipt that has a structural total, borrowing a bounded run of
+letter-only fragments immediately above - so an already-inline receipt, a
+non-receipt, or a fully column-drifted layout is untouched.
+
+Every line is then run through `ITextNormalizer` (`Parsing/Normalization`); the
 default `BasicNormalizer` trims surrounding whitespace and collapses internal
 runs to single spaces. This is generic line tidying only - item-name concerns
 (`#code`/`@unit` stripping, OCR-misread fixing) live in the item rules, not here.
