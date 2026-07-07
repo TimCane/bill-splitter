@@ -52,7 +52,7 @@ internal static partial class ReceiptParseEngine
         var previousHasAmount = false;
         foreach (var line in result.Lines)
         {
-            var text = Normalizer.Normalize(line.Text ?? string.Empty);
+            var text = MoneyMisreadRepair.Repair(Normalizer.Normalize(line.Text ?? string.Empty));
             var priorText = previousText;
             var priorHasAmount = previousHasAmount;
 
