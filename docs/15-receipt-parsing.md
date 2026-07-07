@@ -46,8 +46,8 @@ Runs before any rule sees a line.
 - **Decimal separator**: the money regex accepts `.` or `,` for the fraction.
   *(current)* Thousands grouping and locale forms (`1'234.50`, `1 234,50`) are
   out of scope.
-- **OCR character misreads** *(planned)*: repair inside money/number spans only,
-  never in item names.
+- **OCR character misreads** *(current: `MoneyMisreadRepair`)*: repair inside
+  money/number spans only, never in item names.
 
 | Misread | Fix | Example |
 | --- | --- | --- |

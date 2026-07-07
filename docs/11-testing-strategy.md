@@ -44,6 +44,11 @@ One parameterized test runs the whole corpus.
   unit-price column rule winning `2 Roast Beef 27.00 54.00`. The trace never rides
   the public `ParsedReceipt` and is never logged, so no receipt text leaves the
   process (docs/06-ocr-service.md#parsing, docs/15-receipt-parsing.md#diagnostics).
+- The money-span misread repair (`MoneyMisreadRepair`) has one fixture per
+  misread class - `misread-o-zero`, `misread-s-five`, `misread-il-one`,
+  `misread-b-eight`, `misread-e-pound` - each a line that only parses once the
+  price glyphs are repaired, and each carrying a survivor name (`7UP`, `Coke
+  Zero`) that proves item names are left intact.
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt
