@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Detectors;
 using BillSplitter.Domain.Parsing.Models;
+using BillSplitter.Domain.Parsing.Multiline;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
 
@@ -117,7 +118,12 @@ internal static partial class ReceiptParseEngine
         trace.AddRange(detection.Decisions);
         trace.AddRange(itemDecisions);
 
-        var receipt = new ParsedReceipt(items, detection.Bill, currency, warnings);
+        // A receipt shot as stacked merchant/customer/kitchen copies parses its
+        // items more than once; collapse them back to one when a single copy
+        // reconciles with the printed total. A genuine repeat order is preserved.
+        var deduped = CopyDeduplicator.Dedupe(items, detection.Bill);
+
+        var receipt = new ParsedReceipt(deduped, detection.Bill, currency, warnings);
         return new TracedReceipt(receipt, trace);
     }
 
