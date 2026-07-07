@@ -42,13 +42,16 @@ internal sealed partial class BillDetectionEngine
         // the receipt prints after the amount due, not tax/tip/service or items.
         var warnings = new List<string>();
         var decisions = new List<ParseDecision>();
+        // The trace names the classifier that actually decided, not a hardcoded
+        // type, so injecting a different ILineClassifier keeps the trace honest.
+        var classifierRule = _classifier.GetType().Name;
         long tax = 0, tip = 0, service = 0;
         var itemRows = new List<Candidate>();
         foreach (var candidate in candidates)
         {
             if (ReferenceEquals(candidate, total))
             {
-                decisions.Add(Decide(candidate, LineType.Total, "GrandTotalDetector",
+                decisions.Add(Decide(candidate, LineType.Total, nameof(GrandTotalDetector),
                     "grand total: lowest total-word row by Box.Y"));
                 continue;
             }
@@ -65,34 +68,34 @@ internal sealed partial class BillDetectionEngine
                 or LineType.CategoryRollup or LineType.TaxBreakdown)
             {
                 // Subtotals, rollups and VAT breakdowns: we compute our own.
-                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "dropped: an amount we recompute"));
+                decisions.Add(Decide(candidate, type, classifierRule, "dropped: an amount we recompute"));
                 continue;
             }
 
             if (type == LineType.Tax)
             {
                 tax = candidate.Amount;
-                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "tax keyword"));
+                decisions.Add(Decide(candidate, type, classifierRule, "tax keyword"));
             }
             else if (type == LineType.Tip)
             {
                 tip = candidate.Amount;
-                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "tip keyword"));
+                decisions.Add(Decide(candidate, type, classifierRule, "tip keyword"));
             }
             else if (type == LineType.Service)
             {
                 service = candidate.Amount;
-                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "service keyword or lone label above amount"));
+                decisions.Add(Decide(candidate, type, classifierRule, "service keyword or lone label above amount"));
             }
             else if (type == LineType.Total)
             {
                 // An intermediate total ("Item Total"): we compute our own.
-                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "intermediate total: recomputed"));
+                decisions.Add(Decide(candidate, type, classifierRule, "intermediate total: recomputed"));
             }
             else if (type == LineType.Payment)
             {
                 // Payment tender lines: ignore.
-                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "payment tender line"));
+                decisions.Add(Decide(candidate, type, classifierRule, "payment tender line"));
             }
             else if (UnitPriceDetail().IsMatch(candidate.Name))
             {
@@ -103,7 +106,7 @@ internal sealed partial class BillDetectionEngine
             {
                 // A bare amount with no recoverable label - a columnar misread.
                 warnings.Add($"unreadable amount ignored: {candidate.Text}");
-                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "bare amount with no recoverable label"));
+                decisions.Add(Decide(candidate, type, classifierRule, "bare amount with no recoverable label"));
             }
             else
             {
