@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Models;
+using BillSplitter.Domain.Parsing.Normalization;
 
 namespace BillSplitter.Domain.Parsing.Engine;
 
@@ -17,6 +18,8 @@ internal static partial class ReceiptParseEngine
     /// <summary>Lines the sidecar recognized below this land in <c>Warnings</c>
     /// rather than as items - too unreliable to seed the split from.</summary>
     private const double ConfidenceFloor = 0.5;
+
+    private static readonly ITextNormalizer Normalizer = new BasicNormalizer();
 
     // A money token at the end of the line: 1-4 whole digits, a '.' or ',', two
     // fraction digits, optionally preceded by a currency symbol or a minus and
@@ -86,7 +89,7 @@ internal static partial class ReceiptParseEngine
         var previousText = string.Empty;
         foreach (var line in result.Lines)
         {
-            var text = (line.Text ?? string.Empty).Trim();
+            var text = Normalizer.Normalize(line.Text ?? string.Empty);
             var priorText = previousText;
             previousText = text; // advance for every line, so labels above amounts survive
 
