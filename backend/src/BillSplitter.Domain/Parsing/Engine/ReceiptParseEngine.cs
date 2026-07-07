@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Detectors;
@@ -5,6 +6,7 @@ using BillSplitter.Domain.Parsing.Models;
 using BillSplitter.Domain.Parsing.Multiline;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
+using BillSplitter.Domain.Parsing.Spatial;
 
 namespace BillSplitter.Domain.Parsing.Engine;
 
@@ -29,12 +31,10 @@ internal static partial class ReceiptParseEngine
     private static readonly BillDetectionEngine BillEngine = new(Classifier);
     private static readonly ItemSelectionEngine ItemEngine = new();
 
-    // A money token at the end of the line: 1-4 whole digits, a '.' or ',', two
-    // fraction digits, optionally preceded by a currency symbol or a minus and
-    // optionally followed by a single-letter VAT-class code ("4.00 B"). The end
-    // anchor is the reject for "11.00%" - other trailing text means it is not a
-    // clean amount row.
-    [GeneratedRegex(@"(?<neg>-\s*)?(?<sym>[£€$])?\s*(?<whole>\d{1,4})[.,](?<frac>\d{2})(?:\s+[A-Z])?\s*$")]
+    // A money token (ReceiptPatterns.Money) at the end of the line. The end anchor
+    // is the reject for "11.00%" - other trailing text means it is not a clean
+    // amount row.
+    [GeneratedRegex(ReceiptPatterns.Money + @"\s*$")]
     private static partial Regex MoneyAtEnd();
 
     public static ParsedReceipt Parse(OcrResult result) => ParseTraced(result).Receipt;
@@ -48,10 +48,27 @@ internal static partial class ReceiptParseEngine
         var warnings = new List<string>();
         var currency = GuessCurrency(result.Lines);
 
+        // Repair money-span misreads first, on every line, so the pre-passes below
+        // see corrected prices. They gate folding on a real money token ("E6.5O" is
+        // not one until repaired), so a misread price on a wrapped-name row or above
+        // a modifier line would otherwise never fold. GuessCurrency stays on the raw
+        // lines: a repaired "E" -> "£" must not preempt a genuine currency symbol.
+        var repaired = result.Lines
+            .Select(line => line with { Text = MoneyMisreadRepair.Repair(line.Text ?? string.Empty) })
+            .ToList();
+
+        // Two multi-line pre-passes run before candidates are built. First assemble
+        // any item name wrapped across lines onto its price line ("Classic" / "BAO"
+        // / "6.50" -> one row), then fold amount-less modifier lines ("+ Bacon",
+        // "No Onion") into the priced line above them. Order matters: names must be
+        // whole priced rows before modifiers attach, or a modifier would splice into
+        // a still-nameless price and block the wrapped-name fold.
+        var lines = ModifierMerger.Merge(WrappedNameMerger.Merge(repaired));
+
         var candidates = new List<Candidate>();
         var previousText = string.Empty;
         var previousHasAmount = false;
-        foreach (var line in result.Lines)
+        foreach (var line in lines)
         {
             var text = Normalizer.Normalize(line.Text ?? string.Empty);
             var priorText = previousText;
@@ -82,12 +99,23 @@ internal static partial class ReceiptParseEngine
             }
 
             var name = text[..money.Index].Trim();
-            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text, priorText, priorHasAmount));
+            candidates.Add(new Candidate(line.Box.Y, line.Box.X, ToMinor(money), name, text, priorText, priorHasAmount));
         }
+
+        // OCR can emit priced rows out of reading order; reorder them by bounding box
+        // so the item list reads top-to-bottom. Priced candidates only, and late on
+        // purpose: the grand total is anchored positionally (max Box.Y) either way, and
+        // the multi-line pre-passes and the PreviousText capture above already ran in
+        // scan order - so a modifier fold or a label-printed-above-its-amount on a
+        // genuinely scrambled receipt is paired upstream, not repaired here. Sorting
+        // whole priced rows only changes their order, never their pairing, so a
+        // columnar layout (name and price in separate columns) still parks. Gated: an
+        // already-ordered receipt is returned untouched.
+        var ordered = BoxOrderer.Order(candidates);
 
         // The bill engine anchors on the grand total, then reads tax/tip/service
         // off the rows above it and hands back the rest as item rows.
-        var detection = BillEngine.Detect(candidates);
+        var detection = BillEngine.Detect(ordered);
         warnings.AddRange(detection.Warnings);
 
         // Each item row goes through the competing item rules; the engine keeps the

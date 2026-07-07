@@ -46,8 +46,8 @@ Runs before any rule sees a line.
 - **Decimal separator**: the money regex accepts `.` or `,` for the fraction.
   *(current)* Thousands grouping and locale forms (`1'234.50`, `1 234,50`) are
   out of scope.
-- **OCR character misreads** *(planned)*: repair inside money/number spans only,
-  never in item names.
+- **OCR character misreads** *(current: `MoneyMisreadRepair`)*: repair inside
+  money/number spans only, never in item names.
 
 | Misread | Fix | Example |
 | --- | --- | --- |
@@ -58,7 +58,9 @@ Runs before any rule sees a line.
 | `E` | `£` | `E12.50` -> `£12.50` |
 
 Guard: only digit-adjacent positions, so `7UP`, `No.8 Burger`, `Coke Zero`
-survive intact.
+survive intact. The `E` -> `£` case fires only when the `E` is not the tail of a
+word, so a name glued to its price (`PALE ALE8.00`, `WINE12.00`) keeps its final
+letter rather than losing it to a phantom `£`.
 
 ## Price detection
 
@@ -105,9 +107,9 @@ ones (weight, PLU/barcode) are dropped.
 | item #code | `Burger #12 5.00` | current (`ItemCode()`) |
 | x-quantity | `Burger x2 £10.00` | planned |
 | quantity suffix | `Burger (2) £10.00` | planned |
-| name newline total | `Burger` / `£5.00` | planned (wrapped merge) |
-| wrapped description | `Large Double` / `Bacon` / `£15.99` | planned (wrapped merge) |
-| modifier lines | `Burger` / `+ Bacon` / `No Onion` | planned (modifier attach) |
+| name newline total | `Burger` / `£5.00` | current (wrapped merge) |
+| wrapped description | `Large Double` / `Bacon` / `£15.99` | current (wrapped merge) |
+| modifier lines | `Burger` / `+ Bacon` / `No Onion` | current (modifier attach) |
 
 ## Classify, don't itemise
 
@@ -157,11 +159,16 @@ Lines below `ConfidenceFloor` (0.5) are parked in `Warnings`, not itemised.
 
 OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
-- Sort by `Box.Y` then `Box.X` with a row tolerance before parsing. *(planned:
-  box-sort; gated so already-ordered receipts are untouched. Seed fixture:
-  `westminster-column-drift`.)*
+- Sort by `Box.Y` then `Box.X` before parsing. *(current: `BoxOrderer`; gated so
+  an already-ordered receipt is returned untouched.)* It reorders the priced
+  candidates, not the raw lines, so `PreviousText` (a label printed above its
+  amount) is captured at scan time and never disturbed by the reorder.
 - A price is almost always same-row, far-right - `Box.X` distinguishes a price
   column from a name.
+- A name and its price split into separate columns and drifted to non-adjacent
+  rows (`westminster-column-drift`'s detached `6.50`) are not reunified by the
+  sort - reordering cannot invent an item, only restore the order of ones already
+  read. Recovering a far-drifted column stays parked.
 
 ## Validation
 
@@ -174,9 +181,37 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 ## Multi-line
 
-- **Wrapped names** *(planned)*: join amount-less lines onto the next priced
-  line until a price appears.
-- **Modifiers** *(planned)*: attach `+ Bacon` / `No Onion` to the item above.
+- **Wrapped names** *(current)*: join amount-less lines onto the next priced
+  line until a price appears. Gated to a nameless price on a receipt that has a
+  structural total, borrowing a bounded run of letter-only fragments that sit
+  above the price and in its left column (by `Box.Y`/`Box.X`, not list order) -
+  so a centred store header, a trailing note, an already-inline receipt, a
+  non-receipt, or a fully drifted column layout (the box-sort pass's job) is
+  left untouched.
+- **Modifiers** *(current)*: a pre-pass folds amount-less modifier lines into the
+  priced line above them before candidates are built (`ModifierMerger`), so the
+  item reads enriched - `Burger` + `+ Bacon` + `No Onion` -> `Burger + Bacon No
+  Onion`, price unchanged. Runs after the wrapped-name pass, so a modifier
+  attaches to a whole priced row rather than a still-nameless price. Only a short
+  (one or two word) leading `+`/`*` addition or a
+  `NO`/`EXTRA`/`ADD`/`HOLD`/`SUB`/`LESS`/`W/O`/`WITHOUT` form attaches, and only
+  directly below a priced line. A form naming a payment/status footer or a bill
+  extra (`payment`, `service`, `gratuity`, `tip`, `tax`, `discount`, ...) is left
+  alone, so `No payment received` or `Add Gratuity` never folds into the item and
+  flips it to a bill line. It never names a bare price either: a `+ Bacon` under a
+  price the wrapped-name pass left un-named is not an item, so it does not
+  manufacture a phantom row. The wrapped-name pass also steps over a leading
+  `+`/`*` note without breaking a name it is assembling, so `Classic` / `+ Bacon` /
+  `6.50` still reads `Classic + Bacon 6.50` rather than losing the item. A spliced
+  modifier goes ahead of the whole trailing amount run (`2 BREAD 2.00 4.00` +
+  `Extra Butter` -> `2 BREAD Extra Butter 2.00 4.00`), so a reconciling unit-price
+  column stays trailing for the item rules to drop. Known limitations, both from
+  attaching by list adjacency rather than `OcrBox` geometry: a keyword-form
+  modifier (`Extra Cheese`) that is *not* indented from the wrapped-name column
+  below it is indistinguishable from a name fragment and can fold onto the wrong
+  price; and a modifier-shaped line the OCR emits out of vertical order can attach
+  to whichever priced line precedes it in the list. Indented modifiers and `+`/`*`
+  forms are handled; the geometric cases wait on the box-sort pass.
 - **Duplicate copies** *(current)*: `CopyDeduplicator` collapses repeated item
   blocks (merchant/customer/kitchen) to one - but only when the whole item list is
   K identical blocks (each at least two items) and one block reconciles with the

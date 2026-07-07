@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Margherita", "quantity": 1, "priceMinor": 1200 },
+    { "name": "San Pellegrino", "quantity": 1, "priceMinor": 310 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 1510 },
+  "currency": "GBP",
+  "warnings": []
+}

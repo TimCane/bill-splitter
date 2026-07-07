@@ -1,0 +1,9 @@
+{
+  "durationMs": 3110,
+  "lines": [
+    { "text": "PIZZERIA NAPOLI", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 560, "height": 44 } },
+    { "text": "Margherita             l2.00", "confidence": 0.92, "box": { "x": 40, "y": 130, "width": 780, "height": 36 } },
+    { "text": "San Pellegrino          3.I0", "confidence": 0.93, "box": { "x": 40, "y": 170, "width": 780, "height": 36 } },
+    { "text": "TOTAL                 £15.10", "confidence": 0.95, "box": { "x": 40, "y": 240, "width": 780, "height": 40 } }
+  ]
+}

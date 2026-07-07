@@ -1,0 +1,10 @@
+{
+  "durationMs": 2980,
+  "lines": [
+    { "text": "THE CHOP HOUSE", "confidence": 0.97, "box": { "x": 120, "y": 40, "width": 600, "height": 44 } },
+    { "text": "Steak 25.00", "confidence": 0.96, "box": { "x": 40, "y": 150, "width": 620, "height": 36 } },
+    { "text": "* A 12.5% service charge is added for parties of six or more", "confidence": 0.9, "box": { "x": 40, "y": 190, "width": 700, "height": 28 } },
+    { "text": "Wine 10.00", "confidence": 0.95, "box": { "x": 40, "y": 250, "width": 620, "height": 36 } },
+    { "text": "TOTAL 35.00", "confidence": 0.97, "box": { "x": 40, "y": 320, "width": 620, "height": 40 } }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Classic + Bacon", "quantity": 1, "priceMinor": 650 },
+    { "name": "Cola", "quantity": 1, "priceMinor": 200 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 850 },
+  "currency": "GBP",
+  "warnings": []
+}
