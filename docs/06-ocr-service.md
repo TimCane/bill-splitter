@@ -123,6 +123,15 @@ the fixture corpus. The detector/rule/score reference and the target pipeline
 shape are [15-receipt-parsing.md](15-receipt-parsing.md)
 ([ADR-0006](adr/0006-receipt-parser-pipeline.md)).
 
+`Parse` is a thin static facade over an internal engine under
+`BillSplitter.Domain/Parsing` (`Models`, `Engine`, and - as each concern is
+extracted - `Normalization`, `Classification`, `Rules`, `Validation`). The
+pipeline is `normalize -> classify -> item rules + engine -> bill detectors +
+engine -> validate`; Phase A moves the heuristics below out of the engine one
+layer at a time, corpus green at every step, without changing `Parse`'s
+signature or output. The facade keeps the single call site (`OcrWorker`) and
+the no-DI, pure-Domain status quo unchanged.
+
 1. **Price extraction.** A line is a candidate item/amount row if it ends
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a
    currency symbol. Amount = digits as minor units. Reject rows whose money
