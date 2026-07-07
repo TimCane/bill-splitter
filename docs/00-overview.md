@@ -70,4 +70,5 @@ hour later.
 | [12-ci.md](12-ci.md) | GitHub Actions pipelines, merge gates |
 | [13-deployment.md](13-deployment.md) | Production topology, env reference |
 | [14-build-order.md](14-build-order.md) | Milestones with acceptance criteria |
+| [15-receipt-parsing.md](15-receipt-parsing.md) | Parser detector/rule/score reference |
 | [adr/](adr/) | Decision records for the calls that shaped this design |

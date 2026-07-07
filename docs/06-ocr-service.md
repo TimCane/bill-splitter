@@ -119,7 +119,9 @@ capacity and max-concurrency are the `Ocr__QueueCapacity` /
 `Parse(OcrResult) -> ParsedReceipt { Items, Bill, Warnings }`. Fixture-driven
 tests are the spec ([11-testing-strategy.md](11-testing-strategy.md#receiptparser));
 the heuristics below are the initial implementation, expected to grow with
-the fixture corpus.
+the fixture corpus. The detector/rule/score reference and the target pipeline
+shape are [15-receipt-parsing.md](15-receipt-parsing.md)
+([ADR-0006](adr/0006-receipt-parser-pipeline.md)).
 
 1. **Price extraction.** A line is a candidate item/amount row if it ends
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a
