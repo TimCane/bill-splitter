@@ -132,6 +132,11 @@ layer at a time, corpus green at every step, without changing `Parse`'s
 signature or output. The facade keeps the single call site (`OcrWorker`) and
 the no-DI, pure-Domain status quo unchanged.
 
+Every line is first run through `ITextNormalizer` (`Parsing/Normalization`); the
+default `BasicNormalizer` trims surrounding whitespace and collapses internal
+runs to single spaces. This is generic line tidying only - item-name concerns
+(`#code`/`@unit` stripping, OCR-misread fixing) live in the item rules, not here.
+
 1. **Price extraction.** A line is a candidate item/amount row if it ends
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a
    currency symbol. Amount = digits as minor units. Reject rows whose money
