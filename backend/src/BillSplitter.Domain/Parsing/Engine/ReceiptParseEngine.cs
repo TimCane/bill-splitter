@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Detectors;
@@ -46,13 +47,22 @@ internal static partial class ReceiptParseEngine
         var warnings = new List<string>();
         var currency = GuessCurrency(result.Lines);
 
+        // Repair money-span misreads first, on every line, so the pre-passes below
+        // see corrected prices. They gate folding on a real money token ("E6.5O" is
+        // not one until repaired), so a misread price on a wrapped-name row or above
+        // a modifier line would otherwise never fold. GuessCurrency stays on the raw
+        // lines: a repaired "E" -> "£" must not preempt a genuine currency symbol.
+        var repaired = result.Lines
+            .Select(line => line with { Text = MoneyMisreadRepair.Repair(line.Text ?? string.Empty) })
+            .ToList();
+
         // Two multi-line pre-passes run before candidates are built. First assemble
         // any item name wrapped across lines onto its price line ("Classic" / "BAO"
         // / "6.50" -> one row), then fold amount-less modifier lines ("+ Bacon",
         // "No Onion") into the priced line above them. Order matters: names must be
         // whole priced rows before modifiers attach, or a modifier would splice into
         // a still-nameless price and block the wrapped-name fold.
-        var lines = ModifierMerger.Merge(WrappedNameMerger.Merge(result.Lines));
+        var lines = ModifierMerger.Merge(WrappedNameMerger.Merge(repaired));
 
         var candidates = new List<Candidate>();
         var previousText = string.Empty;

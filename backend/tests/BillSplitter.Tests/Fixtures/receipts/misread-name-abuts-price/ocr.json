@@ -1,0 +1,9 @@
+{
+  "durationMs": 2610,
+  "lines": [
+    { "text": "THE CROWN INN", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 560, "height": 44 } },
+    { "text": "PALE ALE8.00", "confidence": 0.92, "box": { "x": 40, "y": 130, "width": 780, "height": 36 } },
+    { "text": "Peanuts                 3.50", "confidence": 0.94, "box": { "x": 40, "y": 170, "width": 780, "height": 36 } },
+    { "text": "TOTAL                 £11.50", "confidence": 0.95, "box": { "x": 40, "y": 240, "width": 780, "height": 40 } }
+  ]
+}

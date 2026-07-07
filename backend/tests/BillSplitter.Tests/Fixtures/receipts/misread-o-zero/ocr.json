@@ -1,0 +1,9 @@
+{
+  "durationMs": 2740,
+  "lines": [
+    { "text": "THE COFFEE HOUSE", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 560, "height": 44 } },
+    { "text": "Flat White              3.OO", "confidence": 0.93, "box": { "x": 40, "y": 130, "width": 780, "height": 36 } },
+    { "text": "7UP                     2.50", "confidence": 0.94, "box": { "x": 40, "y": 170, "width": 780, "height": 36 } },
+    { "text": "TOTAL                  £5.5O", "confidence": 0.95, "box": { "x": 40, "y": 240, "width": 780, "height": 40 } }
+  ]
+}

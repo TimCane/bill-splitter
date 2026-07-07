@@ -55,6 +55,16 @@ One parameterized test runs the whole corpus.
   unit-price column rule winning `2 Roast Beef 27.00 54.00`. The trace never rides
   the public `ParsedReceipt` and is never logged, so no receipt text leaves the
   process (docs/06-ocr-service.md#parsing, docs/15-receipt-parsing.md#diagnostics).
+- The money-span misread repair (`MoneyMisreadRepair`) has one fixture per
+  misread class - `misread-o-zero`, `misread-s-five`, `misread-il-one`,
+  `misread-b-eight`, `misread-e-pound` - each a line that only parses once the
+  price glyphs are repaired, and each carrying a survivor name (`7UP`, `Coke
+  Zero`) that proves item names are left intact. `misread-wrapped-name` pins the
+  ordering: the repair runs before the multi-line pre-passes, so a wrapped name
+  whose price line is a misread (`Classic` / `BAO` / `£6.5O`) still folds - it
+  fails if the repair is deferred to the candidate loop. `misread-name-abuts-price`
+  pins the leading-`E` guard: a name glued to its price (`PALE ALE8.00`) keeps its
+  final letter instead of losing it to a phantom `£`.
 - Phase B capabilities each land with their own fixtures: `wrapped-item-names`
   proves the wrapped-name pre-pass (a name split over `Classic` / `BAO` / `£6.50`
   folded into one item) while the already-inline corpus stays byte-for-byte green.

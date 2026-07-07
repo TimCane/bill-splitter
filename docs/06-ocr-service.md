@@ -150,7 +150,14 @@ assembly, so they attach to whole priced rows rather than a still-nameless price
 Every line is then run through `ITextNormalizer` (`Parsing/Normalization`); the
 default `BasicNormalizer` trims surrounding whitespace and collapses internal
 runs to single spaces. This is generic line tidying only - item-name concerns
-(`#code`/`@unit` stripping, OCR-misread fixing) live in the item rules, not here.
+(`#code`/`@unit` stripping) live in the item rules, not here.
+
+A second `Parsing/Normalization` pass, `MoneyMisreadRepair`, then fixes the OCR
+letter/digit confusions that only occur in a price (`O`/`0`, `S`->5, `l`/`I`->1,
+`B`->8, a leading `E`->£), so `E12.5O` reaches the money regex as `£12.50`. It is
+gated to a trailing money-shaped token that carries at least one real digit and
+one repairable glyph, so alphabetic item names (`7UP`, `No.8 Burger`, `Coke
+Zero`, `KX BOB`) are never touched.
 
 Each priced line is then mapped to a `LineType` by `ILineClassifier`
 (`Parsing/Classification`); the default `KeywordClassifier` owns the keyword and
