@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "name": "Tacos Del Mal Shrimp",
+      "quantity": 1,
+      "priceMinor": 1498
+    },
+    {
+      "name": "Especial Salad Chicken",
+      "quantity": 1,
+      "priceMinor": 1250
+    },
+    {
+      "name": "Fountain Beverage",
+      "quantity": 1,
+      "priceMinor": 199
+    }
+  ],
+  "bill": {
+    "taxMinor": 192,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 3139
+  },
+  "currency": "USD",
+  "warnings": []
+}

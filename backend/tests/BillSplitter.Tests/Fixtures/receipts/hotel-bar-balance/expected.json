@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "Hendrick Gin & Tonic",
+      "quantity": 1,
+      "priceMinor": 1050
+    },
+    {
+      "name": "Ginger Mule",
+      "quantity": 1,
+      "priceMinor": 950
+    },
+    {
+      "name": "Glass Camus Zin",
+      "quantity": 1,
+      "priceMinor": 2400
+    },
+    {
+      "name": "Titos Vodka Soda",
+      "quantity": 1,
+      "priceMinor": 1200
+    }
+  ],
+  "bill": {
+    "taxMinor": 476,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 6076
+  },
+  "currency": "USD",
+  "warnings": []
+}

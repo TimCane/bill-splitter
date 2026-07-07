@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "Fresh Clams in Spicy",
+      "quantity": 1,
+      "priceMinor": 4800
+    },
+    {
+      "name": "Garlic Salt Baked Beef",
+      "quantity": 1,
+      "priceMinor": 5800
+    },
+    {
+      "name": "Hawaiian",
+      "quantity": 1,
+      "priceMinor": 5800
+    },
+    {
+      "name": "Whole",
+      "quantity": 1,
+      "priceMinor": 2800
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 1640,
+    "totalMinor": 18040
+  },
+  "currency": "USD",
+  "warnings": []
+}

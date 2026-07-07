@@ -1,0 +1,44 @@
+{
+  "items": [
+    {
+      "name": "Burrata",
+      "quantity": 1,
+      "priceMinor": 1600
+    },
+    {
+      "name": "Pan de Coca",
+      "quantity": 1,
+      "priceMinor": 350
+    },
+    {
+      "name": "Solomillo a la Sal",
+      "quantity": 2,
+      "priceMinor": 4400
+    },
+    {
+      "name": "100% Chocolate fondat",
+      "quantity": 1,
+      "priceMinor": 850
+    },
+    {
+      "name": "Agua 1/2",
+      "quantity": 1,
+      "priceMinor": 450
+    },
+    {
+      "name": "Copa Aphrodisiaque T",
+      "quantity": 2,
+      "priceMinor": 1200
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 6195
+  },
+  "currency": "EUR",
+  "warnings": [
+    "negative amount ignored: 1 Portal Reserva 30% -26.55"
+  ]
+}

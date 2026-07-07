@@ -1,0 +1,16 @@
+{
+  "durationMs": 3000,
+  "lines": [
+    { "text": "Ding Dong Bell", "confidence": 0.94, "box": { "x": 120, "y": 40, "width": 480, "height": 40 } },
+    { "text": "Order No.: C22 [Dine-in]", "confidence": 0.9, "box": { "x": 40, "y": 150, "width": 620, "height": 32 } },
+    { "text": "1 Fresh Clams in Spicy $48.00", "confidence": 0.92, "box": { "x": 40, "y": 220, "width": 720, "height": 34 } },
+    { "text": "Tomato Sauce", "confidence": 0.9, "box": { "x": 80, "y": 256, "width": 400, "height": 30 } },
+    { "text": "1 Garlic Salt Baked Beef $58.00", "confidence": 0.91, "box": { "x": 40, "y": 292, "width": 720, "height": 34 } },
+    { "text": "Tongue", "confidence": 0.9, "box": { "x": 80, "y": 328, "width": 300, "height": 30 } },
+    { "text": "1 Hawaiian $58.00", "confidence": 0.92, "box": { "x": 40, "y": 364, "width": 720, "height": 34 } },
+    { "text": "Whole @$28.00", "confidence": 0.89, "box": { "x": 80, "y": 400, "width": 400, "height": 30 } },
+    { "text": "Subtotal $164.00", "confidence": 0.95, "box": { "x": 40, "y": 460, "width": 720, "height": 34 } },
+    { "text": "Service Charge(10%) $16.40", "confidence": 0.92, "box": { "x": 40, "y": 496, "width": 720, "height": 34 } },
+    { "text": "Amount $180.40", "confidence": 0.96, "box": { "x": 40, "y": 552, "width": 720, "height": 44 } }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "name": "Chicken Nachos Platter",
+      "quantity": 1,
+      "priceMinor": 1249
+    },
+    {
+      "name": "Iced Tea",
+      "quantity": 1,
+      "priceMinor": 200
+    },
+    {
+      "name": "Cherry Pie Crumble",
+      "quantity": 1,
+      "priceMinor": 599
+    }
+  ],
+  "bill": {
+    "taxMinor": 164,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 2212
+  },
+  "currency": "USD",
+  "warnings": []
+}

@@ -1,0 +1,20 @@
+{
+  "durationMs": 3060,
+  "lines": [
+    { "text": "Table: 23  c: 2   ORDER #: 4706", "confidence": 0.9, "box": { "x": 40, "y": 60, "width": 620, "height": 32 } },
+    { "text": "2 ULSD Sugar Free = 8.20", "confidence": 0.9, "box": { "x": 40, "y": 140, "width": 620, "height": 32 } },
+    { "text": "1 Chd MM Carvery = 6.99", "confidence": 0.9, "box": { "x": 40, "y": 174, "width": 620, "height": 32 } },
+    { "text": "1 Midweek Carvery = 10.79", "confidence": 0.9, "box": { "x": 40, "y": 208, "width": 620, "height": 32 } },
+    { "text": "1 Childs Ice Cream = 2.00", "confidence": 0.9, "box": { "x": 40, "y": 242, "width": 620, "height": 32 } },
+    { "text": "1 Rewards Card = 0.00", "confidence": 0.9, "box": { "x": 40, "y": 276, "width": 620, "height": 32 } },
+    { "text": "1 TBY KEFE1 = 0.00", "confidence": 0.89, "box": { "x": 40, "y": 310, "width": 620, "height": 32 } },
+    { "text": "TBY KEFE1 1P = -5.99", "confidence": 0.88, "box": { "x": 40, "y": 344, "width": 620, "height": 32 } },
+    { "text": "Product Group Summary", "confidence": 0.9, "box": { "x": 40, "y": 400, "width": 620, "height": 32 } },
+    { "text": "Wet 8.20", "confidence": 0.9, "box": { "x": 40, "y": 434, "width": 620, "height": 32 } },
+    { "text": "Food And Drink 13.79", "confidence": 0.9, "box": { "x": 40, "y": 468, "width": 620, "height": 32 } },
+    { "text": "20% VAT Net 18.32", "confidence": 0.89, "box": { "x": 40, "y": 520, "width": 620, "height": 32 } },
+    { "text": "20% VAT 3.67", "confidence": 0.89, "box": { "x": 40, "y": 554, "width": 620, "height": 32 } },
+    { "text": "20% VAT Total 21.99", "confidence": 0.89, "box": { "x": 40, "y": 588, "width": 620, "height": 32 } },
+    { "text": "Total £21.99", "confidence": 0.96, "box": { "x": 40, "y": 644, "width": 620, "height": 42 } }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "durationMs": 3130,
+  "lines": [
+    { "text": "CROWNE PLAZA", "confidence": 0.94, "box": { "x": 100, "y": 40, "width": 520, "height": 38 } },
+    { "text": "BARCELONA - FIRA CENTER", "confidence": 0.92, "box": { "x": 80, "y": 90, "width": 560, "height": 32 } },
+    { "text": "CHK 2104178 TBL 39/1 GST 2", "confidence": 0.89, "box": { "x": 40, "y": 160, "width": 620, "height": 32 } },
+    { "text": "1 Burrata 16.00", "confidence": 0.92, "box": { "x": 40, "y": 220, "width": 700, "height": 32 } },
+    { "text": "1 Pan de Coca 3.50", "confidence": 0.92, "box": { "x": 40, "y": 254, "width": 700, "height": 32 } },
+    { "text": "2 Solomillo a la Sal @ 22.00 44.00", "confidence": 0.89, "box": { "x": 40, "y": 288, "width": 700, "height": 32 } },
+    { "text": "1 100% Chocolate fondat 8.50", "confidence": 0.9, "box": { "x": 40, "y": 322, "width": 700, "height": 32 } },
+    { "text": "1 Agua 1/2 4.50", "confidence": 0.91, "box": { "x": 40, "y": 356, "width": 700, "height": 32 } },
+    { "text": "2 Copa Aphrodisiaque T. @ 6.00 12.00", "confidence": 0.88, "box": { "x": 40, "y": 390, "width": 700, "height": 32 } },
+    { "text": "1 Portal Reserva 30% -26.55", "confidence": 0.88, "box": { "x": 40, "y": 424, "width": 700, "height": 32 } },
+    { "text": "fork", "confidence": 0.85, "box": { "x": 40, "y": 458, "width": 200, "height": 30 } },
+    { "text": "5.63 IVA 10% 61.95", "confidence": 0.87, "box": { "x": 40, "y": 510, "width": 700, "height": 32 } },
+    { "text": "Net Total: 56.32€", "confidence": 0.88, "box": { "x": 40, "y": 544, "width": 700, "height": 32 } },
+    { "text": "Subtotal 61.95", "confidence": 0.93, "box": { "x": 40, "y": 580, "width": 700, "height": 32 } },
+    { "text": "Total 61.95", "confidence": 0.95, "box": { "x": 40, "y": 618, "width": 700, "height": 40 } }
+  ]
+}

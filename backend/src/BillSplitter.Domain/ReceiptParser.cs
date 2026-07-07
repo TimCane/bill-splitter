@@ -34,9 +34,11 @@ public static partial class ReceiptParser
     [GeneratedRegex(@"^\s*\d{1,3}([.,]\d+)?\s*%")]
     private static partial Regex LeadingPercent();
 
-    // A grouped-receipt category subtotal ("8 DRINK", "3 FOOD"): a rollup, not
-    // an item - its components are listed separately above it.
-    [GeneratedRegex(@"^\d*\s*(?:FOOD|DRINKS?|BEVERAGES?)\s*$", RegexOptions.IgnoreCase)]
+    // A grouped-receipt category subtotal, a rollup of items listed above it:
+    // a category word with a leading count ("8 DRINK", "3 FOOD") or the bare word
+    // "FOOD" (never a real item name). A bare "Drinks" is left as an item - some
+    // receipts aggregate the drinks onto one priced line.
+    [GeneratedRegex(@"^(?:\d+\s+(?:FOOD|DRINKS?|BEVERAGES?)|FOOD)\s*$", RegexOptions.IgnoreCase)]
     private static partial Regex CategoryRollup();
 
     // A service-charge label that printed above its amount ("Service charge 12.5%
@@ -44,6 +46,13 @@ public static partial class ReceiptParser
     // that merely mentions a tax code ("... GST 3") is not mistaken for one.
     [GeneratedRegex(@"^(?:OPTIONAL\s+|DISCRETIONARY\s+)?SERVICE\b", RegexOptions.IgnoreCase)]
     private static partial Regex ServiceLabel();
+
+    // A per-unit detail line printed under its item ("2 @ $35.50"): once its own
+    // price is stripped the name is only "2 @", so the whole name is a count and
+    // an "@" (with any leftover digits). An item like "2 @ 6.40 Miso Soup" has a
+    // real name after and is not matched.
+    [GeneratedRegex(@"^\d+\s*@\s*[£€$]?[\d.,]*\s*$")]
+    private static partial Regex UnitPriceDetail();
 
     // A leading quantity: "2 ", "2x ", "3 X " -> the count, stripped from the name.
     [GeneratedRegex(@"^(?<qty>\d{1,2})\s?[xX]?\s+")]
@@ -170,6 +179,10 @@ public static partial class ReceiptParser
                 // "90.23  11.28", or Defune's "Service Charge" / "...Server 22.68").
                 service = candidate.Amount;
             }
+            else if (UnitPriceDetail().IsMatch(candidate.Name))
+            {
+                // "2 @ $35.50" under its item: the item already has the line total.
+            }
             else if (IsBareCharge(candidate.Name))
             {
                 // A bare amount with no recoverable label - a columnar misread.
@@ -225,7 +238,7 @@ public static partial class ReceiptParser
     {
         var name = ItemCode().Replace(raw, string.Empty);
         name = AtUnitPrice().Replace(name, string.Empty); // strip "@ 6.50" unit prices
-        name = name.Trim().TrimEnd('.', ' ', '-', '='); // strip dot leaders and "=" separators
+        name = name.Trim().TrimEnd('.', ' ', '-', '=', '@'); // strip dot leaders and separators
         return Whitespace().Replace(name, " ").Trim();
     }
 
@@ -285,18 +298,19 @@ public static partial class ReceiptParser
 
     private static bool IsTax(string u) => u.Contains("TAX") || u.Contains("VAT") || u.Contains("GST") || u.Contains("IVA");
 
-    // A VAT/tax breakdown summary ("20% VAT Net 18.32", "5.63 IVA 10% 61.95"):
-    // it pairs a tax word with a rate. The payable tax prints on its own plain
-    // "TAX x.xx" line (no rate), so a rate here means a breakdown row to ignore.
+    // A VAT breakdown summary ("20% VAT Net 18.32", "5.63 IVA 10% 61.95"): it
+    // pairs a VAT word with a rate. Plain "TAX 6% 6.20" is excluded - a US sales
+    // tax line prints its rate inline and is the real, payable tax.
     private static bool IsTaxBreakdown(string u) =>
-        u.Contains('%') && (u.Contains("VAT") || u.Contains("IVA") || u.Contains("GST") || u.Contains("TAX"));
+        u.Contains('%') && (u.Contains("VAT") || u.Contains("IVA") || u.Contains("GST"));
 
     private static bool IsTip(string u) => u.Contains("TIP") || u.Contains("GRATUIT");
 
     private static bool IsService(string u) => u.Contains("SERVICE");
 
     private static bool IsTotal(string u) =>
-        u.Contains("TOTAL") || u.Contains("AMOUNT") || u.Contains("BALANCE DUE") || u.Contains("TO PAY");
+        u.Contains("TOTAL") || u.Contains("AMOUNT") || u.Contains("AMT")
+        || u.Contains("BALANCE") || u.Contains("TO PAY");
 
     private static bool IsPaymentNoise(string u) =>
         u.Contains("CASH") || u.Contains("CHANGE") || u.Contains("CARD")
