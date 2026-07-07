@@ -1,0 +1,11 @@
+{
+  "items": [
+    { "name": "Cheeseburger", "quantity": 1, "priceMinor": 850 },
+    { "name": "Onion Rings", "quantity": 1, "priceMinor": 425 },
+    { "name": "Cheeseburger", "quantity": 1, "priceMinor": 850 },
+    { "name": "Onion Rings", "quantity": 1, "priceMinor": 425 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 2550 },
+  "currency": "GBP",
+  "warnings": []
+}

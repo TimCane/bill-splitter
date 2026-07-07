@@ -1,0 +1,15 @@
+{
+  "durationMs": 2900,
+  "lines": [
+    { "text": "THE DOUBLE PRINT", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 620, "height": 44 } },
+    { "text": "MERCHANT COPY", "confidence": 0.93, "box": { "x": 120, "y": 84, "width": 620, "height": 32 } },
+    { "text": "Cheeseburger 8.50", "confidence": 0.95, "box": { "x": 40, "y": 150, "width": 820, "height": 36 } },
+    { "text": "Onion Rings 4.25", "confidence": 0.95, "box": { "x": 40, "y": 186, "width": 820, "height": 36 } },
+    { "text": "TOTAL 12.75", "confidence": 0.97, "box": { "x": 40, "y": 250, "width": 820, "height": 40 } },
+    { "text": "THE DOUBLE PRINT", "confidence": 0.96, "box": { "x": 120, "y": 360, "width": 620, "height": 44 } },
+    { "text": "CUSTOMER COPY", "confidence": 0.93, "box": { "x": 120, "y": 404, "width": 620, "height": 32 } },
+    { "text": "Cheeseburger 8.50", "confidence": 0.95, "box": { "x": 40, "y": 470, "width": 820, "height": 36 } },
+    { "text": "Onion Rings 4.25", "confidence": 0.95, "box": { "x": 40, "y": 506, "width": 820, "height": 36 } },
+    { "text": "TOTAL 12.75", "confidence": 0.97, "box": { "x": 40, "y": 570, "width": 820, "height": 40 } }
+  ]
+}
