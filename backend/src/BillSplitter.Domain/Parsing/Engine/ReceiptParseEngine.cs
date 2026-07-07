@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Detectors;
 using BillSplitter.Domain.Parsing.Models;
+using BillSplitter.Domain.Parsing.Multiline;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
 
@@ -28,12 +29,10 @@ internal static partial class ReceiptParseEngine
     private static readonly BillDetectionEngine BillEngine = new(Classifier);
     private static readonly ItemSelectionEngine ItemEngine = new();
 
-    // A money token at the end of the line: 1-4 whole digits, a '.' or ',', two
-    // fraction digits, optionally preceded by a currency symbol or a minus and
-    // optionally followed by a single-letter VAT-class code ("4.00 B"). The end
-    // anchor is the reject for "11.00%" - other trailing text means it is not a
-    // clean amount row.
-    [GeneratedRegex(@"(?<neg>-\s*)?(?<sym>[£€$])?\s*(?<whole>\d{1,4})[.,](?<frac>\d{2})(?:\s+[A-Z])?\s*$")]
+    // A money token (ReceiptPatterns.Money) at the end of the line. The end anchor
+    // is the reject for "11.00%" - other trailing text means it is not a clean
+    // amount row.
+    [GeneratedRegex(ReceiptPatterns.Money + @"\s*$")]
     private static partial Regex MoneyAtEnd();
 
     public static ParsedReceipt Parse(OcrResult result) => ParseTraced(result).Receipt;
@@ -47,10 +46,18 @@ internal static partial class ReceiptParseEngine
         var warnings = new List<string>();
         var currency = GuessCurrency(result.Lines);
 
+        // Two multi-line pre-passes run before candidates are built. First assemble
+        // any item name wrapped across lines onto its price line ("Classic" / "BAO"
+        // / "6.50" -> one row), then fold amount-less modifier lines ("+ Bacon",
+        // "No Onion") into the priced line above them. Order matters: names must be
+        // whole priced rows before modifiers attach, or a modifier would splice into
+        // a still-nameless price and block the wrapped-name fold.
+        var lines = ModifierMerger.Merge(WrappedNameMerger.Merge(result.Lines));
+
         var candidates = new List<Candidate>();
         var previousText = string.Empty;
         var previousHasAmount = false;
-        foreach (var line in result.Lines)
+        foreach (var line in lines)
         {
             var text = MoneyMisreadRepair.Repair(Normalizer.Normalize(line.Text ?? string.Empty));
             var priorText = previousText;

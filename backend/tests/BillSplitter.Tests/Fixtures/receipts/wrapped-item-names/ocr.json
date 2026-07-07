@@ -1,0 +1,14 @@
+{
+  "durationMs": 2740,
+  "lines": [
+    { "text": "THE STEAMED BAO CO", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 620, "height": 44 } },
+    { "text": "Classic", "confidence": 0.95, "box": { "x": 40, "y": 120, "width": 300, "height": 36 } },
+    { "text": "BAO", "confidence": 0.95, "box": { "x": 40, "y": 156, "width": 300, "height": 36 } },
+    { "text": "£6.50", "confidence": 0.96, "box": { "x": 700, "y": 192, "width": 160, "height": 36 } },
+    { "text": "Sticky", "confidence": 0.94, "box": { "x": 40, "y": 248, "width": 300, "height": 36 } },
+    { "text": "Pork Bao", "confidence": 0.94, "box": { "x": 40, "y": 284, "width": 300, "height": 36 } },
+    { "text": "£7.25", "confidence": 0.95, "box": { "x": 700, "y": 320, "width": 160, "height": 36 } },
+    { "text": "Iced Green Tea £3.00", "confidence": 0.95, "box": { "x": 40, "y": 396, "width": 820, "height": 36 } },
+    { "text": "TOTAL £16.75", "confidence": 0.97, "box": { "x": 40, "y": 470, "width": 820, "height": 40 } }
+  ]
+}

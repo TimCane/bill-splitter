@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Steak", "quantity": 1, "priceMinor": 2500 },
+    { "name": "Wine", "quantity": 1, "priceMinor": 1000 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 3500 },
+  "currency": "GBP",
+  "warnings": []
+}

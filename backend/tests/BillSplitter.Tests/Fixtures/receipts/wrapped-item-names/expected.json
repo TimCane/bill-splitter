@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "name": "Classic BAO", "quantity": 1, "priceMinor": 650 },
+    { "name": "Sticky Pork Bao", "quantity": 1, "priceMinor": 725 },
+    { "name": "Iced Green Tea", "quantity": 1, "priceMinor": 300 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 1675 },
+  "currency": "GBP",
+  "warnings": []
+}

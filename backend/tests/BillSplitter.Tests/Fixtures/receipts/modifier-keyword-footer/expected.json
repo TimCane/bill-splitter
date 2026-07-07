@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Ribeye", "quantity": 1, "priceMinor": 2200 },
+    { "name": "Salad", "quantity": 1, "priceMinor": 650 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 2850 },
+  "currency": "GBP",
+  "warnings": []
+}

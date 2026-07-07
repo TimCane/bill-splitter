@@ -12,7 +12,9 @@ namespace BillSplitter.Domain.Parsing.Rules;
 internal static partial class ItemText
 {
     // A bare money token at the end of a name, e.g. the per-unit column in
-    // "2 BREAD 2.00 4.00" once the line total is removed.
+    // "2 BREAD 2.00 4.00" once the line total is removed. A deliberate variant of
+    // ReceiptPatterns.Money with its own uwhole/ufrac groups for the unit-price
+    // arithmetic and no negative branch (a discount is never a per-unit column).
     [GeneratedRegex(@"(?<sym>[£€$])?\s*(?<uwhole>\d{1,4})[.,](?<ufrac>\d{2})\s*$")]
     private static partial Regex TrailingMoney();
 
