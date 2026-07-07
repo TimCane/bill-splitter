@@ -102,11 +102,15 @@ internal static partial class ReceiptParseEngine
             candidates.Add(new Candidate(line.Box.Y, line.Box.X, ToMinor(money), name, text, priorText, priorHasAmount));
         }
 
-        // OCR can emit priced rows out of reading order. Restore it by bounding box
-        // before the bill and item stages read them, so items come out top-to-bottom
-        // and the grand total anchors correctly. Gated: an already-ordered receipt is
-        // returned untouched. PreviousText was captured at scan time, so reordering
-        // here never disturbs a label-printed-above-its-amount association.
+        // OCR can emit priced rows out of reading order; reorder them by bounding box
+        // so the item list reads top-to-bottom. Priced candidates only, and late on
+        // purpose: the grand total is anchored positionally (max Box.Y) either way, and
+        // the multi-line pre-passes and the PreviousText capture above already ran in
+        // scan order - so a modifier fold or a label-printed-above-its-amount on a
+        // genuinely scrambled receipt is paired upstream, not repaired here. Sorting
+        // whole priced rows only changes their order, never their pairing, so a
+        // columnar layout (name and price in separate columns) still parks. Gated: an
+        // already-ordered receipt is returned untouched.
         var ordered = BoxOrderer.Order(candidates);
 
         // The bill engine anchors on the grand total, then reads tax/tip/service
