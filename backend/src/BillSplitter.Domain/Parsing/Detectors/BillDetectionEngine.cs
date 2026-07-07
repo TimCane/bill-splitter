@@ -41,12 +41,22 @@ internal sealed partial class BillDetectionEngine
         // - VAT breakdowns, payment lines, "divide by N" hints - is trailing noise
         // the receipt prints after the amount due, not tax/tip/service or items.
         var warnings = new List<string>();
+        var decisions = new List<ParseDecision>();
         long tax = 0, tip = 0, service = 0;
         var itemRows = new List<Candidate>();
         foreach (var candidate in candidates)
         {
-            if (ReferenceEquals(candidate, total) || candidate.Y >= totalY)
+            if (ReferenceEquals(candidate, total))
             {
+                decisions.Add(Decide(candidate, LineType.Total, "GrandTotalDetector",
+                    "grand total: lowest total-word row by Box.Y"));
+                continue;
+            }
+
+            if (candidate.Y >= totalY)
+            {
+                decisions.Add(Decide(candidate, LineType.Unknown, nameof(BillDetectionEngine),
+                    "trailing noise at or below the grand total"));
                 continue;
             }
 
@@ -54,45 +64,58 @@ internal sealed partial class BillDetectionEngine
             if (type is LineType.Subtotal or LineType.ItemCount
                 or LineType.CategoryRollup or LineType.TaxBreakdown)
             {
-                continue; // Subtotals, rollups and VAT breakdowns: we compute our own.
+                // Subtotals, rollups and VAT breakdowns: we compute our own.
+                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "dropped: an amount we recompute"));
+                continue;
             }
 
             if (type == LineType.Tax)
             {
                 tax = candidate.Amount;
+                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "tax keyword"));
             }
             else if (type == LineType.Tip)
             {
                 tip = candidate.Amount;
+                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "tip keyword"));
             }
             else if (type == LineType.Service)
             {
                 service = candidate.Amount;
+                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "service keyword or lone label above amount"));
             }
             else if (type == LineType.Total)
             {
-                continue; // An intermediate total ("Item Total"): we compute our own.
+                // An intermediate total ("Item Total"): we compute our own.
+                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "intermediate total: recomputed"));
             }
             else if (type == LineType.Payment)
             {
                 // Payment tender lines: ignore.
+                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "payment tender line"));
             }
             else if (UnitPriceDetail().IsMatch(candidate.Name))
             {
                 // "2 @ $35.50" under its item: the item already has the line total.
+                decisions.Add(Decide(candidate, type, nameof(BillDetectionEngine), "per-unit detail printed under its item"));
             }
             else if (type == LineType.BareCharge)
             {
                 // A bare amount with no recoverable label - a columnar misread.
                 warnings.Add($"unreadable amount ignored: {candidate.Text}");
+                decisions.Add(Decide(candidate, type, nameof(KeywordClassifier), "bare amount with no recoverable label"));
             }
             else
             {
+                // An item row: the item engine decides and traces it, not this stage.
                 itemRows.Add(candidate);
             }
         }
 
         var bill = new Bill(tax, tip, service, total?.Amount ?? 0);
-        return new BillDetection(bill, itemRows, warnings);
+        return new BillDetection(bill, itemRows, warnings, decisions);
     }
+
+    private static ParseDecision Decide(Candidate candidate, LineType type, string rule, string evidence) =>
+        new(candidate.Text, type, 0, rule, [evidence]);
 }

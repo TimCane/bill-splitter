@@ -21,6 +21,8 @@ internal sealed class UnitPriceColumnRule : IReceiptRule
         }
 
         return ItemCandidate.ForItem(
-            Confidence, new ParsedItem(shaped.Stripped, shaped.Quantity, candidate.Amount));
+            Confidence,
+            new ParsedItem(shaped.Stripped, shaped.Quantity, candidate.Amount),
+            $"dropped reconciling per-unit column, quantity {shaped.Quantity}");
     }
 }

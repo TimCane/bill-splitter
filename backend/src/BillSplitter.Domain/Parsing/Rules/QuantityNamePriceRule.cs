@@ -13,5 +13,7 @@ internal sealed class QuantityNamePriceRule : IReceiptRule
 
     public ItemCandidate? Apply(Candidate candidate, ShapedItem shaped) =>
         ItemCandidate.ForItem(
-            Confidence, new ParsedItem(shaped.Name, shaped.Quantity, candidate.Amount));
+            Confidence,
+            new ParsedItem(shaped.Name, shaped.Quantity, candidate.Amount),
+            $"name reading, quantity {shaped.Quantity}");
 }
