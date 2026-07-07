@@ -46,8 +46,6 @@ public sealed class ParticipantTokenHandler : AuthenticationHandler<Authenticati
         }
 
         var identity = new ClaimsIdentity(ParticipantAuth.Scheme);
-        identity.AddClaim(new Claim(ParticipantAuth.SessionIdClaim, sessionId));
-
         var record = await _store.GetAsync(sessionId, Context.RequestAborted);
         var participant = record?.Session.FindByTokenHash(TokenHasher.Hash(token));
         if (participant is not null)
