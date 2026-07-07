@@ -44,6 +44,12 @@ One parameterized test runs the whole corpus.
   unit-price column rule winning `2 Roast Beef 27.00 54.00`. The trace never rides
   the public `ParsedReceipt` and is never logged, so no receipt text leaves the
   process (docs/06-ocr-service.md#parsing, docs/15-receipt-parsing.md#diagnostics).
+- Phase B capabilities each land with their own fixtures: `wrapped-item-names`
+  proves the wrapped-name pre-pass (a name split over `Classic` / `BAO` / `£6.50`
+  folded into one item) while the already-inline corpus stays byte-for-byte green.
+  `wrapped-names-edge-cases` pins the fold's geometry: a centred store header
+  above a single-line item is flushed not swallowed, a name wrapped to three
+  lines folds whole, and a VAT-class-coded price (`£5.00 B`) still merges.
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

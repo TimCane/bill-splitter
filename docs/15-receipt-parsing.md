@@ -105,8 +105,8 @@ ones (weight, PLU/barcode) are dropped.
 | item #code | `Burger #12 5.00` | current (`ItemCode()`) |
 | x-quantity | `Burger x2 £10.00` | planned |
 | quantity suffix | `Burger (2) £10.00` | planned |
-| name newline total | `Burger` / `£5.00` | planned (wrapped merge) |
-| wrapped description | `Large Double` / `Bacon` / `£15.99` | planned (wrapped merge) |
+| name newline total | `Burger` / `£5.00` | current (wrapped merge) |
+| wrapped description | `Large Double` / `Bacon` / `£15.99` | current (wrapped merge) |
 | modifier lines | `Burger` / `+ Bacon` / `No Onion` | planned (modifier attach) |
 
 ## Classify, don't itemise
@@ -174,8 +174,13 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 ## Multi-line
 
-- **Wrapped names** *(planned)*: join amount-less lines onto the next priced
-  line until a price appears.
+- **Wrapped names** *(current)*: join amount-less lines onto the next priced
+  line until a price appears. Gated to a nameless price on a receipt that has a
+  structural total, borrowing a bounded run of letter-only fragments that sit
+  above the price and in its left column (by `Box.Y`/`Box.X`, not list order) -
+  so a centred store header, a trailing note, an already-inline receipt, a
+  non-receipt, or a fully drifted column layout (the box-sort pass's job) is
+  left untouched.
 - **Modifiers** *(planned)*: attach `+ Bacon` / `No Onion` to the item above.
 - **Duplicate copies** *(planned)*: de-dupe repeated item blocks
   (merchant/customer/kitchen) without collapsing a genuinely repeated dish.
