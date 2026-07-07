@@ -4,6 +4,7 @@ using BillSplitter.Domain.Parsing.Detectors;
 using BillSplitter.Domain.Parsing.Models;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
+using BillSplitter.Domain.Parsing.Validation;
 
 namespace BillSplitter.Domain.Parsing.Engine;
 
@@ -116,6 +117,15 @@ internal static partial class ReceiptParseEngine
         var trace = new List<ParseDecision>(detection.Decisions.Count + itemDecisions.Count);
         trace.AddRange(detection.Decisions);
         trace.AddRange(itemDecisions);
+
+        // Last: the whole-receipt sum check. Items plus extras should equal the
+        // printed grand total; a gap is the host's cue that a line was missed or
+        // invented. Cross-line, so it appends a warning but adds no trace entry.
+        var reconcile = ReconciliationValidator.Check(items, detection.Bill, warnings);
+        if (reconcile is not null)
+        {
+            warnings.Add(reconcile);
+        }
 
         var receipt = new ParsedReceipt(items, detection.Bill, currency, warnings);
         return new TracedReceipt(receipt, trace);
