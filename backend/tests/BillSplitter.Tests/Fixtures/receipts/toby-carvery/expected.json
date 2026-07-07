@@ -44,6 +44,7 @@
   },
   "currency": "GBP",
   "warnings": [
-    "negative amount ignored: TBY KEFE1 1P = -5.99"
+    "negative amount ignored: TBY KEFE1 1P = -5.99",
+    "parsed items and extras do not reconcile with the printed total"
   ]
 }

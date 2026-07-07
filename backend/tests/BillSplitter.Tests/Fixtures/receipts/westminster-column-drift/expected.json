@@ -44,6 +44,7 @@
   },
   "currency": "GBP",
   "warnings": [
-    "price with no name ignored: 6.50"
+    "price with no name ignored: 6.50",
+    "parsed items and extras do not reconcile with the printed total"
   ]
 }

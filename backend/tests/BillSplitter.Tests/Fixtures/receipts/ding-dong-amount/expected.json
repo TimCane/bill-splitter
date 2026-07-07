@@ -28,5 +28,7 @@
     "totalMinor": 18040
   },
   "currency": "USD",
-  "warnings": []
+  "warnings": [
+    "parsed items and extras do not reconcile with the printed total"
+  ]
 }
