@@ -4,6 +4,7 @@ using BillSplitter.Domain.Parsing.Detectors;
 using BillSplitter.Domain.Parsing.Models;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
+using BillSplitter.Domain.Parsing.Spatial;
 
 namespace BillSplitter.Domain.Parsing.Engine;
 
@@ -81,12 +82,19 @@ internal static partial class ReceiptParseEngine
             }
 
             var name = text[..money.Index].Trim();
-            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text, priorText, priorHasAmount));
+            candidates.Add(new Candidate(line.Box.Y, line.Box.X, ToMinor(money), name, text, priorText, priorHasAmount));
         }
+
+        // OCR can emit priced rows out of reading order. Restore it by bounding box
+        // before the bill and item stages read them, so items come out top-to-bottom
+        // and the grand total anchors correctly. Gated: an already-ordered receipt is
+        // returned untouched. PreviousText was captured at scan time, so reordering
+        // here never disturbs a label-printed-above-its-amount association.
+        var ordered = BoxOrderer.Order(candidates);
 
         // The bill engine anchors on the grand total, then reads tax/tip/service
         // off the rows above it and hands back the rest as item rows.
-        var detection = BillEngine.Detect(candidates);
+        var detection = BillEngine.Detect(ordered);
         warnings.AddRange(detection.Warnings);
 
         // Each item row goes through the competing item rules; the engine keeps the
