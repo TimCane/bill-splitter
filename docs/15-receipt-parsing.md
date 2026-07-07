@@ -176,9 +176,11 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 - **Wrapped names** *(current)*: join amount-less lines onto the next priced
   line until a price appears. Gated to a nameless price on a receipt that has a
-  structural total, borrowing a bounded run of letter-only fragments immediately
-  above it - so an already-inline receipt, a non-receipt, or a fully drifted
-  column layout (the box-sort pass's job) is left untouched.
+  structural total, borrowing a bounded run of letter-only fragments that sit
+  above the price and in its left column (by `Box.Y`/`Box.X`, not list order) -
+  so a centred store header, a trailing note, an already-inline receipt, a
+  non-receipt, or a fully drifted column layout (the box-sort pass's job) is
+  left untouched.
 - **Modifiers** *(planned)*: attach `+ Bacon` / `No Onion` to the item above.
 - **Duplicate copies** *(planned)*: de-dupe repeated item blocks
   (merchant/customer/kitchen) without collapsing a genuinely repeated dish.

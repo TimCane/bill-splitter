@@ -10,19 +10,25 @@ namespace BillSplitter.Domain.Parsing.Multiline;
 /// its name inline is untouched. It also fires only when the receipt has a
 /// structural total (a keyword row ending in money), which keeps a non-receipt or
 /// a fully column-drifted layout - whose bare prices are the box-sort pass's job,
-/// not this one - out of scope.</summary>
+/// not this one - out of scope. Fragments are borrowed by geometry, not list
+/// order: only lines sitting above the price (smaller <c>Box.Y</c>) and in its
+/// item's left column (<c>Box.X</c> within a line height of the fragment nearest
+/// the price) fold in, so a centred store header or an out-of-order line above the
+/// price is flushed as its own line rather than swallowed into the name.</summary>
 internal static partial class WrappedNameMerger
 {
-    /// <summary>How many stacked fragment lines above a price we will fold into
-    /// one name. A wrapped name runs to two short lines ("Large Double" / "Bacon");
-    /// bounding the run keeps a header stacked above the item from being swallowed -
-    /// it is flushed as its own line instead.</summary>
-    private const int MaxFragments = 2;
+    /// <summary>Upper bound on how many stacked fragment lines fold into one name -
+    /// a safety cap on a runaway column, not the header guard (that is geometric:
+    /// the run stops at the first fragment outside the item's left column). Three
+    /// covers a name wrapped to three short lines ("Slow-Roasted" / "Pork" /
+    /// "Belly").</summary>
+    private const int MaxFragments = 3;
 
-    // A line that is only an amount ("£6.50", "6.50", "£ 5.50"): a price whose name
-    // landed on the lines above it. Negative amounts are discounts, not wrapped
-    // items, so they are excluded.
-    [GeneratedRegex(@"^[£€$]?\s*\d{1,4}[.,]\d{2}\s*$")]
+    // A line that is only an amount ("£6.50", "6.50", "£ 5.50", "6.50 B"): a price
+    // whose name landed on the lines above it. The optional trailing letter is a
+    // VAT-class code, so this stays in step with the engine's MoneyAtEnd. Negative
+    // amounts are discounts, not wrapped items, so they are excluded.
+    [GeneratedRegex(@"^[£€$]?\s*\d{1,4}[.,]\d{2}(?:\s+[A-Z])?\s*$")]
     private static partial Regex NamelessPrice();
 
     // A keyword total row that still carries its amount ("TOTAL 13.75",
@@ -38,12 +44,15 @@ internal static partial class WrappedNameMerger
     private static partial Regex NameFragment();
 
     // Words that are letter-only yet never an item name; a fragment matching one is
-    // a header or bill label, not the top of a wrapped item.
+    // a header, bill label or payment tender, not the top of a wrapped item. The
+    // gate keywords (AMOUNT/BALANCE/DUE) sit here too, so a two-line bill label is
+    // never folded into a phantom item.
     private static readonly string[] NonItemWords =
     [
         "TOTAL", "SUBTOTAL", "TAX", "VAT", "GST", "SERVICE", "TIP", "GRATUITY",
         "CASH", "CARD", "CHANGE", "TABLE", "ORDER", "SERVER", "GUEST", "COVER",
-        "THANK", "THANKS", "WELCOME", "RECEIPT", "INVOICE",
+        "THANK", "THANKS", "WELCOME", "RECEIPT", "INVOICE", "AMOUNT", "BALANCE",
+        "DUE", "PAID", "VISA", "MASTERCARD", "AMEX", "DEBIT", "CREDIT", "MAESTRO",
     ];
 
     /// <summary>Returns the lines with any wrapped item names folded onto their
@@ -64,13 +73,22 @@ internal static partial class WrappedNameMerger
 
             if (NamelessPrice().IsMatch(text) && fragments.Count > 0)
             {
-                // Fold the run immediately above (bounded, so a header two lines up
-                // is emitted as its own line rather than swallowed) onto the price.
-                var take = Math.Min(MaxFragments, fragments.Count);
+                // Fold only the fragments that read as this item's wrapped name -
+                // above the price and in its left column. Anything else (a header, a
+                // line the OCR emitted out of order) is flushed as its own line.
+                var take = WrappedRunLength(fragments, line.Box);
                 var flushed = fragments.Count - take;
                 for (var i = 0; i < flushed; i++)
                 {
                     merged.Add(fragments[i]);
+                }
+
+                if (take == 0)
+                {
+                    // Nothing above the price belongs to it: leave the price alone.
+                    merged.Add(line);
+                    fragments.Clear();
+                    continue;
                 }
 
                 var name = string.Join(' ', fragments.Skip(flushed).Select(f => f.Text!.Trim()));
@@ -92,6 +110,36 @@ internal static partial class WrappedNameMerger
 
         merged.AddRange(fragments);
         return merged;
+    }
+
+    // The contiguous run of buffered fragments, counting up from the one nearest
+    // the price, that fold into its name: each must sit above the price (smaller
+    // Box.Y) and share the nearest fragment's left column (Box.X within a line
+    // height), bounded by MaxFragments. The column test is what flushes a header
+    // stacked above the item instead of swallowing it; the Box.Y test keeps a line
+    // the OCR emitted out of vertical order from being folded onto the wrong price.
+    private static int WrappedRunLength(List<OcrLine> fragments, OcrBox price)
+    {
+        var anchor = fragments[^1].Box;
+        if (anchor.Y >= price.Y)
+        {
+            return 0;
+        }
+
+        var tolerance = anchor.Height;
+        var take = 0;
+        for (var i = fragments.Count - 1; i >= 0 && take < MaxFragments; i--)
+        {
+            var box = fragments[i].Box;
+            if (box.Y >= price.Y || Math.Abs(box.X - anchor.X) > tolerance)
+            {
+                break;
+            }
+
+            take++;
+        }
+
+        return take;
     }
 
     private static bool IsFragment(string text) =>

@@ -136,8 +136,9 @@ Before candidates are read, a gated pre-pass (`Parsing/Multiline`) folds an item
 name wrapped across lines onto its price row (`WrappedNameMerger`: `Classic` /
 `BAO` / `£6.50` -> one `Classic BAO £6.50`). It fires only for a nameless priced
 line on a receipt that has a structural total, borrowing a bounded run of
-letter-only fragments immediately above - so an already-inline receipt, a
-non-receipt, or a fully column-drifted layout is untouched.
+letter-only fragments that sit above the price and in its left column (by
+`Box.Y`/`Box.X`, not list order) - so a centred store header, an already-inline
+receipt, a non-receipt, or a fully column-drifted layout is untouched.
 
 Every line is then run through `ITextNormalizer` (`Parsing/Normalization`); the
 default `BasicNormalizer` trims surrounding whitespace and collapses internal
