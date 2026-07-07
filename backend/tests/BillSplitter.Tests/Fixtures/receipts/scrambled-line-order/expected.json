@@ -1,0 +1,10 @@
+{
+  "items": [
+    { "name": "Croissant", "quantity": 1, "priceMinor": 350 },
+    { "name": "Espresso", "quantity": 1, "priceMinor": 250 },
+    { "name": "Flat White", "quantity": 2, "priceMinor": 700 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 1300 },
+  "currency": "GBP",
+  "warnings": []
+}
