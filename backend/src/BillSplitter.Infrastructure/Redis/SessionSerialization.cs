@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Sessions;
 
 namespace BillSplitter.Infrastructure.Redis;
 

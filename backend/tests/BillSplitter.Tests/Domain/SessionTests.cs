@@ -1,5 +1,7 @@
 using System.Text.Json;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Common;
+using BillSplitter.Domain.Receipts;
+using BillSplitter.Domain.Sessions;
 using FluentAssertions;
 
 namespace BillSplitter.Tests.Domain;

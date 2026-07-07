@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Sessions;
 
 /// <summary>Bill extras plus the printed total. <c>SubtotalMinor</c> is always
 /// computed from the items, never stored (docs/02-domain-model.md#bill).</summary>

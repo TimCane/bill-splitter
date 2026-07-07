@@ -1,4 +1,6 @@
-namespace BillSplitter.Domain;
+using BillSplitter.Domain.Receipts;
+
+namespace BillSplitter.Domain.Abstractions;
 
 /// <summary>
 /// Broadcasts live session updates. Implemented in the Api over SignalR so Domain

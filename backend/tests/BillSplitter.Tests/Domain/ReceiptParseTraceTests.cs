@@ -1,9 +1,9 @@
 using System.Text.Json;
-using BillSplitter.Domain;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Engine;
 using BillSplitter.Domain.Parsing.Models;
 using BillSplitter.Domain.Parsing.Rules;
+using BillSplitter.Domain.Receipts;
 using FluentAssertions;
 
 namespace BillSplitter.Tests.Domain;

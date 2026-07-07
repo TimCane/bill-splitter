@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Abstractions;
 
 /// <summary>
 /// Cryptographically-random identifiers. Ids are 22-char base64url (16 bytes),

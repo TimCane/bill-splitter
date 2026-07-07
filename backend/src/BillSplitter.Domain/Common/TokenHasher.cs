@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Common;
 
 /// <summary>Hashes participant tokens for storage and lookup. Only the hex
 /// SHA-256 is ever persisted; the raw token is returned once at create/join and

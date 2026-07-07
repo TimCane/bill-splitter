@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Receipts;
 
 /// <summary>The sidecar's output: text lines with geometry, ordered top-to-bottom
 /// (docs/06-ocr-service.md#post-ocr). Deserialized verbatim from the sidecar's

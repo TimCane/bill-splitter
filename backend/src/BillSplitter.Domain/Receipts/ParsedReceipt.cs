@@ -1,4 +1,6 @@
-namespace BillSplitter.Domain;
+using BillSplitter.Domain.Sessions;
+
+namespace BillSplitter.Domain.Receipts;
 
 /// <summary>The parser's output: the items and bill to seed a session at review,
 /// plus the currency guess and the discard <see cref="Warnings"/> shown to the

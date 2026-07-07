@@ -7,6 +7,8 @@ using BillSplitter.Domain.Parsing.Multiline;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
 using BillSplitter.Domain.Parsing.Spatial;
+using BillSplitter.Domain.Receipts;
+using BillSplitter.Domain.Sessions;
 
 namespace BillSplitter.Domain.Parsing.Engine;
 

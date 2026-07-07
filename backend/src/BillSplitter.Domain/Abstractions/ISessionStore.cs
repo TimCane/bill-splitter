@@ -1,4 +1,6 @@
-namespace BillSplitter.Domain;
+using BillSplitter.Domain.Sessions;
+
+namespace BillSplitter.Domain.Abstractions;
 
 /// <summary>A session plus the remaining TTL of its Redis key, read together so
 /// the snapshot's <c>expiresAt</c> reflects the key's real expiry

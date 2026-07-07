@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
 using BillSplitter.Infrastructure.Redis;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;

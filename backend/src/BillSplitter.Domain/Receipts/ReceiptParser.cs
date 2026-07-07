@@ -1,6 +1,6 @@
 using BillSplitter.Domain.Parsing.Engine;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Receipts;
 
 /// <summary>
 /// Pure OCR-lines-to-<see cref="ParsedReceipt"/> parsing

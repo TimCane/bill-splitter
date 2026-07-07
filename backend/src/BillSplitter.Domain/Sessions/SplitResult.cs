@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Sessions;
 
 /// <summary>One participant's computed share of the bill (docs/04-api-contract.md).</summary>
 public sealed record ParticipantTotals(

@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
 using BillSplitter.Api.Http;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Common;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace BillSplitter.Api.Configuration;

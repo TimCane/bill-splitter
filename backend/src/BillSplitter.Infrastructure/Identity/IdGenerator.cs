@@ -1,6 +1,6 @@
 using System.Buffers.Text;
 using System.Security.Cryptography;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
 
 namespace BillSplitter.Infrastructure.Identity;
 

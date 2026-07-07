@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Sessions;
 
 /// <summary>A receipt line. <see cref="PriceMinor"/> is the whole line total, not
 /// a unit price; <see cref="Quantity"/> is informational only and never affects

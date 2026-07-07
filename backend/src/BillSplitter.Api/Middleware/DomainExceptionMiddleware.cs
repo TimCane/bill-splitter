@@ -1,5 +1,5 @@
 using BillSplitter.Api.Http;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Common;
 
 namespace BillSplitter.Api.Middleware;
 

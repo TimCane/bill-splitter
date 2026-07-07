@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Common;
 
 /// <summary>
 /// Stable machine-readable error codes surfaced as ProblemDetails <c>type</c>

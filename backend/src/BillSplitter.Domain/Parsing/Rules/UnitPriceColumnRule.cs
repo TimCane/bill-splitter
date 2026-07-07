@@ -1,4 +1,5 @@
 using BillSplitter.Domain.Parsing.Models;
+using BillSplitter.Domain.Receipts;
 
 namespace BillSplitter.Domain.Parsing.Rules;
 

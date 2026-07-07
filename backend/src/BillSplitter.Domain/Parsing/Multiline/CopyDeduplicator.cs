@@ -1,3 +1,6 @@
+using BillSplitter.Domain.Receipts;
+using BillSplitter.Domain.Sessions;
+
 namespace BillSplitter.Domain.Parsing.Multiline;
 
 /// <summary>Collapses a receipt photographed as several stacked copies

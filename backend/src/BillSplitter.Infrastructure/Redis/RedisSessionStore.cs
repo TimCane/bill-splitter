@@ -1,4 +1,6 @@
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
+using BillSplitter.Domain.Common;
+using BillSplitter.Domain.Sessions;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 

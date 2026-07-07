@@ -1,5 +1,5 @@
 using System.Text.Json;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Receipts;
 using FluentAssertions;
 
 namespace BillSplitter.Tests.Domain;

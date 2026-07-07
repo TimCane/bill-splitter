@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;

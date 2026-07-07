@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Sessions;
 
 /// <summary>A person in the session. Host-ness is not stored here -
 /// <see cref="Session.HostParticipantId"/> is the single source

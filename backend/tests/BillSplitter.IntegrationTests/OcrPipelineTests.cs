@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using WireMock.RequestBuilders;

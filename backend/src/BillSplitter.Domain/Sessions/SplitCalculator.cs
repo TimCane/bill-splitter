@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Sessions;
 
 /// <summary>
 /// Pure, stateless split math: largest-remainder distribution plus per-participant
