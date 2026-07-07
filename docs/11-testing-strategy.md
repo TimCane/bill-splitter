@@ -59,7 +59,10 @@ One parameterized test runs the whole corpus.
   misread class - `misread-o-zero`, `misread-s-five`, `misread-il-one`,
   `misread-b-eight`, `misread-e-pound` - each a line that only parses once the
   price glyphs are repaired, and each carrying a survivor name (`7UP`, `Coke
-  Zero`) that proves item names are left intact.
+  Zero`) that proves item names are left intact. `misread-wrapped-name` pins the
+  ordering: the repair runs before the multi-line pre-passes, so a wrapped name
+  whose price line is a misread (`Classic` / `BAO` / `£6.5O`) still folds - it
+  fails if the repair is deferred to the candidate loop.
 - Phase B capabilities each land with their own fixtures: `wrapped-item-names`
   proves the wrapped-name pre-pass (a name split over `Classic` / `BAO` / `£6.50`
   folded into one item) while the already-inline corpus stays byte-for-byte green.
