@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BillSplitter.Domain;
@@ -16,11 +17,33 @@ public static partial class ReceiptParser
     private const double ConfidenceFloor = 0.5;
 
     // A money token at the end of the line: 1-4 whole digits, a '.' or ',', two
-    // fraction digits, optionally preceded by a currency symbol or a minus. The
-    // end anchor is the reject for "11.00%" - trailing text means it is not a
+    // fraction digits, optionally preceded by a currency symbol or a minus and
+    // optionally followed by a single-letter VAT-class code ("4.00 B"). The end
+    // anchor is the reject for "11.00%" - other trailing text means it is not a
     // clean amount row.
-    [GeneratedRegex(@"(?<neg>-\s*)?(?<sym>[£€$])?\s*(?<whole>\d{1,4})[.,](?<frac>\d{2})\s*$")]
+    [GeneratedRegex(@"(?<neg>-\s*)?(?<sym>[£€$])?\s*(?<whole>\d{1,4})[.,](?<frac>\d{2})(?:\s+[A-Z])?\s*$")]
     private static partial Regex MoneyAtEnd();
+
+    // A bare money token at the end of a name, e.g. the per-unit column in
+    // "2 BREAD 2.00 4.00" once the line total is removed.
+    [GeneratedRegex(@"(?<sym>[£€$])?\s*(?<uwhole>\d{1,4})[.,](?<ufrac>\d{2})\s*$")]
+    private static partial Regex TrailingMoney();
+
+    // A charge line whose label is elsewhere: it opens with a percentage
+    // ("12.5% on 41.30"). Recovered from the preceding line or parked.
+    [GeneratedRegex(@"^\s*\d{1,3}([.,]\d+)?\s*%")]
+    private static partial Regex LeadingPercent();
+
+    // A grouped-receipt category subtotal ("8 DRINK", "3 FOOD"): a rollup, not
+    // an item - its components are listed separately above it.
+    [GeneratedRegex(@"^\d*\s*(?:FOOD|DRINKS?|BEVERAGES?)\s*$", RegexOptions.IgnoreCase)]
+    private static partial Regex CategoryRollup();
+
+    // A service-charge label that printed above its amount ("Service charge 12.5%
+    // on", "Optional Service charge"). Anchored to the line start so a header
+    // that merely mentions a tax code ("... GST 3") is not mistaken for one.
+    [GeneratedRegex(@"^(?:OPTIONAL\s+|DISCRETIONARY\s+)?SERVICE\b", RegexOptions.IgnoreCase)]
+    private static partial Regex ServiceLabel();
 
     // A leading quantity: "2 ", "2x ", "3 X " -> the count, stripped from the name.
     [GeneratedRegex(@"^(?<qty>\d{1,2})\s?[xX]?\s+")]
@@ -49,9 +72,13 @@ public static partial class ReceiptParser
         var currency = GuessCurrency(result.Lines);
 
         var candidates = new List<Candidate>();
+        var previousText = string.Empty;
         foreach (var line in result.Lines)
         {
             var text = (line.Text ?? string.Empty).Trim();
+            var priorText = previousText;
+            previousText = text; // advance for every line, so labels above amounts survive
+
             var money = MoneyAtEnd().Match(text);
             if (!money.Success)
             {
@@ -73,7 +100,7 @@ public static partial class ReceiptParser
             }
 
             var name = text[..money.Index].Trim();
-            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text));
+            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text, priorText));
         }
 
         // Locate the grand total first: it is the lowest TOTAL row on the receipt
@@ -110,9 +137,9 @@ public static partial class ReceiptParser
             }
 
             var upper = candidate.Name.ToUpperInvariant();
-            if (IsSubtotal(upper) || IsItemCount(upper) || IsTotal(upper))
+            if (IsSubtotal(upper) || IsItemCount(upper) || IsTotal(upper) || IsCategoryRollup(upper))
             {
-                continue; // Subtotals and intermediate totals: we compute our own.
+                continue; // Subtotals, intermediate totals and category rollups: our own.
             }
 
             if (IsTax(upper))
@@ -127,7 +154,23 @@ public static partial class ReceiptParser
             {
                 service = candidate.Amount;
             }
-            else if (!IsPaymentNoise(upper))
+            else if (IsPaymentNoise(upper))
+            {
+                // Payment tender lines: ignore.
+            }
+            else if (LoneServiceLabel(candidate.PreviousText))
+            {
+                // A service charge whose label printed on the line above and whose
+                // amount landed alone on this one ("Service charge 12.5% on" /
+                // "90.23  11.28", or Defune's "Service Charge" / "...Server 22.68").
+                service = candidate.Amount;
+            }
+            else if (IsBareCharge(candidate.Name))
+            {
+                // A bare amount with no recoverable label - a columnar misread.
+                warnings.Add($"unreadable amount ignored: {candidate.Text}");
+            }
+            else
             {
                 itemRows.Add(candidate);
             }
@@ -137,6 +180,7 @@ public static partial class ReceiptParser
         foreach (var row in itemRows)
         {
             var (quantity, name) = ExtractQuantity(CleanName(row.Name));
+            name = StripUnitPrice(name, row.Amount, quantity);
             if (name.Length == 0)
             {
                 warnings.Add($"price with no name ignored: {row.Text}");
@@ -193,13 +237,50 @@ public static partial class ReceiptParser
         return rest.Length > 0 && quantity >= 1 ? (quantity, rest) : (1, name);
     }
 
+    // Drop the per-unit price column ("2 ROAST BEEF 27.00" -> "ROAST BEEF") only
+    // when it is unambiguous: a multiple quantity whose trailing number times the
+    // count equals the line total. A single item's trailing number is left alone.
+    private static string StripUnitPrice(string name, long amount, int quantity)
+    {
+        if (quantity <= 1)
+        {
+            return name;
+        }
+
+        var match = TrailingMoney().Match(name);
+        if (!match.Success)
+        {
+            return name;
+        }
+
+        var unit = (long.Parse(match.Groups["uwhole"].Value, CultureInfo.InvariantCulture) * 100)
+            + long.Parse(match.Groups["ufrac"].Value, CultureInfo.InvariantCulture);
+        return unit * quantity == amount
+            ? name[..match.Index].Trim().TrimEnd('.', ' ', '-')
+            : name;
+    }
+
+    // A row whose name carries no item (a bare amount left of the price, or a
+    // stray percentage) - the residue of a split charge line or a columnar
+    // layout. Empty names are handled separately as "price with no name".
+    private static bool IsBareCharge(string name) =>
+        name.Length > 0 && (LeadingPercent().IsMatch(name) || !name.Any(char.IsLetter));
+
+    // The line above an amount is a lone service-charge label when it opens with
+    // "Service"/"Optional Service" and carries no amount of its own - the receipt
+    // split the label and its value across two lines, so the value is the charge.
+    private static bool LoneServiceLabel(string priorText) =>
+        !MoneyAtEnd().Match(priorText).Success && ServiceLabel().IsMatch(priorText);
+
     private static bool IsSubtotal(string u) => u.Contains("SUBTOTAL") || u.Contains("SUB TOTAL");
 
     private static bool IsItemCount(string u) => ItemCount().IsMatch(u);
 
+    private static bool IsCategoryRollup(string u) => CategoryRollup().IsMatch(u);
+
     private static bool IsTax(string u) => u.Contains("TAX") || u.Contains("VAT") || u.Contains("GST");
 
-    private static bool IsTip(string u) => u.Contains("TIP") || u.Contains("GRATUITY");
+    private static bool IsTip(string u) => u.Contains("TIP") || u.Contains("GRATUIT");
 
     private static bool IsService(string u) => u.Contains("SERVICE");
 
@@ -210,5 +291,5 @@ public static partial class ReceiptParser
         u.Contains("CASH") || u.Contains("CHANGE") || u.Contains("CARD")
         || u.Contains("VISA") || u.Contains("MASTERCARD") || u.Contains("AUTH");
 
-    private sealed record Candidate(int Y, long Amount, string Name, string Text);
+    private sealed record Candidate(int Y, long Amount, string Name, string Text, string PreviousText);
 }

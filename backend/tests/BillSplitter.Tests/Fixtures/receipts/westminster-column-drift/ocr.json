@@ -1,0 +1,19 @@
+{
+  "durationMs": 3080,
+  "lines": [
+    { "text": "WESTMINSTER KITCHEN", "confidence": 0.95, "box": { "x": 120, "y": 40, "width": 620, "height": 44 } },
+    { "text": "Table No:1", "confidence": 0.92, "box": { "x": 60, "y": 160, "width": 400, "height": 32 } },
+    { "text": "6.50", "confidence": 0.86, "box": { "x": 620, "y": 210, "width": 140, "height": 30 } },
+    { "text": "1 Apple Tart 11.45", "confidence": 0.92, "box": { "x": 60, "y": 250, "width": 720, "height": 32 } },
+    { "text": "1 Chicken Fillet 3.95", "confidence": 0.92, "box": { "x": 60, "y": 284, "width": 720, "height": 32 } },
+    { "text": "1 Creamy Mashed Potatoes 7.45", "confidence": 0.9, "box": { "x": 60, "y": 318, "width": 720, "height": 32 } },
+    { "text": "1 Deep Fried Brie 8.25", "confidence": 0.91, "box": { "x": 60, "y": 352, "width": 720, "height": 32 } },
+    { "text": "3 Diet Coke 19.90", "confidence": 0.92, "box": { "x": 60, "y": 386, "width": 720, "height": 32 } },
+    { "text": "2 Margarita Pizza 0.00", "confidence": 0.9, "box": { "x": 60, "y": 420, "width": 720, "height": 32 } },
+    { "text": "1 Tap Water Glass 6.75", "confidence": 0.91, "box": { "x": 60, "y": 454, "width": 720, "height": 32 } },
+    { "text": "1 Tricolore", "confidence": 0.9, "box": { "x": 60, "y": 488, "width": 400, "height": 32 } },
+    { "text": "Sub Total: £64.25", "confidence": 0.94, "box": { "x": 60, "y": 560, "width": 720, "height": 34 } },
+    { "text": "Service Charge: £8.03", "confidence": 0.92, "box": { "x": 60, "y": 596, "width": 720, "height": 34 } },
+    { "text": "Total: £72.28", "confidence": 0.96, "box": { "x": 60, "y": 640, "width": 720, "height": 42 } }
+  ]
+}

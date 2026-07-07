@@ -1,0 +1,18 @@
+{
+  "durationMs": 3040,
+  "lines": [
+    { "text": "THE HOLLAND", "confidence": 0.95, "box": { "x": 140, "y": 40, "width": 500, "height": 46 } },
+    { "text": "TAX ID: VAT No. 41585096", "confidence": 0.9, "box": { "x": 60, "y": 150, "width": 620, "height": 32 } },
+    { "text": "Table #8   COVERS #2", "confidence": 0.92, "box": { "x": 60, "y": 200, "width": 620, "height": 34 } },
+    { "text": "2 Roast Beef £52.00", "confidence": 0.94, "box": { "x": 60, "y": 262, "width": 700, "height": 34 } },
+    { "text": "1 Small Gravy £1.50", "confidence": 0.93, "box": { "x": 60, "y": 298, "width": 700, "height": 34 } },
+    { "text": "1 Diet Coke £3.75", "confidence": 0.93, "box": { "x": 60, "y": 334, "width": 700, "height": 34 } },
+    { "text": "1 Flat White £4.00", "confidence": 0.93, "box": { "x": 60, "y": 370, "width": 700, "height": 34 } },
+    { "text": "1 >£1 SHIFT Charity Donation £1.00", "confidence": 0.88, "box": { "x": 60, "y": 406, "width": 700, "height": 34 } },
+    { "text": "Fork Loyalty Discount £50 -£50.00", "confidence": 0.89, "box": { "x": 60, "y": 442, "width": 700, "height": 34 } },
+    { "text": "12.5% Service Charge £7.66", "confidence": 0.92, "box": { "x": 60, "y": 502, "width": 700, "height": 34 } },
+    { "text": "SUBTOTAL Inc VAT £12.25", "confidence": 0.94, "box": { "x": 60, "y": 538, "width": 700, "height": 34 } },
+    { "text": "VAT £2.01", "confidence": 0.93, "box": { "x": 60, "y": 574, "width": 700, "height": 34 } },
+    { "text": "TOTAL £19.91", "confidence": 0.96, "box": { "x": 60, "y": 612, "width": 700, "height": 42 } }
+  ]
+}

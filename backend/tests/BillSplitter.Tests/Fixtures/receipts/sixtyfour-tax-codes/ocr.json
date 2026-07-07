@@ -1,0 +1,23 @@
+{
+  "durationMs": 3220,
+  "lines": [
+    { "text": "64", "confidence": 0.9, "box": { "x": 260, "y": 40, "width": 240, "height": 60 } },
+    { "text": "Main Restaurant, Table 4", "confidence": 0.93, "box": { "x": 60, "y": 150, "width": 620, "height": 34 } },
+    { "text": "Pomme Anna 10.00 A", "confidence": 0.93, "box": { "x": 60, "y": 220, "width": 720, "height": 34 } },
+    { "text": "BOTTLE - BURG RED Chateau", "confidence": 0.9, "box": { "x": 60, "y": 256, "width": 720, "height": 34 } },
+    { "text": "de Marsannay, Marsannay,", "confidence": 0.9, "box": { "x": 60, "y": 292, "width": 720, "height": 34 } },
+    { "text": "Rouge, 2017 98.00 A", "confidence": 0.91, "box": { "x": 60, "y": 328, "width": 720, "height": 34 } },
+    { "text": "Espresso 4.50 A", "confidence": 0.93, "box": { "x": 60, "y": 364, "width": 720, "height": 34 } },
+    { "text": "2 Sapling Gin FREE", "confidence": 0.92, "box": { "x": 60, "y": 400, "width": 720, "height": 34 } },
+    { "text": "Petite gougere FREE", "confidence": 0.9, "box": { "x": 60, "y": 436, "width": 720, "height": 34 } },
+    { "text": "2 DINNER 2 Courses 70.00 140.00 A", "confidence": 0.9, "box": { "x": 60, "y": 472, "width": 720, "height": 34 } },
+    { "text": "SUB-TOTAL 252.50", "confidence": 0.95, "box": { "x": 60, "y": 528, "width": 720, "height": 34 } },
+    { "text": "Service charge 15% on", "confidence": 0.92, "box": { "x": 60, "y": 564, "width": 720, "height": 34 } },
+    { "text": "252.50 37.88 Z", "confidence": 0.91, "box": { "x": 60, "y": 598, "width": 720, "height": 34 } },
+    { "text": "Amount due £ 290.38", "confidence": 0.96, "box": { "x": 60, "y": 662, "width": 720, "height": 42 } },
+    { "text": "No payment received", "confidence": 0.93, "box": { "x": 60, "y": 722, "width": 720, "height": 32 } },
+    { "text": "A: VAT 20% on 210.42: £ 42.08 (252.50)", "confidence": 0.87, "box": { "x": 60, "y": 772, "width": 720, "height": 32 } },
+    { "text": "Division hint", "confidence": 0.9, "box": { "x": 60, "y": 820, "width": 720, "height": 32 } },
+    { "text": "290.38 / 2 = 145.19", "confidence": 0.9, "box": { "x": 60, "y": 854, "width": 720, "height": 32 } }
+  ]
+}

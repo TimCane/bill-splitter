@@ -1,0 +1,67 @@
+{
+  "items": [
+    {
+      "name": "Sea Bream Sashimi",
+      "quantity": 1,
+      "priceMinor": 1280
+    },
+    {
+      "name": "Yellow Tail Sash",
+      "quantity": 1,
+      "priceMinor": 1800
+    },
+    {
+      "name": "Pattier Tuna Sas",
+      "quantity": 1,
+      "priceMinor": 2100
+    },
+    {
+      "name": "Scallop Sashimi",
+      "quantity": 1,
+      "priceMinor": 1280
+    },
+    {
+      "name": "Eel Sashimi",
+      "quantity": 1,
+      "priceMinor": 1400
+    },
+    {
+      "name": "Miso Soup",
+      "quantity": 2,
+      "priceMinor": 1280
+    },
+    {
+      "name": "Agedofu",
+      "quantity": 1,
+      "priceMinor": 640
+    },
+    {
+      "name": "Soft Shell Crab",
+      "quantity": 1,
+      "priceMinor": 1980
+    },
+    {
+      "name": "Prawns Tempura",
+      "quantity": 1,
+      "priceMinor": 2300
+    },
+    {
+      "name": "Green Tea",
+      "quantity": 2,
+      "priceMinor": 360
+    },
+    {
+      "name": "Shochikubai Sma",
+      "quantity": 1,
+      "priceMinor": 560
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 2268,
+    "totalMinor": 17388
+  },
+  "currency": "GBP",
+  "warnings": []
+}

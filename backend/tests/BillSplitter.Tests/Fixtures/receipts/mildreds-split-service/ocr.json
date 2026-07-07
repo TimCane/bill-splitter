@@ -1,0 +1,17 @@
+{
+  "durationMs": 2960,
+  "lines": [
+    { "text": "Mildreds", "confidence": 0.94, "box": { "x": 160, "y": 40, "width": 420, "height": 50 } },
+    { "text": "Ground Floor, Table 18", "confidence": 0.93, "box": { "x": 60, "y": 160, "width": 560, "height": 34 } },
+    { "text": "optional street smart", "confidence": 0.9, "box": { "x": 60, "y": 220, "width": 560, "height": 32 } },
+    { "text": "donation 1.00", "confidence": 0.92, "box": { "x": 60, "y": 254, "width": 560, "height": 32 } },
+    { "text": "kiri hodi 19.90", "confidence": 0.92, "box": { "x": 60, "y": 288, "width": 560, "height": 32 } },
+    { "text": "paratha 3.90", "confidence": 0.92, "box": { "x": 60, "y": 322, "width": 560, "height": 32 } },
+    { "text": "korean burger with fries 17.50", "confidence": 0.91, "box": { "x": 60, "y": 356, "width": 560, "height": 32 } },
+    { "text": "SUB-TOTAL 42.30", "confidence": 0.95, "box": { "x": 60, "y": 412, "width": 560, "height": 34 } },
+    { "text": "Optional Service charge", "confidence": 0.92, "box": { "x": 60, "y": 448, "width": 560, "height": 32 } },
+    { "text": "12.5% on 41.30 5.17", "confidence": 0.9, "box": { "x": 60, "y": 482, "width": 560, "height": 32 } },
+    { "text": "Amount due £ 47.47", "confidence": 0.96, "box": { "x": 60, "y": 544, "width": 560, "height": 42 } },
+    { "text": "No payment received", "confidence": 0.93, "box": { "x": 60, "y": 604, "width": 560, "height": 32 } }
+  ]
+}

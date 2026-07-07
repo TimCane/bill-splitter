@@ -1,0 +1,25 @@
+{
+  "durationMs": 3400,
+  "lines": [
+    { "text": "L'ESCARGOT", "confidence": 0.9, "box": { "x": 120, "y": 40, "width": 620, "height": 50 } },
+    { "text": "1x Cotes-du-Rhone white, Ch.", "confidence": 0.88, "box": { "x": 40, "y": 210, "width": 560, "height": 32 } },
+    { "text": "Beauchene GLS", "confidence": 0.88, "box": { "x": 40, "y": 244, "width": 560, "height": 32 } },
+    { "text": "1x 6x Escargots Sun", "confidence": 0.87, "box": { "x": 40, "y": 278, "width": 560, "height": 32 } },
+    { "text": "1x Cabbage & potatoes Sun", "confidence": 0.87, "box": { "x": 40, "y": 312, "width": 560, "height": 32 } },
+    { "text": "1x Lemon Sole Sun", "confidence": 0.88, "box": { "x": 40, "y": 346, "width": 560, "height": 32 } },
+    { "text": "1x Chocolat Souffle Sun", "confidence": 0.86, "box": { "x": 40, "y": 380, "width": 560, "height": 32 } },
+    { "text": "1x 3 Courses", "confidence": 0.88, "box": { "x": 40, "y": 414, "width": 560, "height": 32 } },
+    { "text": "£12.00", "confidence": 0.9, "box": { "x": 660, "y": 300, "width": 160, "height": 30 } },
+    { "text": "£0.00", "confidence": 0.9, "box": { "x": 660, "y": 340, "width": 160, "height": 30 } },
+    { "text": "£0.00", "confidence": 0.9, "box": { "x": 660, "y": 380, "width": 160, "height": 30 } },
+    { "text": "£0.00", "confidence": 0.9, "box": { "x": 660, "y": 420, "width": 160, "height": 30 } },
+    { "text": "£0.00", "confidence": 0.9, "box": { "x": 660, "y": 460, "width": 160, "height": 30 } },
+    { "text": "£39.00", "confidence": 0.9, "box": { "x": 660, "y": 500, "width": 160, "height": 30 } },
+    { "text": "Sub-total:", "confidence": 0.92, "box": { "x": 40, "y": 560, "width": 300, "height": 32 } },
+    { "text": "Service charge:", "confidence": 0.92, "box": { "x": 40, "y": 596, "width": 300, "height": 32 } },
+    { "text": "TOTAL :", "confidence": 0.93, "box": { "x": 40, "y": 636, "width": 300, "height": 40 } },
+    { "text": "£51.00", "confidence": 0.9, "box": { "x": 660, "y": 560, "width": 160, "height": 30 } },
+    { "text": "£7.65", "confidence": 0.9, "box": { "x": 660, "y": 596, "width": 160, "height": 30 } },
+    { "text": "£58.65", "confidence": 0.9, "box": { "x": 660, "y": 636, "width": 160, "height": 34 } }
+  ]
+}

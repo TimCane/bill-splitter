@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "Pomme Anna",
+      "quantity": 1,
+      "priceMinor": 1000
+    },
+    {
+      "name": "Rouge, 2017",
+      "quantity": 1,
+      "priceMinor": 9800
+    },
+    {
+      "name": "Espresso",
+      "quantity": 1,
+      "priceMinor": 450
+    },
+    {
+      "name": "DINNER 2 Courses",
+      "quantity": 2,
+      "priceMinor": 14000
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 3788,
+    "totalMinor": 29038
+  },
+  "currency": "GBP",
+  "warnings": []
+}

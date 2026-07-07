@@ -1,0 +1,42 @@
+{
+  "items": [
+    {
+      "name": "Bread",
+      "quantity": 2,
+      "priceMinor": 400
+    },
+    {
+      "name": "Roast Beef",
+      "quantity": 2,
+      "priceMinor": 5400
+    },
+    {
+      "name": "Beau Mayne Rouge 175ml",
+      "quantity": 1,
+      "priceMinor": 950
+    },
+    {
+      "name": "Cotes-Du-Rhone PERRIN 175ml",
+      "quantity": 1,
+      "priceMinor": 1150
+    },
+    {
+      "name": "Strawberry Pavlova",
+      "quantity": 1,
+      "priceMinor": 1000
+    },
+    {
+      "name": "Optional Carbon Free Dining",
+      "quantity": 1,
+      "priceMinor": 123
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 1128,
+    "totalMinor": 10151
+  },
+  "currency": "GBP",
+  "warnings": []
+}
