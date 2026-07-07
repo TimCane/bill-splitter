@@ -165,9 +165,13 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 ## Validation
 
-- **Reconciliation** *(planned)*: `sum(items) + tax + tip + service` vs the
-  printed grand total, within tolerance. Mismatch -> a `Warnings` entry the host
-  sees at review. Pure; no contract change.
+- **Reconciliation** *(current)*: `sum(items) + tax + tip + service` vs the
+  printed grand total, within a 2 minor-unit tolerance (absorbs percentage
+  rounding). Mismatch -> a `Warnings` entry the host sees at review. Runs last in
+  the pipeline; pure, cross-line, and adds no trace entry. Skipped when no grand
+  total was anchored (total is zero) and when a negative amount was parked - an
+  unmodeled discount necessarily unbalances the sum, so the discount warning
+  already says it. Pure; no contract change.
 - Claims reconcile exactly downstream in `SplitCalculator`
   ([ADR-0005](adr/0005-integer-shares-claims.md)); parser reconciliation is a
   soft warning, not a hard gate.

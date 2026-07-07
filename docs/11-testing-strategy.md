@@ -44,6 +44,15 @@ One parameterized test runs the whole corpus.
   unit-price column rule winning `2 Roast Beef 27.00 54.00`. The trace never rides
   the public `ParsedReceipt` and is never logged, so no receipt text leaves the
   process (docs/06-ocr-service.md#parsing, docs/15-receipt-parsing.md#diagnostics).
+- The `ReconciliationValidator` (`Parsing/Validation`) is the last stage: it
+  checks `sum(items) + tax + tip + service` against the printed grand total and
+  parks a reconcile warning on a gap over tolerance. Its two dedicated fixtures
+  are `reconciling-simple` (balances, no warning) and `mismatch-missing-item` (a
+  dropped item line, so items fall short and the warning fires). Three existing
+  fixtures legitimately gained the reconcile warning when it landed:
+  `defune-at-quantity` (a ~GBP1.40 receipt/OCR discrepancy), `ding-dong-amount`
+  (a "Whole @$28.00" phantom item inflating the sum) and
+  `westminster-column-drift` (a GBP6.50 price parked when its name drifted off).
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

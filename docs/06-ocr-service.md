@@ -170,6 +170,14 @@ wins parks a warning instead of adding an item. The default set is
 are calibrated so selection reproduces the old first-match order; the shared
 name-shaping primitives (clean, quantity, unit-price column) live in `ItemText`.
 
+Once items and bill are assembled the validate stage (`Parsing/Validation`) runs
+`ReconciliationValidator`: `sum(items) + tax + tip + service` against the printed
+grand total, within a 2 minor-unit tolerance. A gap over tolerance parks a
+reconcile warning (a line missed or invented, or a misread total). It is skipped
+when no grand total was anchored (total is zero) and when a negative amount was
+already parked, since an unmodeled discount necessarily unbalances the sum.
+Cross-line, so it appends a warning but adds no trace entry.
+
 As it runs, the pipeline records a `ParseDecision` per priced line - the winning
 rule, its score and the evidence - into an in-memory trace. The bill stage traces
 the grand-total anchor, the tax/tip/service extras and the dropped noise; the item
@@ -206,7 +214,10 @@ the process ([10-security-privacy.md](10-security-privacy.md),
 5. **Discards** produce `Warnings` (shown on the review screen so the host
    knows what to double-check): rows with a price but no name, negative
    amounts (discount rows - parked as a warning in MVP, not modeled),
-   confidence < 0.5.
+   confidence < 0.5. The final validate stage adds one more: a reconcile
+   warning when items plus extras miss the printed grand total by more than a
+   2 minor-unit tolerance (skipped when the total is zero or a discount was
+   parked).
 6. **Currency guess**: first currency symbol seen (`£ -> GBP`, `€ -> EUR`,
    `$ -> USD`); default `GBP`. Host confirms at review.
 
