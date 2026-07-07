@@ -1,7 +1,7 @@
 namespace BillSplitter.Domain.Parsing.Models;
 
-/// <summary>What a receipt line was classified as. The engine keeps the
-/// highest-confidence classification per line rather than the first match
+/// <summary>What a receipt line was classified as. The classifier walks its
+/// rules in priority order and the highest-priority match wins
 /// (docs/15-receipt-parsing.md#classify-dont-itemise).</summary>
 internal enum LineType
 {
