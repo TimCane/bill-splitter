@@ -36,7 +36,13 @@ internal static partial class ReceiptParseEngine
     [GeneratedRegex(@"(?<neg>-\s*)?(?<sym>[£€$])?\s*(?<whole>\d{1,4})[.,](?<frac>\d{2})(?:\s+[A-Z])?\s*$")]
     private static partial Regex MoneyAtEnd();
 
-    public static ParsedReceipt Parse(OcrResult result)
+    public static ParsedReceipt Parse(OcrResult result) => ParseTraced(result).Receipt;
+
+    /// <summary>The full parse plus its in-memory decision trace. The public facade
+    /// (<see cref="ReceiptParser.Parse"/>) keeps only the <see cref="ParsedReceipt"/>;
+    /// the trace is a test-only surface, never logged or wired
+    /// (docs/15-receipt-parsing.md#diagnostics).</summary>
+    public static TracedReceipt ParseTraced(OcrResult result)
     {
         var warnings = new List<string>();
         var currency = GuessCurrency(result.Lines);
@@ -84,22 +90,35 @@ internal static partial class ReceiptParseEngine
         warnings.AddRange(detection.Warnings);
 
         // Each item row goes through the competing item rules; the engine keeps the
-        // highest-confidence reading (an item, or a reject that parks a warning).
+        // highest-confidence reading (an item, or a reject that parks a warning) and
+        // reports which rule won so the row can be traced.
         var items = new List<ParsedItem>();
+        var itemDecisions = new List<ParseDecision>();
         foreach (var row in detection.ItemRows)
         {
-            var selected = ItemEngine.Select(row);
-            if (selected.Item is not null)
+            var selection = ItemEngine.Select(row);
+            var best = selection.Best;
+            var type = best.Item is not null ? LineType.Item : LineType.BareCharge;
+            itemDecisions.Add(new ParseDecision(row.Text, type, best.Confidence, selection.Rule, best.Evidence));
+            if (best.Item is not null)
             {
-                items.Add(selected.Item);
+                items.Add(best.Item);
             }
             else
             {
-                warnings.Add(selected.Warning!);
+                warnings.Add(best.Warning!);
             }
         }
 
-        return new ParsedReceipt(items, detection.Bill, currency, warnings);
+        // The trace is the bill stage's decisions (grand total, extras, dropped
+        // noise) followed by the item stage's; together one decision per priced
+        // line. In-memory only - the facade returns just the receipt.
+        var trace = new List<ParseDecision>(detection.Decisions.Count + itemDecisions.Count);
+        trace.AddRange(detection.Decisions);
+        trace.AddRange(itemDecisions);
+
+        var receipt = new ParsedReceipt(items, detection.Bill, currency, warnings);
+        return new TracedReceipt(receipt, trace);
     }
 
     private static long ToMinor(Match money) =>

@@ -1,3 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <!-- The parse-decision trace is a test-only diagnostic surface: the corpus
+         tests read the internal engine directly (docs/15-receipt-parsing.md#diagnostics). -->
+    <InternalsVisibleTo Include="BillSplitter.Tests" />
+  </ItemGroup>
+
 </Project>

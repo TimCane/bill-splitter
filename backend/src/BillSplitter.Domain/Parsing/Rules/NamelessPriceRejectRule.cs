@@ -13,6 +13,9 @@ internal sealed class NamelessPriceRejectRule : IReceiptRule
 
     public ItemCandidate? Apply(Candidate candidate, ShapedItem shaped) =>
         shaped.Stripped.Length == 0
-            ? ItemCandidate.Reject(Confidence, $"price with no name ignored: {candidate.Text}")
+            ? ItemCandidate.Reject(
+                Confidence,
+                $"price with no name ignored: {candidate.Text}",
+                "price with no recoverable name")
             : null;
 }

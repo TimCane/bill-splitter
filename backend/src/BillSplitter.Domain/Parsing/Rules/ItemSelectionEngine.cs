@@ -19,20 +19,27 @@ internal sealed class ItemSelectionEngine
         new QuantityNamePriceRule(),
     ];
 
-    public ItemCandidate Select(Candidate candidate)
+    public ItemSelection Select(Candidate candidate)
     {
         var shaped = ItemText.Shape(candidate);
         ItemCandidate? best = null;
+        IReceiptRule? bestRule = null;
         foreach (var rule in _rules)
         {
             var result = rule.Apply(candidate, shaped);
             if (result is not null && (best is null || result.Confidence > best.Confidence))
             {
                 best = result;
+                bestRule = rule;
             }
         }
 
-        return best ?? throw new InvalidOperationException(
-            "no item rule produced a reading; the rule set must include an always-applies default");
+        if (best is null || bestRule is null)
+        {
+            throw new InvalidOperationException(
+                "no item rule produced a reading; the rule set must include an always-applies default");
+        }
+
+        return new ItemSelection(best, bestRule.GetType().Name);
     }
 }

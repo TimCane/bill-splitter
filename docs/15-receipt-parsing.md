@@ -182,8 +182,13 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 ## Diagnostics
 
-The engine records why a line was classified (rule, score, evidence) in-memory
-so corpus tests can assert it *(planned: `ParseDecision`)*. This never reaches
+The engine records why a line was classified (rule, score, evidence) in-memory as
+a `ParseDecision` per priced line so corpus tests can assert it *(current)*. The
+bill stage traces the grand-total anchor, the tax/tip/service extras and the
+dropped noise; the item stage traces the winning rule and its confidence for each
+item row (keyword bill classification is priority-ordered, not scored, so those
+decisions carry score `0`). It is a test-only surface - `ParseTraced` on the
+internal engine returns it, `ReceiptParser.Parse` discards it. This never reaches
 production logs - no receipt text, names or amounts are logged
 ([10-security-privacy.md](10-security-privacy.md)).
 
