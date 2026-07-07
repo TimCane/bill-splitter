@@ -11,10 +11,7 @@ internal sealed class QuantityNamePriceRule : IReceiptRule
 {
     public const int Confidence = 30;
 
-    public ItemCandidate? Apply(Candidate candidate)
-    {
-        var (quantity, name) = ItemText.ExtractQuantity(ItemText.CleanName(candidate.Name));
-        return ItemCandidate.ForItem(
-            Confidence, new ParsedItem(name, quantity, candidate.Amount), nameof(QuantityNamePriceRule));
-    }
+    public ItemCandidate? Apply(Candidate candidate, ShapedItem shaped) =>
+        ItemCandidate.ForItem(
+            Confidence, new ParsedItem(shaped.Name, shaped.Quantity, candidate.Amount));
 }

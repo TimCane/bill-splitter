@@ -12,17 +12,15 @@ internal sealed class UnitPriceColumnRule : IReceiptRule
 {
     public const int Confidence = 60;
 
-    public ItemCandidate? Apply(Candidate candidate)
+    public ItemCandidate? Apply(Candidate candidate, ShapedItem shaped)
     {
-        var (quantity, name) = ItemText.ExtractQuantity(ItemText.CleanName(candidate.Name));
-        var stripped = ItemText.StripUnitPrice(name, candidate.Amount, quantity);
-        if (stripped == name)
+        if (shaped.Stripped == shaped.Name)
         {
             // No reconciling per-unit column to drop: leave the row to the default rule.
             return null;
         }
 
         return ItemCandidate.ForItem(
-            Confidence, new ParsedItem(stripped, quantity, candidate.Amount), nameof(UnitPriceColumnRule));
+            Confidence, new ParsedItem(shaped.Stripped, shaped.Quantity, candidate.Amount));
     }
 }

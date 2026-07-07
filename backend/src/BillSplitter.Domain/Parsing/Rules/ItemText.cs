@@ -1,12 +1,14 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using BillSplitter.Domain.Parsing.Models;
 
 namespace BillSplitter.Domain.Parsing.Rules;
 
-/// <summary>The shared item-name shaping primitives the item rules build on
-/// (docs/15-receipt-parsing.md): strip codes and unit-price noise from a name,
-/// pull a leading quantity off it, and drop a reconciling per-unit price column.
-/// Low-level text ops - the rules own the policy of when to apply them.</summary>
+/// <summary>Shapes an item row once into the <see cref="ShapedItem"/> the rules
+/// classify (docs/15-receipt-parsing.md): strip codes and unit-price noise from
+/// the name, pull a leading quantity off it, and drop a reconciling per-unit price
+/// column. The rules read the result; they never re-derive it, so a reject and an
+/// item reading of the same row cannot disagree about what is left.</summary>
 internal static partial class ItemText
 {
     // A bare money token at the end of a name, e.g. the per-unit column in
@@ -31,7 +33,14 @@ internal static partial class ItemText
     [GeneratedRegex(@"\s+")]
     private static partial Regex Whitespace();
 
-    public static string CleanName(string raw)
+    public static ShapedItem Shape(Candidate candidate)
+    {
+        var (quantity, name) = ExtractQuantity(CleanName(candidate.Name));
+        var stripped = StripUnitPrice(name, candidate.Amount, quantity);
+        return new ShapedItem(quantity, name, stripped);
+    }
+
+    private static string CleanName(string raw)
     {
         var name = ItemCode().Replace(raw, string.Empty);
         name = AtUnitPrice().Replace(name, string.Empty); // strip "@ 6.50" unit prices
@@ -39,7 +48,7 @@ internal static partial class ItemText
         return Whitespace().Replace(name, " ").Trim();
     }
 
-    public static (int Quantity, string Name) ExtractQuantity(string name)
+    private static (int Quantity, string Name) ExtractQuantity(string name)
     {
         var match = LeadingQuantity().Match(name);
         if (!match.Success)
@@ -55,7 +64,7 @@ internal static partial class ItemText
     // Drop the per-unit price column ("2 ROAST BEEF 27.00" -> "ROAST BEEF") only
     // when it is unambiguous: a multiple quantity whose trailing number times the
     // count equals the line total. A single item's trailing number is left alone.
-    public static string StripUnitPrice(string name, long amount, int quantity)
+    private static string StripUnitPrice(string name, long amount, int quantity)
     {
         if (quantity <= 1)
         {
@@ -68,8 +77,7 @@ internal static partial class ItemText
             return name;
         }
 
-        var unit = (long.Parse(match.Groups["uwhole"].Value, CultureInfo.InvariantCulture) * 100)
-            + long.Parse(match.Groups["ufrac"].Value, CultureInfo.InvariantCulture);
+        var unit = AmountMath.ToMinorUnits(match.Groups["uwhole"].Value, match.Groups["ufrac"].Value);
         return unit * quantity == amount
             ? name[..match.Index].Trim().TrimEnd('.', ' ', '-')
             : name;

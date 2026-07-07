@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Models;
@@ -179,8 +178,7 @@ internal static partial class ReceiptParseEngine
     }
 
     private static long ToMinor(Match money) =>
-        (long.Parse(money.Groups["whole"].Value, CultureInfo.InvariantCulture) * 100)
-        + long.Parse(money.Groups["frac"].Value, CultureInfo.InvariantCulture);
+        AmountMath.ToMinorUnits(money.Groups["whole"].Value, money.Groups["frac"].Value);
 
     private static string GuessCurrency(IReadOnlyList<OcrLine> lines)
     {
