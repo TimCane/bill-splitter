@@ -58,7 +58,9 @@ Runs before any rule sees a line.
 | `E` | `£` | `E12.50` -> `£12.50` |
 
 Guard: only digit-adjacent positions, so `7UP`, `No.8 Burger`, `Coke Zero`
-survive intact.
+survive intact. The `E` -> `£` case fires only when the `E` is not the tail of a
+word, so a name glued to its price (`PALE ALE8.00`, `WINE12.00`) keeps its final
+letter rather than losing it to a phantom `£`.
 
 ## Price detection
 

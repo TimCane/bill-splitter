@@ -16,9 +16,12 @@ internal static partial class MoneyMisreadRepair
 {
     // A trailing money-shaped token that mixes real digits with repairable
     // glyphs. Whole and fraction runs accept digits plus O/S/l/I/B; an optional
-    // leading currency symbol may be a misread E (attached, no space). The trailing
-    // VAT-class letter is matched but never rewritten - "4.00 B" keeps its code.
-    [GeneratedRegex(@"(?:(?<sym>[£€$])\s*|(?<sym>E))?(?<whole>[\dOSlIB]{1,4})(?<sep>[.,])(?<frac>[\dOSlIB]{2})(?<vat>\s+[A-Z])?\s*$")]
+    // leading currency symbol may be a misread E (attached, no space) - but only
+    // when it is not the tail of a word, so a name glued to its price ("WINE12.00",
+    // "PALE ALE8.00") keeps its final letter instead of losing it to a phantom £.
+    // The trailing VAT-class letter is matched but never rewritten - "4.00 B" keeps
+    // its code.
+    [GeneratedRegex(@"(?:(?<sym>[£€$])\s*|(?<sym>(?<![A-Za-z])E))?(?<whole>[\dOSlIB]{1,4})(?<sep>[.,])(?<frac>[\dOSlIB]{2})(?<vat>\s+[A-Z])?\s*$")]
     private static partial Regex MoneyToken();
 
     public static string Repair(string text)

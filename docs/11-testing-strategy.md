@@ -62,7 +62,9 @@ One parameterized test runs the whole corpus.
   Zero`) that proves item names are left intact. `misread-wrapped-name` pins the
   ordering: the repair runs before the multi-line pre-passes, so a wrapped name
   whose price line is a misread (`Classic` / `BAO` / `£6.5O`) still folds - it
-  fails if the repair is deferred to the candidate loop.
+  fails if the repair is deferred to the candidate loop. `misread-name-abuts-price`
+  pins the leading-`E` guard: a name glued to its price (`PALE ALE8.00`) keeps its
+  final letter instead of losing it to a phantom `£`.
 - Phase B capabilities each land with their own fixtures: `wrapped-item-names`
   proves the wrapped-name pre-pass (a name split over `Classic` / `BAO` / `£6.50`
   folded into one item) while the already-inline corpus stays byte-for-byte green.
