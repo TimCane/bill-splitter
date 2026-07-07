@@ -1,0 +1,16 @@
+{
+  "durationMs": 2880,
+  "lines": [
+    { "text": "THE TAVERN RESTAURANT", "confidence": 0.94, "box": { "x": 60, "y": 40, "width": 700, "height": 44 } },
+    { "text": "Sweetfish Sushi", "confidence": 0.92, "box": { "x": 200, "y": 120, "width": 360, "height": 34 } },
+    { "text": "VISA DEBIT CARD PURCHASE", "confidence": 0.9, "box": { "x": 40, "y": 200, "width": 620, "height": 32 } },
+    { "text": "QTY DESC AMT", "confidence": 0.9, "box": { "x": 40, "y": 244, "width": 620, "height": 32 } },
+    { "text": "1 Chicken Nachos Platter $12.49", "confidence": 0.93, "box": { "x": 40, "y": 290, "width": 720, "height": 34 } },
+    { "text": "1 Iced Tea $2.00", "confidence": 0.93, "box": { "x": 40, "y": 326, "width": 720, "height": 34 } },
+    { "text": "1 Cherry Pie Crumble $5.99", "confidence": 0.92, "box": { "x": 40, "y": 362, "width": 720, "height": 34 } },
+    { "text": "AMT $22.12", "confidence": 0.94, "box": { "x": 40, "y": 430, "width": 500, "height": 34 } },
+    { "text": "SUBTOTAL $20.48", "confidence": 0.95, "box": { "x": 40, "y": 476, "width": 500, "height": 34 } },
+    { "text": "TAX $1.64", "confidence": 0.94, "box": { "x": 40, "y": 522, "width": 500, "height": 34 } },
+    { "text": "TOTAL $22.12", "confidence": 0.96, "box": { "x": 40, "y": 566, "width": 500, "height": 40 } }
+  ]
+}

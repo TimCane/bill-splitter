@@ -1,0 +1,14 @@
+{
+  "durationMs": 2760,
+  "lines": [
+    { "text": "PADELLA", "confidence": 0.96, "box": { "x": 150, "y": 40, "width": 440, "height": 46 } },
+    { "text": "1x Agretti              £ 5.50", "confidence": 0.95, "box": { "x": 60, "y": 150, "width": 720, "height": 36 } },
+    { "text": "1x Beef                 £ 10.00", "confidence": 0.95, "box": { "x": 60, "y": 188, "width": 720, "height": 36 } },
+    { "text": "1x Rhubarb Tart         £ 4.50", "confidence": 0.94, "box": { "x": 60, "y": 226, "width": 720, "height": 36 } },
+    { "text": "1x Gls Cabernet Sangiovese £ 5.00", "confidence": 0.93, "box": { "x": 60, "y": 264, "width": 720, "height": 36 } },
+    { "text": "Item Total              £ 25.00", "confidence": 0.96, "box": { "x": 60, "y": 326, "width": 720, "height": 38 } },
+    { "text": "Optional Service Charge 12.50%£ 3.13", "confidence": 0.92, "box": { "x": 60, "y": 372, "width": 720, "height": 36 } },
+    { "text": "Total                   £ 28.13", "confidence": 0.96, "box": { "x": 60, "y": 424, "width": 720, "height": 40 } },
+    { "text": "Incl.of VAT (20.00%)    £ 4.17", "confidence": 0.93, "box": { "x": 60, "y": 520, "width": 720, "height": 36 } }
+  ]
+}

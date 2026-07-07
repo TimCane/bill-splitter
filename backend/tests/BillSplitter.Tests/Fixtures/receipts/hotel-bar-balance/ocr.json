@@ -1,0 +1,16 @@
+{
+  "durationMs": 2900,
+  "lines": [
+    { "text": "Hotel Restaurant and Bar", "confidence": 0.95, "box": { "x": 100, "y": 40, "width": 620, "height": 40 } },
+    { "text": "TERMINAL 2", "confidence": 0.92, "box": { "x": 200, "y": 150, "width": 300, "height": 32 } },
+    { "text": "1 Hendrick Gin & Tonic $10.50", "confidence": 0.93, "box": { "x": 40, "y": 220, "width": 720, "height": 34 } },
+    { "text": "1 Ginger Mule $9.50", "confidence": 0.93, "box": { "x": 40, "y": 256, "width": 720, "height": 34 } },
+    { "text": "1 Glass Camus Zin $24.00", "confidence": 0.92, "box": { "x": 40, "y": 292, "width": 720, "height": 34 } },
+    { "text": "1 Titos Vodka Soda $12.00", "confidence": 0.92, "box": { "x": 40, "y": 328, "width": 720, "height": 34 } },
+    { "text": "Amount $60.76", "confidence": 0.95, "box": { "x": 40, "y": 396, "width": 720, "height": 38 } },
+    { "text": "SUB-TOTAL $56.00", "confidence": 0.95, "box": { "x": 40, "y": 436, "width": 720, "height": 34 } },
+    { "text": "TAX $4.76", "confidence": 0.94, "box": { "x": 40, "y": 472, "width": 720, "height": 34 } },
+    { "text": "BALANCE $60.76", "confidence": 0.95, "box": { "x": 40, "y": 510, "width": 720, "height": 40 } },
+    { "text": "CREDIT CARD AUTH VISA ####3993", "confidence": 0.88, "box": { "x": 40, "y": 560, "width": 720, "height": 32 } }
+  ]
+}

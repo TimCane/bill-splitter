@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "name": "TRKY BRGR / NO BUN",
+      "quantity": 1,
+      "priceMinor": 1200
+    },
+    {
+      "name": "CHCKN POT PIE",
+      "quantity": 1,
+      "priceMinor": 1150
+    },
+    {
+      "name": "ROAST CHCKN",
+      "quantity": 1,
+      "priceMinor": 1350
+    },
+    {
+      "name": "SALAD",
+      "quantity": 1,
+      "priceMinor": 895
+    },
+    {
+      "name": "BRUSSELS SPROUTS",
+      "quantity": 1,
+      "priceMinor": 795
+    },
+    {
+      "name": "ICED TEA",
+      "quantity": 1,
+      "priceMinor": 300
+    },
+    {
+      "name": "SODA",
+      "quantity": 1,
+      "priceMinor": 300
+    },
+    {
+      "name": "LEMONADE",
+      "quantity": 1,
+      "priceMinor": 500
+    }
+  ],
+  "bill": {
+    "taxMinor": 584,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 7074
+  },
+  "currency": "GBP",
+  "warnings": []
+}

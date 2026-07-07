@@ -1,0 +1,11 @@
+{
+  "items": [
+    { "name": "Egg Benedictine", "quantity": 1, "priceMinor": 1190 },
+    { "name": "Orange Juice", "quantity": 1, "priceMinor": 550 },
+    { "name": "Scrambled Eggs - Bacon", "quantity": 1, "priceMinor": 1190 },
+    { "name": "Cappuccino", "quantity": 1, "priceMinor": 550 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 435, "totalMinor": 3915 },
+  "currency": "GBP",
+  "warnings": []
+}

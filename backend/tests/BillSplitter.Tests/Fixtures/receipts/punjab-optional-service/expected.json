@@ -1,0 +1,14 @@
+{
+  "items": [
+    { "name": "COBRA PREM", "quantity": 1, "priceMinor": 515 },
+    { "name": "COKE", "quantity": 2, "priceMinor": 530 },
+    { "name": "PAPADUM PLAIN", "quantity": 1, "priceMinor": 170 },
+    { "name": "BUTTER CHICKEN", "quantity": 1, "priceMinor": 1075 },
+    { "name": "CHICKEN TIKKA MASALA", "quantity": 1, "priceMinor": 1050 },
+    { "name": "PILAU RICE", "quantity": 1, "priceMinor": 330 },
+    { "name": "BULLET NAAN", "quantity": 1, "priceMinor": 365 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 404, "totalMinor": 4439 },
+  "currency": "GBP",
+  "warnings": []
+}

@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "name": "BBQ Potato Chips",
+      "quantity": 1,
+      "priceMinor": 700
+    },
+    {
+      "name": "Diet Coke",
+      "quantity": 1,
+      "priceMinor": 300
+    },
+    {
+      "name": "Trillium Fort Point",
+      "quantity": 1,
+      "priceMinor": 1000
+    },
+    {
+      "name": "Fried Chicken Sandwich",
+      "quantity": 2,
+      "priceMinor": 3400
+    },
+    {
+      "name": "Famous Duck Grilled Cheese",
+      "quantity": 1,
+      "priceMinor": 2500
+    },
+    {
+      "name": "Mac & Cheese",
+      "quantity": 1,
+      "priceMinor": 1700
+    },
+    {
+      "name": "Burger of the moment",
+      "quantity": 1,
+      "priceMinor": 1800
+    },
+    {
+      "name": "Admin Fee (3.00%)",
+      "quantity": 1,
+      "priceMinor": 342
+    }
+  ],
+  "bill": {
+    "taxMinor": 711,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 12453
+  },
+  "currency": "USD",
+  "warnings": []
+}

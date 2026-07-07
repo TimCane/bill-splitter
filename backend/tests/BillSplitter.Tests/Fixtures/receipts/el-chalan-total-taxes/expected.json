@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "CAUSA DE POLLO 1",
+      "quantity": 1,
+      "priceMinor": 895
+    },
+    {
+      "name": "CEVICHE DE CAMARONES 1",
+      "quantity": 1,
+      "priceMinor": 1695
+    },
+    {
+      "name": "LIMONADA 1",
+      "quantity": 1,
+      "priceMinor": 400
+    },
+    {
+      "name": "PESCADO AL AJILLO 1",
+      "quantity": 1,
+      "priceMinor": 1595
+    }
+  ],
+  "bill": {
+    "taxMinor": 367,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 4952
+  },
+  "currency": "USD",
+  "warnings": []
+}

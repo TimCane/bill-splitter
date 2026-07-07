@@ -1,0 +1,62 @@
+{
+  "items": [
+    {
+      "name": "JACK DANIELS 50ML",
+      "quantity": 1,
+      "priceMinor": 1100
+    },
+    {
+      "name": "COKE 200ML M",
+      "quantity": 1,
+      "priceMinor": 200
+    },
+    {
+      "name": "TAU STILL LARGE",
+      "quantity": 1,
+      "priceMinor": 500
+    },
+    {
+      "name": "FRANKLIN & SON LEMONADE",
+      "quantity": 1,
+      "priceMinor": 400
+    },
+    {
+      "name": "PASTA BOLEGNESE",
+      "quantity": 1,
+      "priceMinor": 1400
+    },
+    {
+      "name": "PASTA BOLEGNESE",
+      "quantity": 1,
+      "priceMinor": 1400
+    },
+    {
+      "name": "RIB-EYE STEAK",
+      "quantity": 1,
+      "priceMinor": 3500
+    },
+    {
+      "name": "CHIPS",
+      "quantity": 1,
+      "priceMinor": 600
+    },
+    {
+      "name": "JACK DANIELS 25ML",
+      "quantity": 1,
+      "priceMinor": 650
+    },
+    {
+      "name": "COKE 200ML M",
+      "quantity": 1,
+      "priceMinor": 200
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 1244,
+    "serviceMinor": 0,
+    "totalMinor": 11194
+  },
+  "currency": "GBP",
+  "warnings": []
+}

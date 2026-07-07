@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "name": "Pasta with cheese",
+      "quantity": 1,
+      "priceMinor": 7100
+    },
+    {
+      "name": "Chicken Pitzza",
+      "quantity": 1,
+      "priceMinor": 2455
+    },
+    {
+      "name": "Drinks",
+      "quantity": 1,
+      "priceMinor": 780
+    }
+  ],
+  "bill": {
+    "taxMinor": 620,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 10955
+  },
+  "currency": "USD",
+  "warnings": []
+}

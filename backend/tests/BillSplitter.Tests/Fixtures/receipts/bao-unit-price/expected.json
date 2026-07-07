@@ -1,0 +1,12 @@
+{
+  "items": [
+    { "name": "Classic BAO", "quantity": 5, "priceMinor": 3250 },
+    { "name": "Chicken Bao KX", "quantity": 1, "priceMinor": 675 },
+    { "name": "Lamb Dumplings KX", "quantity": 2, "priceMinor": 1800 },
+    { "name": "Aged Beef Rice", "quantity": 1, "priceMinor": 1450 },
+    { "name": "Dan Dan Noodles KX BOB", "quantity": 1, "priceMinor": 975 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 1018, "totalMinor": 9168 },
+  "currency": "GBP",
+  "warnings": []
+}

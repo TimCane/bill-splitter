@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "donation",
+      "quantity": 1,
+      "priceMinor": 100
+    },
+    {
+      "name": "kiri hodi",
+      "quantity": 1,
+      "priceMinor": 1990
+    },
+    {
+      "name": "paratha",
+      "quantity": 1,
+      "priceMinor": 390
+    },
+    {
+      "name": "korean burger with fries",
+      "quantity": 1,
+      "priceMinor": 1750
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 517,
+    "totalMinor": 4747
+  },
+  "currency": "GBP",
+  "warnings": []
+}

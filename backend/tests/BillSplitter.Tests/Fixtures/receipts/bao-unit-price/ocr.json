@@ -1,0 +1,15 @@
+{
+  "durationMs": 3050,
+  "lines": [
+    { "text": "BAO KINGS CROSS", "confidence": 0.95, "box": { "x": 120, "y": 40, "width": 560, "height": 46 } },
+    { "text": "5 Classic BAO @6.50      £32.50", "confidence": 0.94, "box": { "x": 60, "y": 190, "width": 760, "height": 36 } },
+    { "text": "1 Chicken Bao KX          £6.75", "confidence": 0.94, "box": { "x": 60, "y": 228, "width": 760, "height": 36 } },
+    { "text": "2 Lamb Dumplings KX @9.00 £18.00", "confidence": 0.93, "box": { "x": 60, "y": 266, "width": 760, "height": 36 } },
+    { "text": "1 Aged Beef Rice         £14.50", "confidence": 0.94, "box": { "x": 60, "y": 304, "width": 760, "height": 36 } },
+    { "text": "1 Dan Dan Noodles KX BOB  £9.75", "confidence": 0.92, "box": { "x": 60, "y": 342, "width": 760, "height": 36 } },
+    { "text": "6 Item(s)                £81.50", "confidence": 0.95, "box": { "x": 60, "y": 404, "width": 760, "height": 36 } },
+    { "text": "12.5% Service Charge 12.5% £10.18", "confidence": 0.92, "box": { "x": 60, "y": 442, "width": 760, "height": 36 } },
+    { "text": "Amount Due               £91.68", "confidence": 0.96, "box": { "x": 60, "y": 494, "width": 760, "height": 42 } },
+    { "text": "20% Net 67.91 Tax 13.59 Gross 81.50", "confidence": 0.90, "box": { "x": 60, "y": 580, "width": 760, "height": 34 } }
+  ]
+}

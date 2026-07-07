@@ -1,0 +1,20 @@
+{
+  "durationMs": 3120,
+  "lines": [
+    { "text": "63021263 Pandey, Jitek", "confidence": 0.88, "box": { "x": 60, "y": 60, "width": 620, "height": 32 } },
+    { "text": "CHK 3887   TBL 108/1   GST 3", "confidence": 0.9, "box": { "x": 60, "y": 110, "width": 620, "height": 32 } },
+    { "text": "1 JACK DANIELS 50ML 11.00", "confidence": 0.92, "box": { "x": 60, "y": 170, "width": 700, "height": 32 } },
+    { "text": "COKE 200ML M 2.00", "confidence": 0.9, "box": { "x": 60, "y": 204, "width": 700, "height": 32 } },
+    { "text": "1 TAU STILL LARGE 5.00", "confidence": 0.9, "box": { "x": 60, "y": 238, "width": 700, "height": 32 } },
+    { "text": "1 FRANKLIN & SON LEMONADE 4.00", "confidence": 0.89, "box": { "x": 60, "y": 272, "width": 700, "height": 32 } },
+    { "text": "1 PASTA BOLEGNESE 14.00", "confidence": 0.92, "box": { "x": 60, "y": 306, "width": 700, "height": 32 } },
+    { "text": "1 PASTA BOLEGNESE 14.00", "confidence": 0.92, "box": { "x": 60, "y": 340, "width": 700, "height": 32 } },
+    { "text": "1 RIB-EYE STEAK 35.00", "confidence": 0.92, "box": { "x": 60, "y": 374, "width": 700, "height": 32 } },
+    { "text": "1 CHIPS 6.00", "confidence": 0.92, "box": { "x": 60, "y": 408, "width": 700, "height": 32 } },
+    { "text": "1 JACK DANIELS 25ML 6.50", "confidence": 0.92, "box": { "x": 60, "y": 442, "width": 700, "height": 32 } },
+    { "text": "COKE 200ML M 2.00", "confidence": 0.9, "box": { "x": 60, "y": 476, "width": 700, "height": 32 } },
+    { "text": "Subtotal £99.50", "confidence": 0.94, "box": { "x": 60, "y": 532, "width": 700, "height": 34 } },
+    { "text": "Discretionary Gratuities £12.44", "confidence": 0.9, "box": { "x": 60, "y": 568, "width": 700, "height": 34 } },
+    { "text": "Total Due £111.94", "confidence": 0.96, "box": { "x": 60, "y": 610, "width": 700, "height": 42 } }
+  ]
+}

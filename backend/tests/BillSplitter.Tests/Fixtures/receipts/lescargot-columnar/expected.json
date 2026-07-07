@@ -1,0 +1,21 @@
+{
+  "items": [],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 0
+  },
+  "currency": "GBP",
+  "warnings": [
+    "price with no name ignored: £12.00",
+    "price with no name ignored: £0.00",
+    "price with no name ignored: £0.00",
+    "price with no name ignored: £0.00",
+    "price with no name ignored: £0.00",
+    "price with no name ignored: £39.00",
+    "price with no name ignored: £51.00",
+    "price with no name ignored: £7.65",
+    "price with no name ignored: £58.65"
+  ]
+}

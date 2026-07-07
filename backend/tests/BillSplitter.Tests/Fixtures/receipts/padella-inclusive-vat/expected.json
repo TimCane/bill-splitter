@@ -1,0 +1,11 @@
+{
+  "items": [
+    { "name": "Agretti", "quantity": 1, "priceMinor": 550 },
+    { "name": "Beef", "quantity": 1, "priceMinor": 1000 },
+    { "name": "Rhubarb Tart", "quantity": 1, "priceMinor": 450 },
+    { "name": "Gls Cabernet Sangiovese", "quantity": 1, "priceMinor": 500 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 313, "totalMinor": 2813 },
+  "currency": "GBP",
+  "warnings": []
+}

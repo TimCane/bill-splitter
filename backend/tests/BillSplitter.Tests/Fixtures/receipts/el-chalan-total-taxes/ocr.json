@@ -1,0 +1,18 @@
+{
+  "durationMs": 2960,
+  "lines": [
+    { "text": "El Chalan Restaurant", "confidence": 0.94, "box": { "x": 120, "y": 40, "width": 520, "height": 38 } },
+    { "text": "TABLE: 13 - 1 Guest", "confidence": 0.92, "box": { "x": 60, "y": 150, "width": 500, "height": 32 } },
+    { "text": "ITEM QTY PRICE", "confidence": 0.91, "box": { "x": 60, "y": 200, "width": 620, "height": 32 } },
+    { "text": "CAUSA DE POLLO 1 $8.95", "confidence": 0.93, "box": { "x": 60, "y": 250, "width": 700, "height": 34 } },
+    { "text": "CEVICHE DE CAMARONES 1 $16.95", "confidence": 0.92, "box": { "x": 60, "y": 286, "width": 700, "height": 34 } },
+    { "text": "LIMONADA 1 $4.00", "confidence": 0.93, "box": { "x": 60, "y": 322, "width": 700, "height": 34 } },
+    { "text": "PESCADO AL AJILLO 1 $15.95", "confidence": 0.91, "box": { "x": 60, "y": 358, "width": 700, "height": 34 } },
+    { "text": "Subtotal $45.85", "confidence": 0.95, "box": { "x": 60, "y": 418, "width": 700, "height": 34 } },
+    { "text": "Total Taxes $3.67", "confidence": 0.93, "box": { "x": 60, "y": 454, "width": 700, "height": 34 } },
+    { "text": "Grand Total $49.52", "confidence": 0.95, "box": { "x": 60, "y": 508, "width": 700, "height": 36 } },
+    { "text": "Amount Due: $49.52", "confidence": 0.96, "box": { "x": 60, "y": 548, "width": 700, "height": 42 } },
+    { "text": "15% $7.43 20% $9.90 25% $12.38", "confidence": 0.88, "box": { "x": 60, "y": 620, "width": 700, "height": 32 } },
+    { "text": "TIP IS NOT INCLUDED", "confidence": 0.92, "box": { "x": 60, "y": 660, "width": 700, "height": 32 } }
+  ]
+}

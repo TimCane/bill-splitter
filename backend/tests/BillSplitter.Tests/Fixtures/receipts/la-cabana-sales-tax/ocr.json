@@ -1,0 +1,15 @@
+{
+  "durationMs": 2740,
+  "lines": [
+    { "text": "La Cabana - Venice", "confidence": 0.93, "box": { "x": 120, "y": 40, "width": 460, "height": 38 } },
+    { "text": "Order Type: Dine In", "confidence": 0.92, "box": { "x": 60, "y": 150, "width": 500, "height": 32 } },
+    { "text": "1 Dos Tacos (Brunch) 18.00", "confidence": 0.93, "box": { "x": 60, "y": 230, "width": 700, "height": 34 } },
+    { "text": "1 6. Taco y Enchilada (Super Combo) 21.95", "confidence": 0.9, "box": { "x": 60, "y": 266, "width": 700, "height": 34 } },
+    { "text": "1 Brunch Reg Lime Margarita 12.75", "confidence": 0.92, "box": { "x": 60, "y": 302, "width": 700, "height": 34 } },
+    { "text": "Subtotal 52.70", "confidence": 0.94, "box": { "x": 60, "y": 362, "width": 700, "height": 34 } },
+    { "text": "Sales Tax 5.01", "confidence": 0.93, "box": { "x": 60, "y": 398, "width": 700, "height": 34 } },
+    { "text": "Total 57.71", "confidence": 0.96, "box": { "x": 60, "y": 438, "width": 700, "height": 40 } },
+    { "text": "Pay With Cash: 55.49", "confidence": 0.92, "box": { "x": 60, "y": 494, "width": 700, "height": 34 } },
+    { "text": "Customer copy", "confidence": 0.9, "box": { "x": 60, "y": 540, "width": 400, "height": 32 } }
+  ]
+}

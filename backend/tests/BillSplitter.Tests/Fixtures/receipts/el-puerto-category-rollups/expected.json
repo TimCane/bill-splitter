@@ -1,0 +1,32 @@
+{
+  "items": [
+    {
+      "name": "COKE",
+      "quantity": 8,
+      "priceMinor": 2200
+    },
+    {
+      "name": "ALL DAY SET MENU",
+      "quantity": 1,
+      "priceMinor": 3200
+    },
+    {
+      "name": "CALAMARES",
+      "quantity": 1,
+      "priceMinor": 950
+    },
+    {
+      "name": "DOVER SOLE",
+      "quantity": 1,
+      "priceMinor": 5210
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 11560
+  },
+  "currency": "GBP",
+  "warnings": []
+}

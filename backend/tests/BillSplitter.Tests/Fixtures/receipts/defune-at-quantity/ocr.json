@@ -1,0 +1,24 @@
+{
+  "durationMs": 3350,
+  "lines": [
+    { "text": "Defune", "confidence": 0.94, "box": { "x": 160, "y": 40, "width": 360, "height": 40 } },
+    { "text": "CHK# 3   TBL# 109", "confidence": 0.92, "box": { "x": 60, "y": 150, "width": 620, "height": 32 } },
+    { "text": "Restaurant", "confidence": 0.92, "box": { "x": 60, "y": 200, "width": 400, "height": 32 } },
+    { "text": "1 Sea Bream Sashimi 12.80", "confidence": 0.93, "box": { "x": 60, "y": 250, "width": 700, "height": 32 } },
+    { "text": "1 Yellow Tail Sash 18.00", "confidence": 0.92, "box": { "x": 60, "y": 284, "width": 700, "height": 32 } },
+    { "text": "1 Pattier Tuna Sas 21.00", "confidence": 0.9, "box": { "x": 60, "y": 318, "width": 700, "height": 32 } },
+    { "text": "1 Scallop Sashimi 12.80", "confidence": 0.92, "box": { "x": 60, "y": 352, "width": 700, "height": 32 } },
+    { "text": "1 Eel Sashimi 14.00", "confidence": 0.92, "box": { "x": 60, "y": 386, "width": 700, "height": 32 } },
+    { "text": "2 @ 6.40 Miso Soup 12.80", "confidence": 0.89, "box": { "x": 60, "y": 420, "width": 700, "height": 32 } },
+    { "text": "1 Agedofu 6.40", "confidence": 0.9, "box": { "x": 60, "y": 454, "width": 700, "height": 32 } },
+    { "text": "1 Soft Shell Crab 19.80", "confidence": 0.92, "box": { "x": 60, "y": 488, "width": 700, "height": 32 } },
+    { "text": "1 Prawns Tempura 23.00", "confidence": 0.92, "box": { "x": 60, "y": 522, "width": 700, "height": 32 } },
+    { "text": "2 @ 1.80 Green Tea 3.60", "confidence": 0.89, "box": { "x": 60, "y": 556, "width": 700, "height": 32 } },
+    { "text": "1 Shochikubai Sma 5.60", "confidence": 0.88, "box": { "x": 60, "y": 590, "width": 700, "height": 32 } },
+    { "text": "SUBTOTAL 151.20", "confidence": 0.94, "box": { "x": 60, "y": 646, "width": 700, "height": 34 } },
+    { "text": "Service Charge", "confidence": 0.92, "box": { "x": 60, "y": 682, "width": 700, "height": 32 } },
+    { "text": "BackofficeServer T#0000016 22.68", "confidence": 0.86, "box": { "x": 60, "y": 716, "width": 700, "height": 32 } },
+    { "text": "TOTAL: £173.88", "confidence": 0.96, "box": { "x": 60, "y": 772, "width": 700, "height": 42 } },
+    { "text": "Sales-VAT 126.00 20.00% 25.20 151.00", "confidence": 0.85, "box": { "x": 60, "y": 840, "width": 700, "height": 32 } }
+  ]
+}

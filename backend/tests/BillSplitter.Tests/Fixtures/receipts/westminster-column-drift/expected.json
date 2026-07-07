@@ -1,0 +1,49 @@
+{
+  "items": [
+    {
+      "name": "Apple Tart",
+      "quantity": 1,
+      "priceMinor": 1145
+    },
+    {
+      "name": "Chicken Fillet",
+      "quantity": 1,
+      "priceMinor": 395
+    },
+    {
+      "name": "Creamy Mashed Potatoes",
+      "quantity": 1,
+      "priceMinor": 745
+    },
+    {
+      "name": "Deep Fried Brie",
+      "quantity": 1,
+      "priceMinor": 825
+    },
+    {
+      "name": "Diet Coke",
+      "quantity": 3,
+      "priceMinor": 1990
+    },
+    {
+      "name": "Margarita Pizza",
+      "quantity": 2,
+      "priceMinor": 0
+    },
+    {
+      "name": "Tap Water Glass",
+      "quantity": 1,
+      "priceMinor": 675
+    }
+  ],
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 803,
+    "totalMinor": 7228
+  },
+  "currency": "GBP",
+  "warnings": [
+    "price with no name ignored: 6.50"
+  ]
+}

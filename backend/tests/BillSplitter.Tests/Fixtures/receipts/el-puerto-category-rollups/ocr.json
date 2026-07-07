@@ -1,0 +1,15 @@
+{
+  "durationMs": 3110,
+  "lines": [
+    { "text": "El Puerto", "confidence": 0.9, "box": { "x": 120, "y": 40, "width": 520, "height": 56 } },
+    { "text": "TABLE NO: P17", "confidence": 0.93, "box": { "x": 60, "y": 200, "width": 620, "height": 40 } },
+    { "text": "8 COKE £22.00", "confidence": 0.94, "box": { "x": 60, "y": 300, "width": 760, "height": 36 } },
+    { "text": "8 DRINK £22.00", "confidence": 0.93, "box": { "x": 60, "y": 344, "width": 760, "height": 36 } },
+    { "text": "1 ALL DAY SET MENU £32.00", "confidence": 0.93, "box": { "x": 60, "y": 388, "width": 760, "height": 36 } },
+    { "text": "1 CALAMARES £9.50", "confidence": 0.93, "box": { "x": 60, "y": 424, "width": 760, "height": 36 } },
+    { "text": "1 DOVER SOLE £52.10", "confidence": 0.93, "box": { "x": 60, "y": 460, "width": 760, "height": 36 } },
+    { "text": "3 FOOD £93.60", "confidence": 0.93, "box": { "x": 60, "y": 504, "width": 760, "height": 36 } },
+    { "text": "TOTAL £115.60", "confidence": 0.96, "box": { "x": 60, "y": 580, "width": 760, "height": 42 } },
+    { "text": "SERVICE CHARGE NOT INCLUDED", "confidence": 0.93, "box": { "x": 60, "y": 650, "width": 760, "height": 36 } }
+  ]
+}

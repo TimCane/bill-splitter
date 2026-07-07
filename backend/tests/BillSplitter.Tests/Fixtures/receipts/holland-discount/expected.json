@@ -1,0 +1,39 @@
+{
+  "items": [
+    {
+      "name": "Roast Beef",
+      "quantity": 2,
+      "priceMinor": 5200
+    },
+    {
+      "name": "Small Gravy",
+      "quantity": 1,
+      "priceMinor": 150
+    },
+    {
+      "name": "Diet Coke",
+      "quantity": 1,
+      "priceMinor": 375
+    },
+    {
+      "name": "Flat White",
+      "quantity": 1,
+      "priceMinor": 400
+    },
+    {
+      "name": ">£1 SHIFT Charity Donation",
+      "quantity": 1,
+      "priceMinor": 100
+    }
+  ],
+  "bill": {
+    "taxMinor": 201,
+    "tipMinor": 0,
+    "serviceMinor": 766,
+    "totalMinor": 1991
+  },
+  "currency": "GBP",
+  "warnings": [
+    "negative amount ignored: Fork Loyalty Discount £50 -£50.00"
+  ]
+}
