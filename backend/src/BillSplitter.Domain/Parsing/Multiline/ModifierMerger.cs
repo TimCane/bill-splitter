@@ -95,6 +95,16 @@ internal static partial class ModifierMerger
         return merged ?? lines;
     }
 
+    /// <summary>A leading "+"/"*" addition ("+ Bacon", "* Extra Cheese") - the
+    /// unambiguous modifier form, never a wrapped-name fragment. The wrapped-name
+    /// pass steps over such a line without breaking a name it is assembling, so it
+    /// survives for <see cref="Merge"/> to fold into the item below.</summary>
+    internal static bool IsLeadingAddition(string text)
+    {
+        var collapsed = Whitespace().Replace(text.Trim(), " ");
+        return LeadingAddition().IsMatch(collapsed) && IsModifier(collapsed);
+    }
+
     private static bool IsModifier(string text)
     {
         if (!LeadingAddition().IsMatch(text) && !KeywordModifier().IsMatch(text))

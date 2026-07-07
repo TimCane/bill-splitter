@@ -191,7 +191,14 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
   directly below a priced line. A form naming a payment/status footer or a bill
   extra (`payment`, `service`, `gratuity`, `tip`, `tax`, `discount`, ...) is left
   alone, so `No payment received` or `Add Gratuity` never folds into the item and
-  flips it to a bill line.
+  flips it to a bill line. It never names a bare price either: a `+ Bacon` under a
+  price the wrapped-name pass left un-named is not an item, so it does not
+  manufacture a phantom row. The wrapped-name pass also steps over a leading
+  `+`/`*` note without breaking a name it is assembling, so `Classic` / `+ Bacon` /
+  `6.50` still reads `Classic + Bacon 6.50` rather than losing the item. Known
+  limitation: a keyword-form modifier (`Extra Cheese`) that is *not* indented from
+  the wrapped-name column below it is indistinguishable from a name fragment and
+  can fold onto the wrong price; indented modifiers and `+`/`*` forms are handled.
 - **Duplicate copies** *(planned)*: de-dupe repeated item blocks
   (merchant/customer/kitchen) without collapsing a genuinely repeated dish.
 
