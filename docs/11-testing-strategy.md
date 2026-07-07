@@ -37,6 +37,17 @@ One parameterized test runs the whole corpus.
   the `KeywordClassifier` line classifier, the `ItemSelectionEngine` item rules
   and the `BillDetectionEngine`/`GrandTotalDetector` bill detectors - keeps the
   corpus byte-identical green, so no per-layer unit tests are added.
+- Multi-line handling has its own hand-authored fixtures. `burger-modifiers`
+  exercises the `ModifierMerger` happy path (an item followed by `+ Bacon` /
+  `No Onion` and another with `Extra Sauce`); the `No payment received` corpus
+  fixtures keep proving the pre-pass leaves payment-status footers alone. Each
+  hardening case has its own fixture pinning behaviour that would otherwise lose or
+  invent an item: `modifier-footnote` (a long `*` service-charge disclaimer must
+  not fold), `modifier-keyword-footer` (`Add Gratuity` must not fold and reclassify
+  the item), `modifier-nameless-price` (a note under a bare price parks a warning,
+  not a phantom item), `modifier-between-wrapped-name` (a `+ Bacon` between a
+  wrapped name and its price keeps the item), and `modifier-unit-price-column` (a
+  spliced modifier leaves the reconciling unit-price column strippable).
 - The pipeline's in-memory parse-decision trace (ADR-0006 Phase A, `ParseDecision`)
   has its own corpus-backed test, `ReceiptParseTraceTests`: it reads the trace off
   the internal `ReceiptParseEngine.ParseTraced` (exposed via `InternalsVisibleTo`)
@@ -44,10 +55,25 @@ One parameterized test runs the whole corpus.
   unit-price column rule winning `2 Roast Beef 27.00 54.00`. The trace never rides
   the public `ParsedReceipt` and is never logged, so no receipt text leaves the
   process (docs/06-ocr-service.md#parsing, docs/15-receipt-parsing.md#diagnostics).
-- Phase B capabilities each land with their own fixtures: `scrambled-line-order`
-  proves the box-orderer (priced rows the sidecar emitted out of Y-order parse
-  back into reading order) while the already-ordered corpus stays byte-for-byte
-  green.
+- The money-span misread repair (`MoneyMisreadRepair`) has one fixture per
+  misread class - `misread-o-zero`, `misread-s-five`, `misread-il-one`,
+  `misread-b-eight`, `misread-e-pound` - each a line that only parses once the
+  price glyphs are repaired, and each carrying a survivor name (`7UP`, `Coke
+  Zero`) that proves item names are left intact. `misread-wrapped-name` pins the
+  ordering: the repair runs before the multi-line pre-passes, so a wrapped name
+  whose price line is a misread (`Classic` / `BAO` / `£6.5O`) still folds - it
+  fails if the repair is deferred to the candidate loop. `misread-name-abuts-price`
+  pins the leading-`E` guard: a name glued to its price (`PALE ALE8.00`) keeps its
+  final letter instead of losing it to a phantom `£`.
+- Phase B capabilities each land with their own fixtures: `wrapped-item-names`
+  proves the wrapped-name pre-pass (a name split over `Classic` / `BAO` / `£6.50`
+  folded into one item) while the already-inline corpus stays byte-for-byte green.
+  `wrapped-names-edge-cases` pins the fold's geometry: a centred store header
+  above a single-line item is flushed not swallowed, a name wrapped to three
+  lines folds whole, and a VAT-class-coded price (`£5.00 B`) still merges.
+  `scrambled-line-order` proves the box-orderer (priced rows the sidecar
+  emitted out of Y-order parse back into reading order) while the
+  already-ordered corpus stays byte-for-byte green.
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

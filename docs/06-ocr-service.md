@@ -132,10 +132,32 @@ layer at a time, corpus green at every step, without changing `Parse`'s
 signature or output. The facade keeps the single call site (`OcrWorker`) and
 the no-DI, pure-Domain status quo unchanged.
 
-Every line is first run through `ITextNormalizer` (`Parsing/Normalization`); the
+Before candidates are read, two gated pre-passes run in `Parsing/Multiline`, name
+assembly first, then modifier folding. `WrappedNameMerger` folds an item name
+wrapped across lines onto its price row (`Classic` / `BAO` / `£6.50` -> one
+`Classic BAO £6.50`); it fires only for a nameless priced line on a receipt that
+has a structural total, borrowing a bounded run of letter-only fragments that sit
+above the price and in its left column (by `Box.Y`/`Box.X`, not list order) - so a
+centred store header, an already-inline receipt, a non-receipt, or a fully
+column-drifted layout is untouched. `ModifierMerger` then folds amount-less
+modifier lines (`+ Bacon`, `No Onion`, `Extra Sauce`) directly below a priced line
+into that line's name ahead of the money token, so the item reads enriched
+(`Burger + Bacon No Onion`) and no stray row is emitted; it is conservative by
+design - only leading `+`/`*` additions or a short keyword form attach, leaving
+footers such as `No payment received` untouched. Modifiers fold after name
+assembly, so they attach to whole priced rows rather than a still-nameless price.
+
+Every line is then run through `ITextNormalizer` (`Parsing/Normalization`); the
 default `BasicNormalizer` trims surrounding whitespace and collapses internal
 runs to single spaces. This is generic line tidying only - item-name concerns
-(`#code`/`@unit` stripping, OCR-misread fixing) live in the item rules, not here.
+(`#code`/`@unit` stripping) live in the item rules, not here.
+
+A second `Parsing/Normalization` pass, `MoneyMisreadRepair`, then fixes the OCR
+letter/digit confusions that only occur in a price (`O`/`0`, `S`->5, `l`/`I`->1,
+`B`->8, a leading `E`->£), so `E12.5O` reaches the money regex as `£12.50`. It is
+gated to a trailing money-shaped token that carries at least one real digit and
+one repairable glyph, so alphabetic item names (`7UP`, `No.8 Burger`, `Coke
+Zero`, `KX BOB`) are never touched.
 
 Once the priced candidates are built, `BoxOrderer` (`Parsing/Spatial`) restores
 reading order by sorting them on `Box.Y` then `Box.X`, so a sidecar that emitted

@@ -1,0 +1,10 @@
+{
+  "durationMs": 3010,
+  "lines": [
+    { "text": "Classic", "confidence": 0.93, "box": { "x": 40, "y": 150, "width": 300, "height": 30 } },
+    { "text": "+ Bacon", "confidence": 0.93, "box": { "x": 40, "y": 190, "width": 300, "height": 30 } },
+    { "text": "6.50", "confidence": 0.95, "box": { "x": 560, "y": 230, "width": 120, "height": 34 } },
+    { "text": "Cola 2.00", "confidence": 0.95, "box": { "x": 40, "y": 290, "width": 620, "height": 34 } },
+    { "text": "TOTAL 8.50", "confidence": 0.97, "box": { "x": 40, "y": 350, "width": 620, "height": 40 } }
+  ]
+}
