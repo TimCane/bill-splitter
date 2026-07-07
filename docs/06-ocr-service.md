@@ -137,6 +137,15 @@ default `BasicNormalizer` trims surrounding whitespace and collapses internal
 runs to single spaces. This is generic line tidying only - item-name concerns
 (`#code`/`@unit` stripping, OCR-misread fixing) live in the item rules, not here.
 
+Once the priced candidates are built, `BoxOrderer` (`Parsing/Spatial`) restores
+reading order by sorting them on `Box.Y` then `Box.X`, so a sidecar that emitted
+rows scrambled still yields items top-to-bottom and a correctly anchored grand
+total. It is gated - an already-ordered receipt is returned untouched - and
+reorders the priced candidates only, so a label captured above its amount is not
+disturbed. A name and price split into separate columns and drifted to
+non-adjacent rows is not reunified - the sort reorders items already read, it
+never invents one.
+
 Each priced line is then mapped to a `LineType` by `ILineClassifier`
 (`Parsing/Classification`); the default `KeywordClassifier` owns the keyword and
 positional decisions of step 3 (subtotal, item-count, rollup, VAT breakdown,
