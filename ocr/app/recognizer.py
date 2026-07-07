@@ -128,16 +128,73 @@ def _response_from_raw(raw: Any, duration_ms: int) -> OcrResponse:
     """Shape PaddleOCR's nested output into the response contract. PaddleOCR
     returns one entry per submitted image (we submit one), each a list of
     ``[quad, (text, confidence)]`` detections, or ``None`` when nothing is
-    found."""
+    found. Detections are per-phrase (a name, a quantity, a price column each
+    land as their own box), so assemble the ones that share a row into a single
+    reading line before returning (docs/06-ocr-service.md)."""
     detections = raw[0] if raw else None
-    lines = [_line_from_detection(det) for det in (detections or [])]
-    lines.sort(key=lambda line: line.box.y)
-    return OcrResponse(durationMs=duration_ms, lines=lines)
+    fragments = [_fragment_from_detection(det) for det in (detections or [])]
+    return OcrResponse(durationMs=duration_ms, lines=_assemble_lines(fragments))
 
 
-def _line_from_detection(detection: Any) -> OcrLine:
+def _fragment_from_detection(detection: Any) -> OcrLine:
     quad, (text, confidence) = detection
     return OcrLine(text=text, confidence=float(confidence), box=_axis_aligned_box(quad))
+
+
+# Fraction of the shorter fragment's height that must overlap vertically for two
+# fragments to count as the same row. High enough that tightly stacked but
+# distinct lines stay apart, low enough to tolerate the baseline jitter between a
+# tall price glyph and its shorter item name.
+_ROW_OVERLAP = 0.5
+
+
+def _assemble_lines(fragments: list[OcrLine]) -> list[OcrLine]:
+    """Group per-detection fragments that share a horizontal band into one
+    reading line. The contract (docs/06) and the parser downstream expect a
+    whole row's text on one line - name, quantity and right-aligned price
+    together - but PaddleOCR detects each as its own box. Fragments are swept
+    top-to-bottom and folded into a row while they vertically overlap it; each
+    row is then read left-to-right by ``Box.x``, its text joined and its boxes
+    unioned. Lines come out ordered top-to-bottom."""
+    rows: list[list[OcrLine]] = []
+    for fragment in sorted(fragments, key=lambda f: f.box.y):
+        row = next((row for row in rows if _shares_band(row, fragment)), None)
+        if row is None:
+            rows.append([fragment])
+        else:
+            row.append(fragment)
+
+    lines = [_merge_row(row) for row in rows]
+    lines.sort(key=lambda line: line.box.y)
+    return lines
+
+
+def _shares_band(row: list[OcrLine], fragment: OcrLine) -> bool:
+    top = min(f.box.y for f in row)
+    bottom = max(f.box.y + f.box.height for f in row)
+    f_top, f_bottom = fragment.box.y, fragment.box.y + fragment.box.height
+    overlap = min(bottom, f_bottom) - max(top, f_top)
+    shorter = min(bottom - top, f_bottom - f_top)
+    return shorter > 0 and overlap / shorter >= _ROW_OVERLAP
+
+
+def _merge_row(row: list[OcrLine]) -> OcrLine:
+    ordered = sorted(row, key=lambda f: f.box.x)
+    return OcrLine(
+        text=" ".join(f.text for f in ordered),
+        # The row is only as trustworthy as its weakest fragment; a shaky token
+        # should still be able to sink the whole line below the confidence floor.
+        confidence=min(f.confidence for f in ordered),
+        box=_union_box([f.box for f in ordered]),
+    )
+
+
+def _union_box(boxes: list[Box]) -> Box:
+    left = min(b.x for b in boxes)
+    top = min(b.y for b in boxes)
+    right = max(b.x + b.width for b in boxes)
+    bottom = max(b.y + b.height for b in boxes)
+    return Box(x=left, y=top, width=right - left, height=bottom - top)
 
 
 def _axis_aligned_box(quad: Any) -> Box:
