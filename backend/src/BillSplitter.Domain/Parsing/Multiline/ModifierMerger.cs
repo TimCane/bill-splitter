@@ -66,10 +66,16 @@ internal static partial class ModifierMerger
             var line = lines[i];
             var text = Whitespace().Replace((line.Text ?? string.Empty).Trim(), " ");
 
-            if (MoneyAtEnd().IsMatch(text))
+            var money = MoneyAtEnd().Match(text);
+            if (money.Success)
             {
                 merged?.Add(line);
-                attachIndex = (merged?.Count ?? i + 1) - 1;
+                // Only a priced line that carries its own name can take a modifier.
+                // A bare price is one the wrapped-name pass ran before us left
+                // nameless; attaching a note to it would name a row the reject rule
+                // is about to drop, manufacturing a phantom item.
+                var hasName = text[..money.Index].Trim().Length > 0;
+                attachIndex = hasName ? (merged?.Count ?? i + 1) - 1 : -1;
                 continue;
             }
 
