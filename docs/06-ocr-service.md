@@ -142,11 +142,21 @@ Each priced line is then mapped to a `LineType` by `ILineClassifier`
 positional decisions of step 3 (subtotal, item-count, rollup, VAT breakdown,
 tax, tip, service, total, payment noise, bare charge). Highest-priority match
 wins, so a "Total Taxes" row reads as tax before total and a "20% VAT" breakdown
-is dropped before it is counted as payable tax. The engine consumes the
-`LineType` for the above-total classification, and the classifier's separate
-`IsGrandTotalCandidate` for grand-total detection - a looser test, since a
+is dropped before it is counted as payable tax.
+
+The bill fields are then read off the priced candidates by the bill detectors
+(`Parsing/Detectors`). `GrandTotalDetector` anchors on the grand total using the
+classifier's `IsGrandTotalCandidate` - a looser test than `Classify`, since a
 "Total incl. VAT" row is the amount due even though its tax word outranks the
-total word in the `LineType` precedence.
+total word in the `LineType` precedence - taking the lowest such row by `Box.Y`
+and, on a same-row tie, the larger amount. `BillDetectionEngine` then classifies
+only the rows above that anchor: `Tax`/`Tip`/`Service` become `bill.taxMinor`/
+`tipMinor`/`serviceMinor`; subtotals, rollups, VAT breakdowns, intermediate
+totals and payment noise are dropped; a bare charge is parked as a warning; and
+whatever is left is handed back as the item rows. Everything at or below the
+grand total is trailing noise the receipt prints after the amount due. It
+returns a `BillDetection` (the `Bill`, the item rows, and its warnings); the
+engine forwards the item rows to the item rules and merges the warnings.
 
 Each item row above the total is then read by the item rules (`Parsing/Rules`).
 Every `IReceiptRule` inspects the row and returns an `ItemCandidate` - a parsed
