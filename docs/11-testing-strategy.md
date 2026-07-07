@@ -71,6 +71,9 @@ One parameterized test runs the whole corpus.
   `wrapped-names-edge-cases` pins the fold's geometry: a centred store header
   above a single-line item is flushed not swallowed, a name wrapped to three
   lines folds whole, and a VAT-class-coded price (`£5.00 B`) still merges.
+  `scrambled-line-order` proves the box-orderer (priced rows the sidecar
+  emitted out of Y-order parse back into reading order) while the
+  already-ordered corpus stays byte-for-byte green.
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

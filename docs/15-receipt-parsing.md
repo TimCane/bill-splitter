@@ -159,11 +159,16 @@ Lines below `ConfidenceFloor` (0.5) are parked in `Warnings`, not itemised.
 
 OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
-- Sort by `Box.Y` then `Box.X` with a row tolerance before parsing. *(planned:
-  box-sort; gated so already-ordered receipts are untouched. Seed fixture:
-  `westminster-column-drift`.)*
+- Sort by `Box.Y` then `Box.X` before parsing. *(current: `BoxOrderer`; gated so
+  an already-ordered receipt is returned untouched.)* It reorders the priced
+  candidates, not the raw lines, so `PreviousText` (a label printed above its
+  amount) is captured at scan time and never disturbed by the reorder.
 - A price is almost always same-row, far-right - `Box.X` distinguishes a price
   column from a name.
+- A name and its price split into separate columns and drifted to non-adjacent
+  rows (`westminster-column-drift`'s detached `6.50`) are not reunified by the
+  sort - reordering cannot invent an item, only restore the order of ones already
+  read. Recovering a far-drifted column stays parked.
 
 ## Validation
 
