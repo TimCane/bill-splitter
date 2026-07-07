@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Steak Frites", "quantity": 1, "priceMinor": 1850 },
+    { "name": "Coke Zero", "quantity": 1, "priceMinor": 275 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 2125 },
+  "currency": "GBP",
+  "warnings": []
+}

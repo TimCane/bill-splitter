@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Flat White", "quantity": 1, "priceMinor": 300 },
+    { "name": "7UP", "quantity": 1, "priceMinor": 250 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 550 },
+  "currency": "GBP",
+  "warnings": []
+}

@@ -1,0 +1,9 @@
+{
+  "durationMs": 2980,
+  "lines": [
+    { "text": "BISTRO ROUGE", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 560, "height": 44 } },
+    { "text": "Steak Frites           18.SO", "confidence": 0.92, "box": { "x": 40, "y": 130, "width": 780, "height": 36 } },
+    { "text": "Coke Zero               2.75", "confidence": 0.94, "box": { "x": 40, "y": 170, "width": 780, "height": 36 } },
+    { "text": "TOTAL                 £21.2S", "confidence": 0.95, "box": { "x": 40, "y": 240, "width": 780, "height": 40 } }
+  ]
+}

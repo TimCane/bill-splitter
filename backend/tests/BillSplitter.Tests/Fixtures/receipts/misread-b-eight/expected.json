@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "Pint Lager", "quantity": 1, "priceMinor": 800 },
+    { "name": "Crisps", "quantity": 1, "priceMinor": 120 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 920 },
+  "currency": "GBP",
+  "warnings": []
+}
