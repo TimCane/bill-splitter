@@ -73,7 +73,11 @@ One parameterized test runs the whole corpus.
   lines folds whole, and a VAT-class-coded price (`£5.00 B`) still merges.
   `scrambled-line-order` proves the box-orderer (priced rows the sidecar
   emitted out of Y-order parse back into reading order) while the
-  already-ordered corpus stays byte-for-byte green.
+  already-ordered corpus stays byte-for-byte green. `duplicate-receipt-copy`
+  proves the copy de-duplicator (a receipt shot as merchant + customer copies
+  collapsed to one) and `repeated-order-not-copy` guards the negative case (a
+  genuine double order preserved), while the existing corpus - including
+  `jack-daniels-gratuity`'s legitimately repeated dishes - stays byte-for-byte green.
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

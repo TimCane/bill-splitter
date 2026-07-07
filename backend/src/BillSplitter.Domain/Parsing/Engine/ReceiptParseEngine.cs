@@ -146,7 +146,18 @@ internal static partial class ReceiptParseEngine
         trace.AddRange(detection.Decisions);
         trace.AddRange(itemDecisions);
 
-        var receipt = new ParsedReceipt(items, detection.Bill, currency, warnings);
+        // A receipt shot as stacked merchant/customer/kitchen copies parses its
+        // items more than once; collapse them back to one when a single copy
+        // reconciles with the printed total. A genuine repeat order is preserved.
+        var deduped = CopyDeduplicator.Dedupe(items, detection.Bill);
+
+        // A collapsed copy also raised each of its warnings once per copy (a
+        // low-confidence or negative line lives in every stacked copy but never in
+        // the item list, so the collapse cannot reach it); fold those to distinct so
+        // the host sees each warning once, matching the single item list.
+        var reportedWarnings = deduped.Count < items.Count ? warnings.Distinct().ToList() : warnings;
+
+        var receipt = new ParsedReceipt(deduped, detection.Bill, currency, reportedWarnings);
         return new TracedReceipt(receipt, trace);
     }
 

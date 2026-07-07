@@ -212,8 +212,13 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
   price; and a modifier-shaped line the OCR emits out of vertical order can attach
   to whichever priced line precedes it in the list. Indented modifiers and `+`/`*`
   forms are handled; the geometric cases wait on the box-sort pass.
-- **Duplicate copies** *(planned)*: de-dupe repeated item blocks
-  (merchant/customer/kitchen) without collapsing a genuinely repeated dish.
+- **Duplicate copies** *(current)*: `CopyDeduplicator` collapses repeated item
+  blocks (merchant/customer/kitchen) to one - but only when the whole item list is
+  K identical blocks (each at least two items) and one block reconciles with the
+  printed total while all of them do not. A genuinely repeated dish or a repeat
+  order is preserved, since its one block would not reconcile. When a copy
+  collapses, the warnings each copy raised (a low-confidence or negative line
+  sits in every copy) are folded to distinct, so the host sees each once.
 
 ## Diagnostics
 

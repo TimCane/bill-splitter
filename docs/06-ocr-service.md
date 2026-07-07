@@ -168,6 +168,11 @@ disturbed. A name and price split into separate columns and drifted to
 non-adjacent rows is not reunified - the sort reorders items already read, it
 never invents one.
 
+Once the items are read, `CopyDeduplicator` (`Parsing/Multiline`) collapses a
+receipt shot as stacked merchant/customer/kitchen copies back to one: it fires
+only when the whole item list is K identical blocks and a single block reconciles
+with the printed total, so a genuine repeat order is preserved.
+
 Each priced line is then mapped to a `LineType` by `ILineClassifier`
 (`Parsing/Classification`); the default `KeywordClassifier` owns the keyword and
 positional decisions of step 3 (subtotal, item-count, rollup, VAT breakdown,

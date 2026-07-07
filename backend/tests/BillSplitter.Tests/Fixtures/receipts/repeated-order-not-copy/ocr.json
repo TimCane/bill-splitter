@@ -1,0 +1,11 @@
+{
+  "durationMs": 2650,
+  "lines": [
+    { "text": "THE SHARED TABLE", "confidence": 0.96, "box": { "x": 120, "y": 40, "width": 620, "height": 44 } },
+    { "text": "Cheeseburger 8.50", "confidence": 0.95, "box": { "x": 40, "y": 130, "width": 820, "height": 36 } },
+    { "text": "Onion Rings 4.25", "confidence": 0.95, "box": { "x": 40, "y": 166, "width": 820, "height": 36 } },
+    { "text": "Cheeseburger 8.50", "confidence": 0.95, "box": { "x": 40, "y": 202, "width": 820, "height": 36 } },
+    { "text": "Onion Rings 4.25", "confidence": 0.95, "box": { "x": 40, "y": 238, "width": 820, "height": 36 } },
+    { "text": "TOTAL 25.50", "confidence": 0.97, "box": { "x": 40, "y": 310, "width": 820, "height": 40 } }
+  ]
+}
