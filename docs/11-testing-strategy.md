@@ -37,6 +37,13 @@ One parameterized test runs the whole corpus.
   the `KeywordClassifier` line classifier, the `ItemSelectionEngine` item rules
   and the `BillDetectionEngine`/`GrandTotalDetector` bill detectors - keeps the
   corpus byte-identical green, so no per-layer unit tests are added.
+- The pipeline's in-memory parse-decision trace (ADR-0006 Phase A, `ParseDecision`)
+  has its own corpus-backed test, `ReceiptParseTraceTests`: it reads the trace off
+  the internal `ReceiptParseEngine.ParseTraced` (exposed via `InternalsVisibleTo`)
+  and asserts the deciding rule and score for a fixture line - e.g. the reconciling
+  unit-price column rule winning `2 Roast Beef 27.00 54.00`. The trace never rides
+  the public `ParsedReceipt` and is never logged, so no receipt text leaves the
+  process (docs/06-ocr-service.md#parsing, docs/15-receipt-parsing.md#diagnostics).
 - Seed set to create at milestone 3: clean UK card receipt, US receipt
   with TAX+TIP lines, quantity lines (`2x`, `2 @ 5.50`), service charge,
   dot leaders, a deliberately blurry photo (low confidence), a non-receipt

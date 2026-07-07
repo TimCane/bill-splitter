@@ -170,6 +170,17 @@ wins parks a warning instead of adding an item. The default set is
 are calibrated so selection reproduces the old first-match order; the shared
 name-shaping primitives (clean, quantity, unit-price column) live in `ItemText`.
 
+As it runs, the pipeline records a `ParseDecision` per priced line - the winning
+rule, its score and the evidence - into an in-memory trace. The bill stage traces
+the grand-total anchor, the tax/tip/service extras and the dropped noise; the item
+stage traces which rule won each item row (score = the item engine's confidence;
+keyword bill classification is priority-ordered, not scored, so those carry `0`).
+The trace is a **test-only** diagnostic: `ParseTraced` on the internal engine
+returns it for the corpus tests, `ReceiptParser.Parse` discards it, and it never
+rides the `ParsedReceipt` wire contract or reaches a log - no receipt text leaves
+the process ([10-security-privacy.md](10-security-privacy.md),
+[15-receipt-parsing.md](15-receipt-parsing.md#diagnostics)).
+
 1. **Price extraction.** A line is a candidate item/amount row if it ends
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a
    currency symbol. Amount = digits as minor units. Reject rows whose money
