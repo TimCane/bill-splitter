@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "name": "Egusi",
+      "quantity": 1,
+      "priceMinor": 3500
+    },
+    {
+      "name": "Cassava Leaf",
+      "quantity": 1,
+      "priceMinor": 3500
+    },
+    {
+      "name": "Cape Town Margarita",
+      "quantity": 5,
+      "priceMinor": 9000
+    },
+    {
+      "name": "Lagos",
+      "quantity": 1,
+      "priceMinor": 2200
+    },
+    {
+      "name": "Saratoga Still",
+      "quantity": 1,
+      "priceMinor": 900
+    }
+  ],
+  "bill": {
+    "taxMinor": 700,
+    "tipMinor": 0,
+    "serviceMinor": 3600,
+    "totalMinor": 23400
+  },
+  "currency": "USD",
+  "warnings": []
+}

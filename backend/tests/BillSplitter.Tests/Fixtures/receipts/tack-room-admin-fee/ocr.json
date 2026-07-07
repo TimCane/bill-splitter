@@ -1,0 +1,18 @@
+{
+  "durationMs": 2890,
+  "lines": [
+    { "text": "The Tack Room", "confidence": 0.95, "box": { "x": 140, "y": 40, "width": 420, "height": 40 } },
+    { "text": "Server: Griffin F", "confidence": 0.92, "box": { "x": 60, "y": 150, "width": 500, "height": 32 } },
+    { "text": "1 BBQ Potato Chips $7.00", "confidence": 0.94, "box": { "x": 60, "y": 230, "width": 700, "height": 34 } },
+    { "text": "1 Diet Coke $3.00", "confidence": 0.94, "box": { "x": 60, "y": 266, "width": 700, "height": 34 } },
+    { "text": "1 Trillium Fort Point $10.00", "confidence": 0.93, "box": { "x": 60, "y": 302, "width": 700, "height": 34 } },
+    { "text": "2 Fried Chicken Sandwich $34.00", "confidence": 0.93, "box": { "x": 60, "y": 338, "width": 700, "height": 34 } },
+    { "text": "1 Famous Duck Grilled Cheese $25.00", "confidence": 0.92, "box": { "x": 60, "y": 374, "width": 700, "height": 34 } },
+    { "text": "1 Mac & Cheese $17.00", "confidence": 0.93, "box": { "x": 60, "y": 410, "width": 700, "height": 34 } },
+    { "text": "1 Burger of the moment $18.00", "confidence": 0.93, "box": { "x": 60, "y": 446, "width": 700, "height": 34 } },
+    { "text": "Subtotal $114.00", "confidence": 0.95, "box": { "x": 60, "y": 508, "width": 700, "height": 34 } },
+    { "text": "Admin Fee (3.00%) $3.42", "confidence": 0.92, "box": { "x": 60, "y": 544, "width": 700, "height": 34 } },
+    { "text": "Tax $7.11", "confidence": 0.94, "box": { "x": 60, "y": 580, "width": 700, "height": 34 } },
+    { "text": "Total $124.53", "confidence": 0.96, "box": { "x": 60, "y": 618, "width": 700, "height": 42 } }
+  ]
+}

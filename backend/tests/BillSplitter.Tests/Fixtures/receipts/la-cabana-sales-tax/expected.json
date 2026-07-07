@@ -1,0 +1,27 @@
+{
+  "items": [
+    {
+      "name": "Dos Tacos (Brunch)",
+      "quantity": 1,
+      "priceMinor": 1800
+    },
+    {
+      "name": "6. Taco y Enchilada (Super Combo)",
+      "quantity": 1,
+      "priceMinor": 2195
+    },
+    {
+      "name": "Brunch Reg Lime Margarita",
+      "quantity": 1,
+      "priceMinor": 1275
+    }
+  ],
+  "bill": {
+    "taxMinor": 501,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 5771
+  },
+  "currency": "GBP",
+  "warnings": []
+}

@@ -1,0 +1,16 @@
+{
+  "durationMs": 3010,
+  "lines": [
+    { "text": "The Continent DC", "confidence": 0.94, "box": { "x": 130, "y": 40, "width": 480, "height": 38 } },
+    { "text": "Server: Idris L", "confidence": 0.92, "box": { "x": 60, "y": 150, "width": 500, "height": 32 } },
+    { "text": "1 Egusi $35.00", "confidence": 0.93, "box": { "x": 60, "y": 230, "width": 700, "height": 34 } },
+    { "text": "1 Cassava Leaf $35.00", "confidence": 0.93, "box": { "x": 60, "y": 266, "width": 700, "height": 34 } },
+    { "text": "5 Cape Town Margarita $90.00", "confidence": 0.92, "box": { "x": 60, "y": 302, "width": 700, "height": 34 } },
+    { "text": "1 Lagos $22.00", "confidence": 0.93, "box": { "x": 60, "y": 338, "width": 700, "height": 34 } },
+    { "text": "1 Saratoga Still $9.00", "confidence": 0.93, "box": { "x": 60, "y": 374, "width": 700, "height": 34 } },
+    { "text": "Subtotal $191.00", "confidence": 0.95, "box": { "x": 60, "y": 434, "width": 700, "height": 34 } },
+    { "text": "Service Charge (20.00%) $36.00", "confidence": 0.92, "box": { "x": 60, "y": 470, "width": 700, "height": 34 } },
+    { "text": "Tax $7.00", "confidence": 0.94, "box": { "x": 60, "y": 506, "width": 700, "height": 34 } },
+    { "text": "Total $234.00", "confidence": 0.96, "box": { "x": 60, "y": 544, "width": 700, "height": 42 } }
+  ]
+}

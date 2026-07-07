@@ -109,7 +109,7 @@ public static partial class ReceiptParser
         foreach (var candidate in candidates)
         {
             var upper = candidate.Name.ToUpperInvariant();
-            if (IsSubtotal(upper) || IsItemCount(upper) || !IsTotal(upper))
+            if (IsSubtotal(upper) || IsItemCount(upper) || IsTaxBreakdown(upper) || !IsTotal(upper))
             {
                 continue;
             }
@@ -137,13 +137,14 @@ public static partial class ReceiptParser
             }
 
             var upper = candidate.Name.ToUpperInvariant();
-            if (IsSubtotal(upper) || IsItemCount(upper) || IsTotal(upper) || IsCategoryRollup(upper))
+            if (IsSubtotal(upper) || IsItemCount(upper) || IsCategoryRollup(upper) || IsTaxBreakdown(upper))
             {
-                continue; // Subtotals, intermediate totals and category rollups: our own.
+                continue; // Subtotals, rollups and VAT breakdowns: we compute our own.
             }
 
             if (IsTax(upper))
             {
+                // Before the total check so "Total Taxes" reads as tax, not a total.
                 tax = candidate.Amount;
             }
             else if (IsTip(upper))
@@ -153,6 +154,10 @@ public static partial class ReceiptParser
             else if (IsService(upper))
             {
                 service = candidate.Amount;
+            }
+            else if (IsTotal(upper))
+            {
+                continue; // An intermediate total ("Item Total"): we compute our own.
             }
             else if (IsPaymentNoise(upper))
             {
@@ -220,7 +225,7 @@ public static partial class ReceiptParser
     {
         var name = ItemCode().Replace(raw, string.Empty);
         name = AtUnitPrice().Replace(name, string.Empty); // strip "@ 6.50" unit prices
-        name = name.Trim().TrimEnd('.', ' ', '-'); // strip dot leaders
+        name = name.Trim().TrimEnd('.', ' ', '-', '='); // strip dot leaders and "=" separators
         return Whitespace().Replace(name, " ").Trim();
     }
 
@@ -278,14 +283,20 @@ public static partial class ReceiptParser
 
     private static bool IsCategoryRollup(string u) => CategoryRollup().IsMatch(u);
 
-    private static bool IsTax(string u) => u.Contains("TAX") || u.Contains("VAT") || u.Contains("GST");
+    private static bool IsTax(string u) => u.Contains("TAX") || u.Contains("VAT") || u.Contains("GST") || u.Contains("IVA");
+
+    // A VAT/tax breakdown summary ("20% VAT Net 18.32", "5.63 IVA 10% 61.95"):
+    // it pairs a tax word with a rate. The payable tax prints on its own plain
+    // "TAX x.xx" line (no rate), so a rate here means a breakdown row to ignore.
+    private static bool IsTaxBreakdown(string u) =>
+        u.Contains('%') && (u.Contains("VAT") || u.Contains("IVA") || u.Contains("GST") || u.Contains("TAX"));
 
     private static bool IsTip(string u) => u.Contains("TIP") || u.Contains("GRATUIT");
 
     private static bool IsService(string u) => u.Contains("SERVICE");
 
     private static bool IsTotal(string u) =>
-        u.Contains("TOTAL") || u.Contains("AMOUNT DUE") || u.Contains("BALANCE DUE") || u.Contains("TO PAY");
+        u.Contains("TOTAL") || u.Contains("AMOUNT") || u.Contains("BALANCE DUE") || u.Contains("TO PAY");
 
     private static bool IsPaymentNoise(string u) =>
         u.Contains("CASH") || u.Contains("CHANGE") || u.Contains("CARD")
