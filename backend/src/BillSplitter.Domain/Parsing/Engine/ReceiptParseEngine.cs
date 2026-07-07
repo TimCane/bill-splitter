@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Models;
 using BillSplitter.Domain.Parsing.Normalization;
 
@@ -20,6 +21,7 @@ internal static partial class ReceiptParseEngine
     private const double ConfidenceFloor = 0.5;
 
     private static readonly ITextNormalizer Normalizer = new BasicNormalizer();
+    private static readonly ILineClassifier Classifier = new KeywordClassifier();
 
     // A money token at the end of the line: 1-4 whole digits, a '.' or ',', two
     // fraction digits, optionally preceded by a currency symbol or a minus and
@@ -33,24 +35,6 @@ internal static partial class ReceiptParseEngine
     // "2 BREAD 2.00 4.00" once the line total is removed.
     [GeneratedRegex(@"(?<sym>[£€$])?\s*(?<uwhole>\d{1,4})[.,](?<ufrac>\d{2})\s*$")]
     private static partial Regex TrailingMoney();
-
-    // A charge line whose label is elsewhere: it opens with a percentage
-    // ("12.5% on 41.30"). Recovered from the preceding line or parked.
-    [GeneratedRegex(@"^\s*\d{1,3}([.,]\d+)?\s*%")]
-    private static partial Regex LeadingPercent();
-
-    // A grouped-receipt category subtotal, a rollup of items listed above it:
-    // a category word with a leading count ("8 DRINK", "3 FOOD") or the bare word
-    // "FOOD" (never a real item name). A bare "Drinks" is left as an item - some
-    // receipts aggregate the drinks onto one priced line.
-    [GeneratedRegex(@"^(?:\d+\s+(?:FOOD|DRINKS?|BEVERAGES?)|FOOD)\s*$", RegexOptions.IgnoreCase)]
-    private static partial Regex CategoryRollup();
-
-    // A service-charge label that printed above its amount ("Service charge 12.5%
-    // on", "Optional Service charge"). Anchored to the line start so a header
-    // that merely mentions a tax code ("... GST 3") is not mistaken for one.
-    [GeneratedRegex(@"^(?:OPTIONAL\s+|DISCRETIONARY\s+)?SERVICE\b", RegexOptions.IgnoreCase)]
-    private static partial Regex ServiceLabel();
 
     // A per-unit detail line printed under its item ("2 @ $35.50"): once its own
     // price is stripped the name is only "2 @", so the whole name is a count and
@@ -73,10 +57,6 @@ internal static partial class ReceiptParseEngine
     [GeneratedRegex(@"@\s*[£€$]?\d{1,4}[.,]\d{2}")]
     private static partial Regex AtUnitPrice();
 
-    // An item-count summary line ("6 Item(s)"). A subtotal in disguise - drop it.
-    [GeneratedRegex(@"^\d+\s+ITEM", RegexOptions.IgnoreCase)]
-    private static partial Regex ItemCount();
-
     [GeneratedRegex(@"\s+")]
     private static partial Regex Whitespace();
 
@@ -87,13 +67,18 @@ internal static partial class ReceiptParseEngine
 
         var candidates = new List<Candidate>();
         var previousText = string.Empty;
+        var previousHasAmount = false;
         foreach (var line in result.Lines)
         {
             var text = Normalizer.Normalize(line.Text ?? string.Empty);
             var priorText = previousText;
-            previousText = text; // advance for every line, so labels above amounts survive
+            var priorHasAmount = previousHasAmount;
 
             var money = MoneyAtEnd().Match(text);
+            // Advance for every line, so a label printed above its amount survives
+            // to the next candidate as PreviousText.
+            previousText = text;
+            previousHasAmount = money.Success;
             if (!money.Success)
             {
                 // No amount: a header, address or free-text line. Ignored, not a warning.
@@ -114,7 +99,7 @@ internal static partial class ReceiptParseEngine
             }
 
             var name = text[..money.Index].Trim();
-            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text, priorText));
+            candidates.Add(new Candidate(line.Box.Y, ToMinor(money), name, text, priorText, priorHasAmount));
         }
 
         // Locate the grand total first: it is the lowest TOTAL row on the receipt
@@ -122,8 +107,7 @@ internal static partial class ReceiptParseEngine
         Candidate? total = null;
         foreach (var candidate in candidates)
         {
-            var upper = candidate.Name.ToUpperInvariant();
-            if (IsSubtotal(upper) || IsItemCount(upper) || IsTaxBreakdown(upper) || !IsTotal(upper))
+            if (!Classifier.IsGrandTotalCandidate(candidate))
             {
                 continue;
             }
@@ -150,45 +134,38 @@ internal static partial class ReceiptParseEngine
                 continue;
             }
 
-            var upper = candidate.Name.ToUpperInvariant();
-            if (IsSubtotal(upper) || IsItemCount(upper) || IsCategoryRollup(upper) || IsTaxBreakdown(upper))
+            var type = Classifier.Classify(candidate);
+            if (type is LineType.Subtotal or LineType.ItemCount
+                or LineType.CategoryRollup or LineType.TaxBreakdown)
             {
                 continue; // Subtotals, rollups and VAT breakdowns: we compute our own.
             }
 
-            if (IsTax(upper))
+            if (type == LineType.Tax)
             {
-                // Before the total check so "Total Taxes" reads as tax, not a total.
                 tax = candidate.Amount;
             }
-            else if (IsTip(upper))
+            else if (type == LineType.Tip)
             {
                 tip = candidate.Amount;
             }
-            else if (IsService(upper))
+            else if (type == LineType.Service)
             {
                 service = candidate.Amount;
             }
-            else if (IsTotal(upper))
+            else if (type == LineType.Total)
             {
                 continue; // An intermediate total ("Item Total"): we compute our own.
             }
-            else if (IsPaymentNoise(upper))
+            else if (type == LineType.Payment)
             {
                 // Payment tender lines: ignore.
-            }
-            else if (LoneServiceLabel(candidate.PreviousText))
-            {
-                // A service charge whose label printed on the line above and whose
-                // amount landed alone on this one ("Service charge 12.5% on" /
-                // "90.23  11.28", or Defune's "Service Charge" / "...Server 22.68").
-                service = candidate.Amount;
             }
             else if (UnitPriceDetail().IsMatch(candidate.Name))
             {
                 // "2 @ $35.50" under its item: the item already has the line total.
             }
-            else if (IsBareCharge(candidate.Name))
+            else if (type == LineType.BareCharge)
             {
                 // A bare amount with no recoverable label - a columnar misread.
                 warnings.Add($"unreadable amount ignored: {candidate.Text}");
@@ -282,42 +259,4 @@ internal static partial class ReceiptParseEngine
             ? name[..match.Index].Trim().TrimEnd('.', ' ', '-')
             : name;
     }
-
-    // A row whose name carries no item (a bare amount left of the price, or a
-    // stray percentage) - the residue of a split charge line or a columnar
-    // layout. Empty names are handled separately as "price with no name".
-    private static bool IsBareCharge(string name) =>
-        name.Length > 0 && (LeadingPercent().IsMatch(name) || !name.Any(char.IsLetter));
-
-    // The line above an amount is a lone service-charge label when it opens with
-    // "Service"/"Optional Service" and carries no amount of its own - the receipt
-    // split the label and its value across two lines, so the value is the charge.
-    private static bool LoneServiceLabel(string priorText) =>
-        !MoneyAtEnd().Match(priorText).Success && ServiceLabel().IsMatch(priorText);
-
-    private static bool IsSubtotal(string u) => u.Contains("SUBTOTAL") || u.Contains("SUB TOTAL");
-
-    private static bool IsItemCount(string u) => ItemCount().IsMatch(u);
-
-    private static bool IsCategoryRollup(string u) => CategoryRollup().IsMatch(u);
-
-    private static bool IsTax(string u) => u.Contains("TAX") || u.Contains("VAT") || u.Contains("GST") || u.Contains("IVA");
-
-    // A VAT breakdown summary ("20% VAT Net 18.32", "5.63 IVA 10% 61.95"): it
-    // pairs a VAT word with a rate. Plain "TAX 6% 6.20" is excluded - a US sales
-    // tax line prints its rate inline and is the real, payable tax.
-    private static bool IsTaxBreakdown(string u) =>
-        u.Contains('%') && (u.Contains("VAT") || u.Contains("IVA") || u.Contains("GST"));
-
-    private static bool IsTip(string u) => u.Contains("TIP") || u.Contains("GRATUIT");
-
-    private static bool IsService(string u) => u.Contains("SERVICE");
-
-    private static bool IsTotal(string u) =>
-        u.Contains("TOTAL") || u.Contains("AMOUNT") || u.Contains("AMT")
-        || u.Contains("BALANCE") || u.Contains("TO PAY");
-
-    private static bool IsPaymentNoise(string u) =>
-        u.Contains("CASH") || u.Contains("CHANGE") || u.Contains("CARD")
-        || u.Contains("VISA") || u.Contains("MASTERCARD") || u.Contains("AUTH");
 }

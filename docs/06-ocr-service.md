@@ -137,6 +137,18 @@ default `BasicNormalizer` trims surrounding whitespace and collapses internal
 runs to single spaces. This is generic line tidying only - item-name concerns
 (`#code`/`@unit` stripping, OCR-misread fixing) live in the item rules, not here.
 
+Each priced line is then mapped to a `LineType` by `ILineClassifier`
+(`Parsing/Classification`); the default `KeywordClassifier` owns the keyword and
+positional decisions of step 3 (subtotal, item-count, rollup, VAT breakdown,
+tax, tip, service, total, payment noise, bare charge). Highest-priority match
+wins, so a "Total Taxes" row reads as tax before total and a "20% VAT" breakdown
+is dropped before it is counted as payable tax. The engine consumes the
+`LineType` for the above-total classification, and the classifier's separate
+`IsGrandTotalCandidate` for grand-total detection - a looser test, since a
+"Total incl. VAT" row is the amount due even though its tax word outranks the
+total word in the `LineType` precedence. Item-name shaping and unit-price rules
+stay in the engine until A4.
+
 1. **Price extraction.** A line is a candidate item/amount row if it ends
    with a money token: `(\d{1,4})[.,](\d{2})` optionally preceded by a
    currency symbol. Amount = digits as minor units. Reject rows whose money

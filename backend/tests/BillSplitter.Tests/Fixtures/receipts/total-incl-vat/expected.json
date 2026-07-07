@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "name": "FISH & CHIPS", "quantity": 1, "priceMinor": 1295 },
+    { "name": "PIE & MASH", "quantity": 1, "priceMinor": 1050 }
+  ],
+  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 2345 },
+  "currency": "GBP",
+  "warnings": []
+}
