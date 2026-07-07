@@ -195,10 +195,16 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
   price the wrapped-name pass left un-named is not an item, so it does not
   manufacture a phantom row. The wrapped-name pass also steps over a leading
   `+`/`*` note without breaking a name it is assembling, so `Classic` / `+ Bacon` /
-  `6.50` still reads `Classic + Bacon 6.50` rather than losing the item. Known
-  limitation: a keyword-form modifier (`Extra Cheese`) that is *not* indented from
-  the wrapped-name column below it is indistinguishable from a name fragment and
-  can fold onto the wrong price; indented modifiers and `+`/`*` forms are handled.
+  `6.50` still reads `Classic + Bacon 6.50` rather than losing the item. A spliced
+  modifier goes ahead of the whole trailing amount run (`2 BREAD 2.00 4.00` +
+  `Extra Butter` -> `2 BREAD Extra Butter 2.00 4.00`), so a reconciling unit-price
+  column stays trailing for the item rules to drop. Known limitations, both from
+  attaching by list adjacency rather than `OcrBox` geometry: a keyword-form
+  modifier (`Extra Cheese`) that is *not* indented from the wrapped-name column
+  below it is indistinguishable from a name fragment and can fold onto the wrong
+  price; and a modifier-shaped line the OCR emits out of vertical order can attach
+  to whichever priced line precedes it in the list. Indented modifiers and `+`/`*`
+  forms are handled; the geometric cases wait on the box-sort pass.
 - **Duplicate copies** *(planned)*: de-dupe repeated item blocks
   (merchant/customer/kitchen) without collapsing a genuinely repeated dish.
 

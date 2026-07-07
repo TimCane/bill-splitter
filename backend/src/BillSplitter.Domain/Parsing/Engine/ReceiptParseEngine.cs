@@ -29,12 +29,10 @@ internal static partial class ReceiptParseEngine
     private static readonly BillDetectionEngine BillEngine = new(Classifier);
     private static readonly ItemSelectionEngine ItemEngine = new();
 
-    // A money token at the end of the line: 1-4 whole digits, a '.' or ',', two
-    // fraction digits, optionally preceded by a currency symbol or a minus and
-    // optionally followed by a single-letter VAT-class code ("4.00 B"). The end
-    // anchor is the reject for "11.00%" - other trailing text means it is not a
-    // clean amount row.
-    [GeneratedRegex(@"(?<neg>-\s*)?(?<sym>[£€$])?\s*(?<whole>\d{1,4})[.,](?<frac>\d{2})(?:\s+[A-Z])?\s*$")]
+    // A money token (ReceiptPatterns.Money) at the end of the line. The end anchor
+    // is the reject for "11.00%" - other trailing text means it is not a clean
+    // amount row.
+    [GeneratedRegex(ReceiptPatterns.Money + @"\s*$")]
     private static partial Regex MoneyAtEnd();
 
     public static ParsedReceipt Parse(OcrResult result) => ParseTraced(result).Receipt;

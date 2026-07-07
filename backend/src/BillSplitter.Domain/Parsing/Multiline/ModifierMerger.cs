@@ -18,10 +18,18 @@ namespace BillSplitter.Domain.Parsing.Multiline;
 /// </summary>
 internal static partial class ModifierMerger
 {
-    // A money token at the end of the line - the same shape the engine anchors on.
-    // The modifier text is inserted immediately before this token.
-    [GeneratedRegex(@"(?<neg>-\s*)?(?<sym>[£€$])?\s*(?<whole>\d{1,4})[.,](?<frac>\d{2})(?:\s+[A-Z])?\s*$")]
+    // A money token (ReceiptPatterns.Money) at the end of the line - the same shape
+    // the engine anchors on, shared so the two cannot disagree about where a price
+    // starts.
+    [GeneratedRegex(ReceiptPatterns.Money + @"\s*$")]
     private static partial Regex MoneyAtEnd();
+
+    // The whole trailing numeric tail - a per-unit column and the line total run
+    // together ("2.00 4.00" in "2 BREAD 2.00 4.00"). The modifier is spliced ahead
+    // of this run, not just the last token, so a reconciling unit column stays
+    // trailing for the item rules to drop.
+    [GeneratedRegex(@"(?:[£€$]?\s*-?\d{1,4}[.,]\d{2}(?:\s+[A-Z])?\s*)+$")]
+    private static partial Regex TrailingMoneyRun();
 
     // Whitespace-collapsed form used only to test the modifier shape.
     [GeneratedRegex(@"\s+")]
@@ -127,14 +135,13 @@ internal static partial class ModifierMerger
 
     private static OcrLine Attach(OcrLine priced, string modifier)
     {
-        var money = MoneyAtEnd().Match(priced.Text);
-        if (!money.Success)
+        var tail = TrailingMoneyRun().Match(priced.Text);
+        if (!tail.Success)
         {
             return priced; // defensive: the priced line always carries an amount
         }
 
-        var name = priced.Text[..money.Index].TrimEnd();
-        var amount = priced.Text[money.Index..];
-        return priced with { Text = $"{name} {modifier} {amount}" };
+        var name = priced.Text[..tail.Index].TrimEnd();
+        return priced with { Text = $"{name} {modifier} {priced.Text[tail.Index..]}" };
     }
 }

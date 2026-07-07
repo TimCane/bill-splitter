@@ -25,9 +25,9 @@ internal static partial class WrappedNameMerger
     private const int MaxFragments = 3;
 
     // A line that is only an amount ("£6.50", "6.50", "£ 5.50", "6.50 B"): a price
-    // whose name landed on the lines above it. The optional trailing letter is a
-    // VAT-class code, so this stays in step with the engine's MoneyAtEnd. Negative
-    // amounts are discounts, not wrapped items, so they are excluded.
+    // whose name landed on the lines above it. A deliberately tighter variant of
+    // ReceiptPatterns.Money - whole-line anchored and dropping the negative branch,
+    // since a discount is not a wrapped item and must not borrow a name.
     [GeneratedRegex(@"^[£€$]?\s*\d{1,4}[.,]\d{2}(?:\s+[A-Z])?\s*$")]
     private static partial Regex NamelessPrice();
 
