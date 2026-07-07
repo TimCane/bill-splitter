@@ -1,3 +1,5 @@
+using BillSplitter.Domain.Sessions;
+
 namespace BillSplitter.Api.Dtos;
 
 /// <summary>

@@ -172,9 +172,12 @@ OCR reorders and splits columns. Use `OcrBox`, do not trust line order alone.
 
 ## Validation
 
-- **Reconciliation** *(planned)*: `sum(items) + tax + tip + service` vs the
-  printed grand total, within tolerance. Mismatch -> a `Warnings` entry the host
-  sees at review. Pure; no contract change.
+- **Reconciliation** *(current: `TotalsValidator`)*: `sum(items) + tax + tip +
+  service` vs the printed grand total, within a penny of slack (the tolerance the
+  copy-collapse check uses). A mismatch parks one `Warnings` entry the host sees
+  at review; a receipt with no printed total has nothing to check against and
+  stays quiet. A collapsed copy reconciles by construction, so it never
+  double-warns. Pure; no contract change.
 - Claims reconcile exactly downstream in `SplitCalculator`
   ([ADR-0005](adr/0005-integer-shares-claims.md)); parser reconciliation is a
   soft warning, not a hard gate.

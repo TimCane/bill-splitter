@@ -1,4 +1,4 @@
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
 
 namespace BillSplitter.Infrastructure.Email;
 

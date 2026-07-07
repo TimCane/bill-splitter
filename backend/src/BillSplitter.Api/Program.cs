@@ -5,7 +5,7 @@ using BillSplitter.Api.Health;
 using BillSplitter.Api.Hubs;
 using BillSplitter.Api.Middleware;
 using BillSplitter.Api.Ocr;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
 using BillSplitter.Infrastructure.Email;
 using BillSplitter.Infrastructure.Identity;
 using BillSplitter.Infrastructure.Ocr;

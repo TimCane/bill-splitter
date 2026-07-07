@@ -1,8 +1,20 @@
 {
   "items": [
-    { "name": "Coffee", "quantity": 1, "priceMinor": 300 }
+    {
+      "name": "Coffee",
+      "quantity": 1,
+      "priceMinor": 300
+    }
   ],
-  "bill": { "taxMinor": 0, "tipMinor": 0, "serviceMinor": 0, "totalMinor": 950 },
+  "bill": {
+    "taxMinor": 0,
+    "tipMinor": 0,
+    "serviceMinor": 0,
+    "totalMinor": 950
+  },
   "currency": "GBP",
-  "warnings": ["price with no name ignored: 6.50"]
+  "warnings": [
+    "price with no name ignored: 6.50",
+    "parsed items and extras do not reconcile with the printed total"
+  ]
 }

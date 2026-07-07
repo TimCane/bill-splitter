@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Common;
 
 /// <summary>
 /// The set of active ISO 4217 currency codes a session may use. Derived from the

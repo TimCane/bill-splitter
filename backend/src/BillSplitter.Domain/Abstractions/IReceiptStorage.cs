@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Abstractions;
 
 /// <summary>A stored receipt image and the content type to echo back
 /// (docs/04-api-contract.md#get-apiv1sessionssessionidreceipt).</summary>

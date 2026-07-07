@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Abstractions;
 
 /// <summary>
 /// Sends the one-off summary email. Implemented over SMTP in Infrastructure so the

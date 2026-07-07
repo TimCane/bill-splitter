@@ -1,5 +1,7 @@
 using BillSplitter.Api.Dtos;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
+using BillSplitter.Domain.Receipts;
+using BillSplitter.Domain.Sessions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BillSplitter.Api.Hubs;

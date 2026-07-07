@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using BillSplitter.Api.Http;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
+using BillSplitter.Domain.Common;
+using BillSplitter.Domain.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Claim = System.Security.Claims.Claim;
@@ -46,8 +48,6 @@ public sealed class ParticipantTokenHandler : AuthenticationHandler<Authenticati
         }
 
         var identity = new ClaimsIdentity(ParticipantAuth.Scheme);
-        identity.AddClaim(new Claim(ParticipantAuth.SessionIdClaim, sessionId));
-
         var record = await _store.GetAsync(sessionId, Context.RequestAborted);
         var participant = record?.Session.FindByTokenHash(TokenHasher.Hash(token));
         if (participant is not null)

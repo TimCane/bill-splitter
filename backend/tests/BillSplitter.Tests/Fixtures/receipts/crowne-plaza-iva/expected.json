@@ -39,6 +39,7 @@
   },
   "currency": "EUR",
   "warnings": [
-    "negative amount ignored: 1 Portal Reserva 30% -26.55"
+    "negative amount ignored: 1 Portal Reserva 30% -26.55",
+    "parsed items and extras do not reconcile with the printed total"
   ]
 }

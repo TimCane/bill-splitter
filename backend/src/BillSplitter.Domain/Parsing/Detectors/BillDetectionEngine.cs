@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using BillSplitter.Domain.Parsing.Classification;
 using BillSplitter.Domain.Parsing.Models;
+using BillSplitter.Domain.Sessions;
 
 namespace BillSplitter.Domain.Parsing.Detectors;
 

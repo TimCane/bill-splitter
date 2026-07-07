@@ -1,5 +1,5 @@
 using System.Text.Json;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BillSplitter.Api.Http;

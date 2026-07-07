@@ -1,3 +1,5 @@
+using BillSplitter.Domain.Receipts;
+
 namespace BillSplitter.Domain.Parsing.Models;
 
 /// <summary>One rule's reading of an item row: the <see cref="ParsedItem"/> it

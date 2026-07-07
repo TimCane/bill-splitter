@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
+using BillSplitter.Domain.Common;
+using BillSplitter.Domain.Receipts;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Sessions;
 
 /// <summary>
 /// The session aggregate root and the only place domain rules live. Every

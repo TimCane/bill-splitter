@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using BillSplitter.Domain.Receipts;
 
 namespace BillSplitter.Domain.Parsing.Multiline;
 

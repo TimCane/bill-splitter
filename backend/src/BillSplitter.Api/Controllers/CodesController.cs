@@ -1,5 +1,6 @@
 using BillSplitter.Api.Dtos;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
+using BillSplitter.Domain.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BillSplitter.Api.Controllers;

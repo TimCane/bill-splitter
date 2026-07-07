@@ -1,3 +1,5 @@
+using BillSplitter.Domain.Receipts;
+
 namespace BillSplitter.Domain.Parsing.Models;
 
 /// <summary>The parse plus its in-memory decision trace: the public <see

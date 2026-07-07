@@ -25,5 +25,4 @@ internal enum LineType
     /// <summary>A bare amount whose name carries no item - a stray percentage or
     /// the columnar residue of a split charge line. Parked in <c>Warnings</c>.</summary>
     BareCharge,
-    Discount,
 }

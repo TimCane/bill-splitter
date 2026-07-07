@@ -12,6 +12,5 @@ public static class ParticipantAuth
     public const string HostPolicy = "HostOnly";
 
     public const string ParticipantIdClaim = "participantId";
-    public const string SessionIdClaim = "sessionId";
     public const string IsHostClaim = "isHost";
 }

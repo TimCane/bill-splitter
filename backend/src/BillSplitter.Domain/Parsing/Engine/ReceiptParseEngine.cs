@@ -7,6 +7,9 @@ using BillSplitter.Domain.Parsing.Multiline;
 using BillSplitter.Domain.Parsing.Normalization;
 using BillSplitter.Domain.Parsing.Rules;
 using BillSplitter.Domain.Parsing.Spatial;
+using BillSplitter.Domain.Parsing.Validators;
+using BillSplitter.Domain.Receipts;
+using BillSplitter.Domain.Sessions;
 
 namespace BillSplitter.Domain.Parsing.Engine;
 
@@ -150,6 +153,16 @@ internal static partial class ReceiptParseEngine
         // items more than once; collapse them back to one when a single copy
         // reconciles with the printed total. A genuine repeat order is preserved.
         var deduped = CopyDeduplicator.Dedupe(items, detection.Bill);
+
+        // Soft reconciliation on the final items and bill: if they do not sum to
+        // the printed total, something was dropped or misread (a parked discount, a
+        // drifted-column price), so warn the host to double-check at review. A
+        // collapsed copy reconciles by construction, so this stays quiet there.
+        var reconcileWarning = TotalsValidator.Check(deduped, detection.Bill);
+        if (reconcileWarning is not null)
+        {
+            warnings.Add(reconcileWarning);
+        }
 
         // A collapsed copy also raised each of its warnings once per copy (a
         // low-confidence or negative line lives in every stacked copy but never in

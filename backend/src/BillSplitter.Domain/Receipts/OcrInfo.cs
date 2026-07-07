@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Receipts;
 
 /// <summary>OCR status, (host-only) failure reason and the parser's discard
 /// <see cref="Warnings"/> shown to the host under the checksum banner

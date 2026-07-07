@@ -34,6 +34,7 @@
   },
   "currency": "GBP",
   "warnings": [
-    "negative amount ignored: Fork Loyalty Discount £50 -£50.00"
+    "negative amount ignored: Fork Loyalty Discount £50 -£50.00",
+    "parsed items and extras do not reconcile with the printed total"
   ]
 }

@@ -1,4 +1,6 @@
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
+using BillSplitter.Domain.Receipts;
+using BillSplitter.Domain.Sessions;
 
 namespace BillSplitter.Api.Ocr;
 

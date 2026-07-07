@@ -1,7 +1,8 @@
 using BillSplitter.Api.Auth;
 using BillSplitter.Api.Configuration;
 using BillSplitter.Api.Dtos;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
+using BillSplitter.Domain.Sessions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

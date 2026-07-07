@@ -1,5 +1,5 @@
 using BillSplitter.Api.Configuration;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Sessions;
 using Microsoft.Extensions.Options;
 
 namespace BillSplitter.Api.Dtos;

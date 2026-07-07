@@ -1,4 +1,5 @@
-using BillSplitter.Domain;
+using BillSplitter.Domain.Receipts;
+using BillSplitter.Domain.Sessions;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;

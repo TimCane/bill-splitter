@@ -1,3 +1,5 @@
+using BillSplitter.Domain.Sessions;
+
 namespace BillSplitter.Domain.Parsing.Models;
 
 /// <summary>What the bill-detection stage read off a receipt: the <see cref="Bill"/>

@@ -1,4 +1,4 @@
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
 using Minio;
 using Minio.DataModel.Args;
 using Minio.DataModel.ILM;

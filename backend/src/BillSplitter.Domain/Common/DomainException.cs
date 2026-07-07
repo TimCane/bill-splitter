@@ -1,4 +1,4 @@
-namespace BillSplitter.Domain;
+namespace BillSplitter.Domain.Common;
 
 /// <summary>
 /// Thrown by aggregate mutations when a domain rule is violated. <see cref="Code"/>

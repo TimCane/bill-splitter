@@ -1,6 +1,8 @@
 using BillSplitter.Api.Dtos;
 using BillSplitter.Api.Ocr;
-using BillSplitter.Domain;
+using BillSplitter.Domain.Abstractions;
+using BillSplitter.Domain.Common;
+using BillSplitter.Domain.Sessions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using SessionOptions = BillSplitter.Api.Configuration.SessionOptions;
