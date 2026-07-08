@@ -68,7 +68,16 @@ override only with reason.
 ## Operations
 
 - **Deploy**: `docker compose -f docker-compose.prod.yml up -d --build`
-  (or the Coolify equivalent). A deploy restarts `app` and drops live
+  (or the Coolify equivalent).
+- **Coolify**: add the repo as a Docker Compose resource on
+  `docker-compose.prod.yml`, set the domain on `app` only (container port
+  8080), and fill `.env.example`'s variables in the resource's environment
+  tab. Coolify injects `restart: unless-stopped` into any service without an
+  explicit policy, which is why `minio-init` pins `restart: "no"` - a
+  restarting one-shot never satisfies `service_completed_successfully` and
+  the stack start hangs. Coolify may still list the exited `minio-init` as
+  degraded; that is cosmetic (its `exclude_from_hc` key is not valid vanilla
+  compose, which CI's e2e job runs, so it is deliberately absent). A deploy restarts `app` and drops live
   SignalR connections; clients auto-reconnect and re-snapshot - mid-meal
   deploys are rude but not destructive. Live sessions survive (they are in
   Redis, which keeps running). In-flight OCR jobs are lost; those sessions
